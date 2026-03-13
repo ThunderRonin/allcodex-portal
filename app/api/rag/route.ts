@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { queryRag } from "@/lib/allknower-server";
+import { queryRag, getRagStatus } from "@/lib/allknower-server";
 import { getAkCreds } from "@/lib/get-creds";
 import { handleRouteError, notConfigured } from "@/lib/route-error";
+
+export async function GET() {
+  try {
+    const creds = await getAkCreds();
+    if (!creds.url || !creds.token) return notConfigured("AllKnower");
+    const status = await getRagStatus(creds);
+    return NextResponse.json(status);
+  } catch (err) {
+    return handleRouteError(err);
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
