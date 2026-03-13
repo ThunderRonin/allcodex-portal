@@ -19,7 +19,7 @@ import {
   CheckCircle2,
   XCircle,
   Brain,
-  TrendingUp,
+  Microscope,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -123,7 +123,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           icon={BookOpen}
           label="Total Lore Entries"
@@ -142,12 +142,6 @@ export default function DashboardPage() {
           label="RAG Indexed"
           value={ragStatus?.indexedNotes ?? "—"}
           sub={ragStatus?.model ?? ""}
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="Quick Actions"
-          value=""
-          sub=""
         />
       </div>
 
@@ -247,7 +241,7 @@ export default function DashboardPage() {
               </Button>
               <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2">
                 <Link href="/ai/gaps">
-                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <Microscope className="h-4 w-4 text-primary" />
                   Gap Detector
                 </Link>
               </Button>
