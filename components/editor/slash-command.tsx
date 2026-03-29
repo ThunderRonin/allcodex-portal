@@ -13,13 +13,13 @@ import {
   Heading3,
   Text,
   List,
-  ListOrdered,
   Quote,
-  Code,
   ImageIcon,
-  CheckSquare,
   Minus,
   Link2,
+  ScrollText,
+  Sparkles,
+  BookOpen,
 } from "lucide-react";
 import { ReactNode } from "react";
 import { Editor } from "@tiptap/core";
@@ -37,7 +37,7 @@ export interface CommandItemProps {
 export const suggestionItems = createSuggestionItems([
   {
     title: "Text",
-    description: "Just start typing with plain text.",
+    description: "Continue writing with plain text.",
     searchTerms: ["p", "paragraph"],
     icon: <Text size={18} />,
     command: ({ editor, range }) => {
@@ -45,18 +45,9 @@ export const suggestionItems = createSuggestionItems([
     },
   },
   {
-    title: "To-do List",
-    description: "Track tasks with a to-do list.",
-    searchTerms: ["todo", "task", "list", "check", "checkbox"],
-    icon: <CheckSquare size={18} />,
-    command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleTaskList().run();
-    },
-  },
-  {
     title: "Heading 1",
-    description: "Big section heading.",
-    searchTerms: ["title", "big", "large"],
+    description: "Major section heading.",
+    searchTerms: ["title", "big", "large", "chapter"],
     icon: <Heading1 size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setNode("heading", { level: 1 }).run();
@@ -64,8 +55,8 @@ export const suggestionItems = createSuggestionItems([
   },
   {
     title: "Heading 2",
-    description: "Medium section heading.",
-    searchTerms: ["subtitle", "medium"],
+    description: "Sub-section heading.",
+    searchTerms: ["subtitle", "medium", "section"],
     icon: <Heading2 size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setNode("heading", { level: 2 }).run();
@@ -73,7 +64,7 @@ export const suggestionItems = createSuggestionItems([
   },
   {
     title: "Heading 3",
-    description: "Small section heading.",
+    description: "Minor heading.",
     searchTerms: ["subtitle", "small"],
     icon: <Heading3 size={18} />,
     command: ({ editor, range }) => {
@@ -82,45 +73,28 @@ export const suggestionItems = createSuggestionItems([
   },
   {
     title: "Bullet List",
-    description: "Create a simple bulleted list.",
-    searchTerms: ["unordered", "point"],
+    description: "Create a simple list.",
+    searchTerms: ["unordered", "point", "list"],
     icon: <List size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleBulletList().run();
     },
   },
   {
-    title: "Numbered List",
-    description: "Create a list with numbering.",
-    searchTerms: ["ordered"],
-    icon: <ListOrdered size={18} />,
-    command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleOrderedList().run();
-    },
-  },
-  {
     title: "Quote",
-    description: "Capture a quote.",
-    searchTerms: ["blockquote"],
+    description: "Insert an excerpt or spoken dialogue.",
+    searchTerms: ["blockquote", "dialogue", "speech"],
     icon: <Quote size={18} />,
     command: ({ editor, range }) =>
       editor.chain().focus().deleteRange(range).toggleNode("paragraph", "paragraph").toggleBlockquote().run(),
   },
   {
-    title: "Code",
-    description: "Capture a code snippet.",
-    searchTerms: ["codeblock"],
-    icon: <Code size={18} />,
-    command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
-  },
-  {
     title: "Image",
-    description: "Upload an image from your computer.",
-    searchTerms: ["photo", "picture", "media"],
+    description: "Upload an image or illustration.",
+    searchTerms: ["photo", "picture", "media", "map", "portrait"],
     icon: <ImageIcon size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
-      // Create a hidden file input to trigger the OS file picker
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "image/*";
@@ -136,21 +110,52 @@ export const suggestionItems = createSuggestionItems([
   },
   {
     title: "Divider",
-    description: "Visually divide blocks.",
-    searchTerms: ["lines", "hr", "horizontal rule"],
+    description: "Insert a decorative scene break.",
+    searchTerms: ["lines", "hr", "scene", "break", "separator"],
     icon: <Minus size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHorizontalRule().run();
     },
   },
   {
+    title: "Lore Callout",
+    description: "Highlight important worldbuilding detail.",
+    searchTerms: ["callout", "info", "note", "important", "aside"],
+    icon: <ScrollText size={18} />,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .toggleNode("paragraph", "paragraph")
+        .toggleBlockquote()
+        .insertContent("📜 ")
+        .run();
+    },
+  },
+  {
+    title: "Secret",
+    description: "Mark hidden knowledge or GM-only notes.",
+    searchTerms: ["secret", "hidden", "gm", "spoiler", "private"],
+    icon: <Sparkles size={18} />,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .toggleNode("paragraph", "paragraph")
+        .toggleBlockquote()
+        .insertContent("🔒 SECRET: ")
+        .run();
+    },
+  },
+  {
     title: "Autolink",
     description: "Find and link mentions of existing lore entries.",
-    searchTerms: ["autolink", "link", "connect", "magic"],
+    searchTerms: ["autolink", "link", "connect", "magic", "mention"],
     icon: <Link2 size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
-      // Dispatch event to the LoreEditor wrapper to open the dialog
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("open-autolink-dialog", { detail: { editor } })

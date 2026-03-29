@@ -8,13 +8,15 @@ import {
   StarterKit,
   Placeholder,
   TiptapUnderline,
-  TextStyle,
   Color,
   HighlightExtension,
   Command,
+  renderItems,
+  TextStyle,
 } from "novel";
 
 import { mentionExtension } from "./mention-extension";
+import { suggestionItems } from "./slash-command";
 
 export const defaultExtensions = [
   StarterKit.configure({
@@ -104,4 +106,10 @@ export const defaultExtensions = [
     nested: true,
   }),
   mentionExtension,
+  Command.configure({
+    suggestion: {
+      items: () => suggestionItems,
+      render: renderItems,
+    },
+  }),
 ];

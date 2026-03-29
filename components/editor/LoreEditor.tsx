@@ -46,7 +46,7 @@ const TailoredEditor = ({ content, extensions, saveStatus, setSaveStatus, onSave
     <EditorContent
       immediatelyRender={false}
       extensions={[...defaultExtensions, ...(extensions || [])]}
-      className="w-full max-w-none p-4 sm:p-8 pt-14 sm:pt-14 relative z-10"
+      className="w-full max-w-none p-4 sm:p-8 relative z-10"
       editorProps={{
         handleDOMEvents: {
           keydown: () => {
@@ -98,10 +98,7 @@ export const LoreEditor = ({
         if (editorDOM) editorDOM.focus();
       }}
     >
-      {/* Editor top toolbar hint */}
-      <div className="absolute top-0 left-0 right-0 h-10 border-b border-border/40 bg-muted/20 flex items-center px-4 text-xs text-muted-foreground/60 select-none pointer-events-none z-0">
-        <span className="font-mono">Type '/' for commands</span>
-      </div>
+
 
       {showSaveStatus && (
         <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
