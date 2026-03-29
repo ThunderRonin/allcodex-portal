@@ -53,7 +53,7 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <Card className="border-border/60">
+    <Card className="border-border bg-card/80">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <Icon className="h-4 w-4 text-primary" />
@@ -149,7 +149,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Lore */}
         <div className="lg:col-span-2">
-          <Card className="border-border/60">
+          <Card className="border-border bg-card/80">
             <CardHeader className="border-b border-border/40 pb-3">
               <CardTitle
                 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider"
@@ -217,7 +217,7 @@ export default function DashboardPage() {
 
         {/* Quick Actions + Status */}
         <div className="space-y-4">
-          <Card className="border-border/60">
+          <Card className="border-border bg-card/80">
             <CardHeader className="border-b border-border/40 pb-3">
               <CardTitle
                 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider"
@@ -254,7 +254,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/60">
+          <Card className="border-border bg-card/80">
             <CardHeader className="border-b border-border/40 pb-3">
               <CardTitle
                 className="text-sm font-semibold text-foreground/80 uppercase tracking-wider"

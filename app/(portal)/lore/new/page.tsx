@@ -10,6 +10,7 @@ import { LoreEditor } from "@/components/editor/LoreEditor";
 import { Save, X, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { TemplatePicker, TemplateDef } from "@/components/editor/TemplatePicker";
+import { PromotedFields } from "@/components/editor/PromotedFields";
 
 export default function NewLorePage() {
   return (
@@ -27,6 +28,7 @@ function NewLoreContent() {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [parentId, setParentId] = useState(searchParams.get("parentId") || "");
   const [content, setContent] = useState("");
+  const [attributeValues, setAttributeValues] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
   const { mutate: createNote, isPending } = useMutation({
@@ -40,6 +42,7 @@ function NewLoreContent() {
           templateId: template?.templateId || undefined,
           parentNoteId: parentId.trim() || undefined,
           content: content || undefined,
+          attributes: attributeValues,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -69,7 +72,7 @@ function NewLoreContent() {
         </div>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-border/60 bg-card/60 p-5">
+      <div className="space-y-4 rounded-lg border border-border bg-card/80 p-5">
         <div className="space-y-1.5">
           <Label htmlFor="title">Title</Label>
           <Input
@@ -136,6 +139,15 @@ function NewLoreContent() {
             />
           </div>
         </div>
+
+        {template && (
+          <PromotedFields 
+            template={template} 
+            values={attributeValues} 
+            onChange={(key, value) => setAttributeValues(prev => ({ ...prev, [key]: value }))} 
+            disabled={isPending}
+          />
+        )}
 
         <div className="space-y-1.5">
           <Label htmlFor="content">

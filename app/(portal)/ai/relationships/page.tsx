@@ -42,10 +42,30 @@ function RelationshipsContent() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   useEffect(() => {
-    if (noteId) {
-      // Pre-fill with note ID info if provided
-      setText(`Note ID: ${noteId}\n\n`);
-    }
+    if (!noteId) return;
+    // Fetch actual note content from AllCodex and populate the textarea
+    fetch(`/api/lore/${noteId}/content`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to fetch note: ${r.status}`);
+        return r.text();
+      })
+      .then((html) => {
+        // Strip HTML tags to get plain text for the embedding query
+        const plain = html
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/\s+/g, " ")
+          .trim();
+        setText(plain);
+      })
+      .catch(() => {
+        // Fallback: leave textarea empty so user can paste manually
+        setText("");
+      });
   }, [noteId]);
 
   const { mutate: getSuggestions, isPending, error: suggestionError } = useMutation({

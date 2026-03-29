@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { TemplatePicker, TemplateDef, LORE_TEMPLATES } from "@/components/editor/TemplatePicker";
+import { PromotedFields } from "@/components/editor/PromotedFields";
 
 interface Note {
   noteId: string;
@@ -27,6 +29,8 @@ export default function EditLorePage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isDraft, setIsDraft] = useState(false);
   const [draftAttrId, setDraftAttrId] = useState<string | null>(null);
+  const [template, setTemplate] = useState<TemplateDef | null>(null);
+  const [attributeValues, setAttributeValues] = useState<Record<string, string>>({});
 
   // Load note metadata
   const { isLoading: noteLoading } = useQuery<Note>({
@@ -37,6 +41,22 @@ export default function EditLorePage() {
       const draftAttr = data.attributes?.find((a) => a.name === "draft");
       setIsDraft(!!draftAttr);
       setDraftAttrId(draftAttr?.attributeId || null);
+
+      if (template === null) {
+        const loreTypeAttr = data.attributes?.find(a => a.name === "loreType");
+        const foundTemplate = LORE_TEMPLATES.find(t => t.value === loreTypeAttr?.value) || null;
+        setTemplate(foundTemplate);
+        
+        if (foundTemplate && Object.keys(attributeValues).length === 0) {
+          const initialValues: Record<string, string> = {};
+          foundTemplate.attributes.forEach(attr => {
+            const sanitizedKey = attr.replace(/\s+/g, '_');
+            const attrData = data.attributes?.find(a => a.name === sanitizedKey);
+            if (attrData) initialValues[attr] = attrData.value;
+          });
+          setAttributeValues(initialValues);
+        }
+      }
     },
   } as any);
 
@@ -61,6 +81,37 @@ export default function EditLorePage() {
           body: JSON.stringify({ title }),
         });
         if (!res.ok) throw new Error("Failed to save title");
+      }
+
+      if (template) {
+        const cachedNote = qc.getQueryData<Note>(["note", id]);
+        for (const attr of template.attributes) {
+          const sanitizedKey = attr.replace(/\s+/g, '_');
+          const existingAttr = cachedNote?.attributes?.find(a => a.name === sanitizedKey && a.type === "label");
+          const newValue = attributeValues[attr] || "";
+          
+          if (existingAttr) {
+            if (newValue.trim() === "") {
+              // Delete
+              await fetch(`/api/lore/${id}/attributes?attrId=${existingAttr.attributeId}`, { method: "DELETE" });
+            } else if (existingAttr.value !== newValue.trim()) {
+              // Replace (Delete then POST)
+              await fetch(`/api/lore/${id}/attributes?attrId=${existingAttr.attributeId}`, { method: "DELETE" });
+              await fetch(`/api/lore/${id}/attributes`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: "label", name: sanitizedKey, value: newValue.trim() })
+              });
+            }
+          } else if (newValue.trim() !== "") {
+            // Create
+            await fetch(`/api/lore/${id}/attributes`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type: "label", name: sanitizedKey, value: newValue.trim() })
+            });
+          }
+        }
       }
     },
     onSuccess: () => {
@@ -131,7 +182,7 @@ export default function EditLorePage() {
         </p>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-border/60 bg-card/60 p-5">
+      <div className="space-y-4 rounded-lg border border-border bg-card/80 p-5">
         <div className="space-y-1.5">
           <Label htmlFor="title">Title</Label>
           <Input
@@ -142,7 +193,16 @@ export default function EditLorePage() {
           />
         </div>
 
-        <div className="space-y-1.5">
+        {template && (
+          <PromotedFields 
+            template={template} 
+            values={attributeValues} 
+            onChange={(key, value) => setAttributeValues(prev => ({ ...prev, [key]: value }))} 
+            disabled={saving}
+          />
+        )}
+
+        <div className="space-y-1.5 pt-4 border-t border-border/50">
           <Label htmlFor="content">
             Content{" "}
             <span className="text-muted-foreground text-xs">(HTML)</span>

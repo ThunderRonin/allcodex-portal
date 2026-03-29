@@ -6,13 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { BookOpen, Plus, Search, Filter, ChevronDown } from "lucide-react";
+import { Plus, Search, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { LoreTree } from "@/components/portal/LoreTree";
 
@@ -38,12 +32,12 @@ const LORE_TYPE_QUERIES: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  character: "border-blue-500/40 text-blue-400",
-  location: "border-green-500/40 text-green-400",
-  faction: "border-purple-500/40 text-purple-400",
-  creature: "border-red-500/40 text-red-400",
-  event: "border-yellow-500/40 text-yellow-400",
-  manuscript: "border-orange-500/40 text-orange-400",
+  character: "border-blue-500/60 text-blue-300 bg-blue-500/10",
+  location: "border-green-500/60 text-green-300 bg-green-500/10",
+  faction: "border-purple-500/60 text-purple-300 bg-purple-500/10",
+  creature: "border-red-500/60 text-red-300 bg-red-500/10",
+  event: "border-yellow-500/60 text-yellow-300 bg-yellow-500/10",
+  manuscript: "border-orange-500/60 text-orange-300 bg-orange-500/10",
 };
 
 function getLoreType(note: Note): string {
@@ -55,11 +49,10 @@ function getLoreType(note: Note): string {
 }
 
 export default function LorePage() {
-  const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>("All");
 
-  const query = LORE_TYPE_QUERIES[filter] ?? "#lore";
+  const query = "#lore";
 
   const { data: notes, isLoading } = useQuery<Note[]>({
     queryKey: ["lore", query],
@@ -74,19 +67,19 @@ export default function LorePage() {
     ? notes.filter((n) => n.title.toLowerCase().includes(search.toLowerCase()))
     : [];
 
-  const filtered = selectedNodeId 
-    ? searched.filter(n => n.parentNoteIds?.includes(selectedNodeId) || n.noteId === selectedNodeId)
+  const filtered = selectedCategory && selectedCategory !== "All"
+    ? searched.filter(n => getLoreType(n) === selectedCategory)
     : searched;
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start">
       {/* Sidebar Tree */}
-      <div className="w-full lg:w-72 shrink-0 rounded-xl border border-border/60 bg-card shadow-sm overflow-hidden hidden lg:block h-[calc(100vh-140px)] sticky top-6">
+      <div className="w-full lg:w-72 shrink-0 rounded-xl border border-border bg-card shadow-sm overflow-hidden hidden lg:block h-[calc(100vh-140px)] sticky top-6">
         <div className="p-3 border-b bg-muted/10 font-medium text-sm text-foreground/80 flex justify-between items-center" style={{ fontFamily: "var(--font-cinzel)" }}>
           Categories
         </div>
         <div className="h-[calc(100%-45px)]">
-          <LoreTree selectedId={selectedNodeId} onSelectNode={setSelectedNodeId} />
+          <LoreTree selectedId={selectedCategory} onSelectNode={setSelectedCategory} />
         </div>
       </div>
 
@@ -124,22 +117,6 @@ export default function LorePage() {
             className="pl-9"
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2 shrink-0">
-              <Filter className="h-4 w-4" />
-              {filter}
-              <ChevronDown className="h-3 w-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {Object.keys(LORE_TYPE_QUERIES).map((t) => (
-              <DropdownMenuItem key={t} onClick={() => setFilter(t)}>
-                {t}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Grid */}
@@ -165,12 +142,12 @@ export default function LorePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((note) => {
             const loreType = getLoreType(note);
-            const colorClass = TYPE_COLORS[loreType] ?? "border-border/60 text-muted-foreground";
+            const colorClass = TYPE_COLORS[loreType] ?? "border-white/20 text-muted-foreground bg-white/5";
             return (
               <Link
                 key={note.noteId}
                 href={`/lore/${note.noteId}`}
-                className="group block rounded-lg border bg-card p-4 hover:border-primary/50 hover:bg-card/80 transition-all"
+                className="group block rounded-lg border border-border bg-card/80 p-4 hover:border-primary/50 hover:bg-white/[0.05] transition-all"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-sm font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-2">

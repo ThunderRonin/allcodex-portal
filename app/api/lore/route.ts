@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const creds = await getEtapiCreds();
     if (!creds.url || !creds.token) return notConfigured("AllCodex");
-    const { loreType, templateId, ...noteParams } = await req.json();
+    const { loreType, templateId, attributes, ...noteParams } = await req.json();
     if (!noteParams.parentNoteId) noteParams.parentNoteId = "root";
     const result = await createNote(creds, noteParams);
     const noteId = (result as any)?.note?.noteId ?? (result as any).noteId;
@@ -30,6 +30,15 @@ export async function POST(req: NextRequest) {
       }
       if (templateId) {
         await createAttribute(creds, { noteId, type: "relation", name: "template", value: templateId }).catch(() => {});
+      }
+      if (attributes && typeof attributes === 'object') {
+        for (const [key, value] of Object.entries(attributes)) {
+          if (value && typeof value === 'string' && value.trim() !== '') {
+            // Replace spaces with underscores for valid Trilium label names
+            const sanitizedKey = key.replace(/\s+/g, '_');
+            await createAttribute(creds, { noteId, type: "label", name: sanitizedKey, value: value.trim() });
+          }
+        }
       }
     }
     return NextResponse.json(result, { status: 201 });

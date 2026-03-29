@@ -138,28 +138,34 @@ export function TemplatePicker({ open, onOpenChange, onSelect }: TemplatePickerP
                     setSearch("");
                     onOpenChange(false);
                   }}
-                  className="group relative flex flex-col items-start gap-2 rounded-xl border border-border/60 bg-card p-5 text-left transition-all hover:border-primary hover:shadow-md hover:scale-[1.02]"
+                  className="group relative flex flex-col items-start w-full h-full rounded-xl border-2 border-border bg-card/80 p-4 text-left transition-all hover:border-primary hover:shadow-xl hover:bg-card/90"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-md bg-primary/10 p-2 text-primary">
+                  <div className="flex flex-col items-start gap-3 w-full mb-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 border border-primary/20 shadow-inner group-hover:bg-primary/20 transition-colors">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="font-semibold text-lg">{t.label}</h3>
+                    <div className="w-full">
+                      <h3 className="font-bold text-sm uppercase tracking-wider leading-tight group-hover:text-primary transition-colors text-foreground/90 break-words" style={{ fontFamily: "var(--font-cinzel)" }}>
+                        {t.label}
+                      </h3>
+                      <div className="h-0.5 w-6 bg-primary/30 mt-1.5 group-hover:w-8 group-hover:bg-primary/60 transition-all duration-300" />
+                    </div>
                   </div>
                   
-                  <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
-                    {t.description}
-                  </p>
-                  
-                  {t.attributes.length > 0 && (
-                    <div className="mt-auto pt-3 flex flex-wrap gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                      {t.attributes.map(attr => (
-                        <span key={attr} className="text-[10px] px-1.5 py-0.5 rounded bg-muted/50 text-muted-foreground border border-border/50">
-                          {attr}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex-1 w-full flex flex-col">
+                    <p className="text-xs sm:text-sm text-muted-foreground/90 line-clamp-3 leading-relaxed mb-3 flex-1">
+                      {t.description}
+                    </p>
+                    {t.attributes.length > 0 && (
+                      <div className="pt-2 flex flex-wrap gap-1.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                        {t.attributes.map(attr => (
+                          <span key={attr} className="text-[10px] px-1.5 py-0.5 rounded bg-muted/50 text-muted-foreground border border-border/50">
+                            {attr}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </button>
               );
             })}

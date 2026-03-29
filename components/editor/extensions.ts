@@ -11,6 +11,7 @@ import {
   TextStyle,
   Color,
   HighlightExtension,
+  Command,
 } from "novel";
 
 import { mentionExtension } from "./mention-extension";

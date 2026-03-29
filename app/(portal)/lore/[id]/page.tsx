@@ -18,7 +18,6 @@ import {
 import {
   ArrowLeft,
   Edit2,
-  ExternalLink,
   Tag,
   Link2,
   Calendar,
@@ -98,7 +97,19 @@ export default function LoreDetailPage({
     enabled: !!note,
   });
 
-  const labels = note?.attributes?.filter((a) => a.type === "label" && !["template"].includes(a.name)) ?? [];
+  const hiddenLabels = ["template", "iconClass", "cssClass", "loreType", "lore", "pageTemplate", "bookTheme"];
+  const allLabels = note?.attributes?.filter(
+    (a) => 
+      a.type === "label" && 
+      !hiddenLabels.includes(a.name) && 
+      !a.name.startsWith("Label:") && 
+      !a.name.startsWith("Relation:") &&
+      !(a.value && (a.value.includes("promoted") || a.value.includes("alias=")))
+  ) ?? [];
+
+  const details = allLabels.filter(a => a.value && a.value.trim() !== "");
+  const tags = allLabels.filter(a => !a.value || a.value.trim() === "");
+
   const relations = note?.attributes?.filter((a) => a.type === "relation" && a.name !== "template") ?? [];
   const loreType = note?.attributes?.find((a) => a.name === "loreType")?.value ?? "lore";
 
@@ -119,20 +130,6 @@ export default function LoreDetailPage({
           <span className="text-sm truncate">{note?.title}</span>
         )}
         <div className="ml-auto flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                <a
-                  href={`${process.env.NEXT_PUBLIC_ALLCODEX_URL ?? "http://localhost:8080"}/#${id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Open in AllCodex</TooltipContent>
-          </Tooltip>
           <Button asChild variant="outline" size="sm" className="gap-2">
             <Link href={`/lore/${id}/edit`}>
               <Edit2 className="h-4 w-4" />
@@ -198,7 +195,7 @@ export default function LoreDetailPage({
         {/* Info box sidebar — World Anvil style */}
         <div className="space-y-4">
           {/* Labels / Promoted Attributes */}
-          {labels.length > 0 && (
+          {details.length > 0 && (
             <Card className="border-primary/20 bg-card/60">
               <CardHeader className="pb-2 border-b border-border/30">
                 <CardTitle
@@ -209,8 +206,30 @@ export default function LoreDetailPage({
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-2">
-                {labels.map((attr) => (
+                {details.map((attr) => (
                   <AttributeRow key={`${attr.name}-${attr.value}`} attr={attr} />
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tags */}
+          {tags.length > 0 && (
+            <Card className="border-border/50 bg-card/40">
+              <CardHeader className="pb-2 border-b border-border/30">
+                <CardTitle
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
+                  style={{ fontFamily: "var(--font-cinzel)" }}
+                >
+                  <Tag className="h-3.5 w-3.5" />
+                  Tags
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-3 flex flex-wrap gap-2">
+                {tags.map((attr) => (
+                  <Badge key={attr.name} variant="secondary" className="text-xs font-normal border-border/50 text-muted-foreground">
+                    {attr.name.replace(/_/g, " ")}
+                  </Badge>
                 ))}
               </CardContent>
             </Card>

@@ -44,8 +44,9 @@ const TailoredEditor = ({ content, extensions, saveStatus, setSaveStatus, onSave
 
   return (
     <EditorContent
+      immediatelyRender={false}
       extensions={[...defaultExtensions, ...(extensions || [])]}
-      className="min-h-[300px] w-full max-w-none p-8 prose prose-invert prose-p:my-1 prose-headings:my-2 prose-h1:text-primary prose-a:text-primary focus:outline-none"
+      className="w-full max-w-none p-4 sm:p-8 pt-14 sm:pt-14 relative z-10"
       editorProps={{
         handleDOMEvents: {
           keydown: () => {
@@ -58,7 +59,7 @@ const TailoredEditor = ({ content, extensions, saveStatus, setSaveStatus, onSave
           paste: (view, event, _slice) => handleImagePaste(view, event, uploadFn),
         },
         attributes: {
-          class: "novel-editor prose prose-invert prose-p:my-1 focus:outline-none max-w-none",
+          class: "novel-editor prose prose-invert prose-p:my-1 prose-headings:my-2 prose-h1:text-primary prose-a:text-primary focus:outline-none max-w-none min-h-[400px] w-full cursor-text",
         },
       }}
       onUpdate={({ editor }) => {
@@ -90,7 +91,18 @@ export const LoreEditor = ({
   }, [initialContent]);
 
   return (
-    <div className={cn("relative w-full border border-border rounded-md bg-background", className)}>
+    <div 
+      className={cn("relative w-full border border-border/80 rounded-xl bg-card/60 shadow-inner group transition-colors hover:border-border overflow-hidden cursor-text", className)}
+      onClick={() => {
+        const editorDOM = document.querySelector('.ProseMirror') as HTMLElement;
+        if (editorDOM) editorDOM.focus();
+      }}
+    >
+      {/* Editor top toolbar hint */}
+      <div className="absolute top-0 left-0 right-0 h-10 border-b border-border/40 bg-muted/20 flex items-center px-4 text-xs text-muted-foreground/60 select-none pointer-events-none z-0">
+        <span className="font-mono">Type '/' for commands</span>
+      </div>
+
       {showSaveStatus && (
         <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
           <div
