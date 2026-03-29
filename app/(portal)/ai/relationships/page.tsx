@@ -69,7 +69,7 @@ function RelationshipsContent() {
       const r = await fetch("/api/ai/relationships", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: t }),
+        body: JSON.stringify({ text: t, ...(noteId ? { noteId } : {}) }),
       });
       if (!r.ok) throw await r.json();
       return r.json();
