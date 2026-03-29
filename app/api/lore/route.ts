@@ -19,14 +19,17 @@ export async function POST(req: NextRequest) {
   try {
     const creds = await getEtapiCreds();
     if (!creds.url || !creds.token) return notConfigured("AllCodex");
-    const { loreType, ...noteParams } = await req.json();
+    const { loreType, templateId, ...noteParams } = await req.json();
     if (!noteParams.parentNoteId) noteParams.parentNoteId = "root";
     const result = await createNote(creds, noteParams);
-    const noteId = result?.note?.noteId ?? (result as any).noteId;
+    const noteId = (result as any)?.note?.noteId ?? (result as any).noteId;
     if (noteId) {
       await createAttribute(creds, { noteId, type: "label", name: "lore", value: "" });
       if (loreType) {
         await createAttribute(creds, { noteId, type: "label", name: "loreType", value: loreType });
+      }
+      if (templateId) {
+        await createAttribute(creds, { noteId, type: "relation", name: "template", value: templateId }).catch(() => {});
       }
     }
     return NextResponse.json(result, { status: 201 });

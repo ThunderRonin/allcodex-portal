@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BookOpen, Plus, Search, Filter, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { LoreTree } from "@/components/portal/LoreTree";
 
 interface Note {
   noteId: string;
@@ -22,10 +23,12 @@ interface Note {
   dateModified: string;
   dateCreated: string;
   attributes: Array<{ name: string; value: string; type?: string }>;
+  parentNoteIds: string[];
 }
 
 const LORE_TYPE_QUERIES: Record<string, string> = {
   All: "#lore",
+  Drafts: "#lore #draft",
   Character: "#lore #loreType=character",
   Location: "#lore #loreType=location",
   Faction: "#lore #loreType=faction",
@@ -54,6 +57,7 @@ function getLoreType(note: Note): string {
 export default function LorePage() {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const query = LORE_TYPE_QUERIES[filter] ?? "#lore";
 
@@ -66,16 +70,32 @@ export default function LorePage() {
     },
   });
 
-  const filtered = Array.isArray(notes)
+  const searched = Array.isArray(notes)
     ? notes.filter((n) => n.title.toLowerCase().includes(search.toLowerCase()))
     : [];
 
+  const filtered = selectedNodeId 
+    ? searched.filter(n => n.parentNoteIds?.includes(selectedNodeId) || n.noteId === selectedNodeId)
+    : searched;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1
+    <div className="flex flex-col lg:flex-row gap-8 items-start">
+      {/* Sidebar Tree */}
+      <div className="w-full lg:w-72 shrink-0 rounded-xl border border-border/60 bg-card shadow-sm overflow-hidden hidden lg:block h-[calc(100vh-140px)] sticky top-6">
+        <div className="p-3 border-b bg-muted/10 font-medium text-sm text-foreground/80 flex justify-between items-center" style={{ fontFamily: "var(--font-cinzel)" }}>
+          Categories
+        </div>
+        <div className="h-[calc(100%-45px)]">
+          <LoreTree selectedId={selectedNodeId} onSelectNode={setSelectedNodeId} />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 min-w-0 space-y-6 w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1
             className="text-2xl font-bold text-primary"
             style={{ fontFamily: "var(--font-cinzel)" }}
           >
@@ -156,12 +176,19 @@ export default function LorePage() {
                   <h3 className="text-sm font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-2">
                     {note.title}
                   </h3>
-                  <Badge
-                    variant="outline"
-                    className={`shrink-0 text-xs capitalize ${colorClass}`}
-                  >
-                    {loreType}
-                  </Badge>
+                  <div className="flex gap-1.5 items-center">
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 text-[10px] uppercase tracking-wider font-semibold ${colorClass}`}
+                    >
+                      {loreType}
+                    </Badge>
+                    {note.attributes?.some(a => a.name === "draft") && (
+                      <Badge variant="outline" className="shrink-0 text-[10px] uppercase tracking-wider font-semibold border-amber-500/40 text-amber-500 bg-amber-500/10">
+                        Draft
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div className="grimoire-divider mt-3 mb-2" />
                 <p className="text-xs text-muted-foreground">
@@ -191,6 +218,7 @@ export default function LorePage() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

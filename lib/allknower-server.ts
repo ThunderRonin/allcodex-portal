@@ -163,6 +163,12 @@ export async function suggestRelationships(creds: AkCreds, text: string): Promis
   return res.json();
 }
 
+export async function akFetchAutocomplete(creds: AkCreds, q: string): Promise<any[]> {
+  const res = await akFetch(creds, `/suggest/autocomplete?q=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  return data.results ?? [];
+}
+
 export async function getGaps(creds: AkCreds): Promise<GapResult> {
   const res = await akFetch(creds, "/suggest/gaps");
   return res.json();

@@ -1,38 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { LoreEditor } from "@/components/editor/LoreEditor";
 import { Save, X, BookOpen } from "lucide-react";
 import Link from "next/link";
-
-const LORE_TYPES = [
-  { value: "character", label: "Character" },
-  { value: "location", label: "Location" },
-  { value: "faction", label: "Faction" },
-  { value: "creature", label: "Creature" },
-  { value: "event", label: "Event" },
-  { value: "manuscript", label: "Manuscript" },
-  { value: "item", label: "Item" },
-  { value: "lore", label: "General Lore" },
-];
+import { TemplatePicker, TemplateDef } from "@/components/editor/TemplatePicker";
 
 export default function NewLorePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NewLoreContent />
+    </Suspense>
+  );
+}
+
+function NewLoreContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [title, setTitle] = useState("");
-  const [loreType, setLoreType] = useState("");
-  const [parentId, setParentId] = useState("");
+  const [template, setTemplate] = useState<TemplateDef | null>(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [parentId, setParentId] = useState(searchParams.get("parentId") || "");
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +36,8 @@ export default function NewLorePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
-          loreType: loreType || "lore",
+          loreType: template?.value || "lore",
+          templateId: template?.templateId || undefined,
           parentNoteId: parentId.trim() || undefined,
           content: content || undefined,
         }),
@@ -88,24 +82,43 @@ export default function NewLorePage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Type</Label>
-            <Select
-              value={loreType}
-              onValueChange={setLoreType}
-              disabled={isPending}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type…" />
-              </SelectTrigger>
-              <SelectContent>
-                {LORE_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="space-y-3">
+            <Label>Template</Label>
+            
+            {!template ? (
+              <Button 
+                variant="outline" 
+                className="w-full h-10 border-dashed justify-start text-muted-foreground"
+                onClick={() => setIsPickerOpen(true)}
+                disabled={isPending}
+              >
+                + Choose a template...
+              </Button>
+            ) : (
+              <div className="relative rounded-lg border border-border bg-card p-3 shadow-sm flex items-start gap-3 group">
+                <div className="rounded-md bg-primary/10 p-2 text-primary shrink-0">
+                  <template.icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm text-foreground">{template.label}</h4>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{template.description}</p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 px-2 text-xs absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setIsPickerOpen(true)}
+                  disabled={isPending}
+                >
+                  Change
+                </Button>
+              </div>
+            )}
+            <TemplatePicker 
+              open={isPickerOpen} 
+              onOpenChange={setIsPickerOpen} 
+              onSelect={setTemplate} 
+            />
           </div>
 
           <div className="space-y-1.5">
@@ -131,15 +144,14 @@ export default function NewLorePage() {
               (optional, plain text or HTML)
             </span>
           </Label>
-          <Textarea
-            id="content"
-            placeholder="Write the initial lore content…"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={8}
-            className="resize-none"
-            disabled={isPending}
-          />
+          <div className="flex-1 mt-6">
+            <LoreEditor
+              initialContent={content}
+              onSave={setContent}
+              className="min-h-[400px]"
+              showSaveStatus={false}
+            />
+          </div>
         </div>
 
         {error && (

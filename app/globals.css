@@ -151,3 +151,16 @@
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+/* ── Lore Mentions ───────────────────────────────────────────────────────────── */
+.lore-mention {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.lore-mention::before {
+  content: "@";
+  opacity: 0.5;
+}

@@ -60,10 +60,11 @@ export interface EtapiNote {
   isProtected: boolean;
   dateCreated: string;
   dateModified: string;
-  utcDateCreated: string;
   utcDateModified: string;
   parentNoteIds: string[];
   childNoteIds: string[];
+  parentBranchIds: string[];
+  childBranchIds: string[];
   attributes: EtapiAttribute[];
 }
 
@@ -94,6 +95,22 @@ export async function searchNotes(creds: EtapiCreds, query: string): Promise<Eta
   const res = await etapiFetch(creds, `/notes?search=${encodeURIComponent(query)}&limit=200`);
   const data = await res.json();
   return data.results ?? [];
+}
+
+/** Quick title search for mention autocomplete (slim response) */
+export async function searchNotesTitles(
+  creds: EtapiCreds,
+  query: string,
+  limit = 8
+): Promise<{ noteId: string; title: string; loreType?: string }[]> {
+  const res = await etapiFetch(creds, `/notes?search=${encodeURIComponent(query)}&limit=${limit}`);
+  const data = await res.json();
+  const notes = data.results ?? [];
+  return notes.map((note: EtapiNote) => ({
+    noteId: note.noteId,
+    title: note.title,
+    loreType: note.attributes.find((a) => a.name === "loreType")?.value,
+  }));
 }
 
 /** Get a single note by ID */
@@ -153,6 +170,52 @@ export async function createAttribute(creds: EtapiCreds, params: {
     body: JSON.stringify(params),
   });
   return res.json();
+}
+
+/** Delete an attribute */
+export async function deleteAttribute(creds: EtapiCreds, attributeId: string): Promise<void> {
+  await etapiFetch(creds, `/attributes/${attributeId}`, { method: "DELETE" });
+}
+
+/** Create a new branch link */
+export async function createBranch(creds: EtapiCreds, params: {
+  noteId: string;
+  parentNoteId: string;
+  notePosition?: number;
+}): Promise<any> {
+  const res = await etapiFetch(creds, "/branches", {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+  return res.json();
+}
+
+/** Get a specific branch */
+export async function getBranch(creds: EtapiCreds, branchId: string): Promise<any> {
+  const res = await etapiFetch(creds, `/branches/${branchId}`);
+  return res.json();
+}
+
+/** Delete a branch */
+export async function deleteBranch(creds: EtapiCreds, branchId: string): Promise<void> {
+  await etapiFetch(creds, `/branches/${branchId}`, { method: "DELETE" });
+}
+
+/** Patch a branch */
+export async function patchBranch(creds: EtapiCreds, branchId: string, patch: {
+  notePosition?: number;
+  prefix?: string;
+}): Promise<any> {
+  const res = await etapiFetch(creds, `/branches/${branchId}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+  return res.json();
+}
+
+/** Refresh ordering of children for a specific parent */
+export async function refreshNoteOrdering(creds: EtapiCreds, parentNoteId: string): Promise<void> {
+  await etapiFetch(creds, `/refresh-note-ordering/${parentNoteId}`, { method: "POST" });
 }
 
 /** Get app info */

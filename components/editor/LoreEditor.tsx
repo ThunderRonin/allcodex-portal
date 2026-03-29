@@ -1,0 +1,120 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { EditorRoot, EditorContent, useEditor } from "novel";
+import { handleImageDrop, handleImagePaste } from "novel";
+import { defaultExtensions } from "./extensions";
+import { AutolinkerDialog } from "./AutolinkerDialog";
+import { SlashCommand } from "./slash-command";
+import { BubbleMenu } from "./bubble-menu";
+import { uploadFn } from "./image-upload";
+import { cn } from "@/lib/utils";
+import { debounce } from "@/lib/utils";
+
+interface LoreEditorProps {
+  initialContent?: string;
+  onSave?: (html: string) => void;
+  className?: string;
+  extensions?: any[];
+  showSaveStatus?: boolean;
+}
+
+interface TailoredEditorProps {
+  content?: string;
+  extensions?: any[];
+  saveStatus: string;
+  setSaveStatus: (status: "Saved" | "Saving..." | "Unsaved") => void;
+  onSave?: (html: string) => void;
+}
+
+const TailoredEditor = ({ content, extensions, saveStatus, setSaveStatus, onSave }: TailoredEditorProps) => {
+  const { editor } = useEditor();
+  const [debouncedSave] = useState(() =>
+    debounce((html: string) => {
+      onSave?.(html);
+      setSaveStatus("Saved");
+    }, 750)
+  );
+
+  useEffect(() => {
+    if (editor && content !== undefined && editor.isEmpty) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
+  return (
+    <EditorContent
+      extensions={[...defaultExtensions, ...(extensions || [])]}
+      className="min-h-[300px] w-full max-w-none p-8 prose prose-invert prose-p:my-1 prose-headings:my-2 prose-h1:text-primary prose-a:text-primary focus:outline-none"
+      editorProps={{
+        handleDOMEvents: {
+          keydown: () => {
+            if (saveStatus === "Saved") setSaveStatus("Unsaved");
+            return false;
+          },
+          // @ts-ignore
+          drop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
+          // @ts-ignore
+          paste: (view, event, _slice) => handleImagePaste(view, event, uploadFn),
+        },
+        attributes: {
+          class: "novel-editor prose prose-invert prose-p:my-1 focus:outline-none max-w-none",
+        },
+      }}
+      onUpdate={({ editor }) => {
+        setSaveStatus("Saving...");
+        debouncedSave(editor.getHTML());
+      }}
+    >
+      <SlashCommand />
+      <BubbleMenu />
+    </EditorContent>
+  );
+};
+
+export const LoreEditor = ({
+  initialContent,
+  onSave,
+  className,
+  extensions = [],
+  showSaveStatus = true,
+}: LoreEditorProps) => {
+  const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "Unsaved">("Saved");
+  const [content, setContent] = useState<string | undefined>(initialContent);
+
+  // When initialContent changes from undefined to a string (data loaded), set it once
+  useEffect(() => {
+    if (initialContent && content === undefined) {
+      setContent(initialContent);
+    }
+  }, [initialContent]);
+
+  return (
+    <div className={cn("relative w-full border border-border rounded-md bg-background", className)}>
+      {showSaveStatus && (
+        <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
+          <div
+            className={cn("text-xs font-medium px-2 py-1 rounded-full", {
+              "bg-muted text-muted-foreground": saveStatus === "Saved",
+              "bg-primary/20 text-primary": saveStatus === "Saving...",
+              "bg-destructive/20 text-destructive": saveStatus === "Unsaved",
+            })}
+          >
+            {saveStatus}
+          </div>
+        </div>
+      )}
+      
+      <EditorRoot>
+        <TailoredEditor
+          content={content}
+          extensions={extensions}
+          saveStatus={saveStatus}
+          setSaveStatus={setSaveStatus}
+          onSave={onSave}
+        />
+      </EditorRoot>
+      <AutolinkerDialog />
+    </div>
+  );
+};

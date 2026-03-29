@@ -4,17 +4,18 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { LoreEditor } from "@/components/editor/LoreEditor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Save, X, Trash2 } from "lucide-react";
+import { Trash2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 interface Note {
   noteId: string;
   title: string;
   type: string;
+  attributes?: Array<{ name: string; value: string; type: string; attributeId: string }>;
 }
 
 export default function EditLorePage() {
@@ -24,6 +25,8 @@ export default function EditLorePage() {
   const [title, setTitle] = useState<string | null>(null);
   const [content, setContent] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isDraft, setIsDraft] = useState(false);
+  const [draftAttrId, setDraftAttrId] = useState<string | null>(null);
 
   // Load note metadata
   const { isLoading: noteLoading } = useQuery<Note>({
@@ -31,6 +34,9 @@ export default function EditLorePage() {
     queryFn: () => fetch(`/api/lore/${id}`).then((r) => r.json()),
     onSuccess: (data: Note) => {
       if (title === null) setTitle(data.title ?? "");
+      const draftAttr = data.attributes?.find((a) => a.name === "draft");
+      setIsDraft(!!draftAttr);
+      setDraftAttrId(draftAttr?.attributeId || null);
     },
   } as any);
 
@@ -48,24 +54,14 @@ export default function EditLorePage() {
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
-      const [metaRes, contentRes] = await Promise.all([
-        title !== null
-          ? fetch(`/api/lore/${id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title }),
-            })
-          : Promise.resolve({ ok: true }),
-        content !== null
-          ? fetch(`/api/lore/${id}/content`, {
-              method: "PUT",
-              headers: { "Content-Type": "text/html" },
-              body: content,
-            })
-          : Promise.resolve({ ok: true }),
-      ]);
-      const res = metaRes as Response;
-      if (!res.ok) throw new Error("Failed to save");
+      if (title !== null) {
+        const res = await fetch(`/api/lore/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title }),
+        });
+        if (!res.ok) throw new Error("Failed to save title");
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["note", id] });
@@ -73,6 +69,34 @@ export default function EditLorePage() {
       router.push(`/lore/${id}`);
     },
     onError: (e: Error) => setSaveError(e.message),
+  });
+
+  const { mutate: toggleDraft, isPending: togglingDraft } = useMutation({
+    onMutate: () => {
+      // Optimistic upate
+      setIsDraft(!isDraft);
+    },
+    mutationFn: async () => {
+      if (isDraft && draftAttrId) {
+        const res = await fetch(`/api/lore/${id}/attributes?attrId=${draftAttrId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to publish");
+      } else {
+        const res = await fetch(`/api/lore/${id}/attributes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "label", name: "draft", value: "" })
+        });
+        if (!res.ok) throw new Error("Failed to set as draft");
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["note", id] });
+    },
+    onError: (e: Error) => {
+      // Revert optimistic update
+      setIsDraft(isDraft);
+      setSaveError(e.message);
+    },
   });
 
   const { mutate: deleteNote, isPending: deleting } = useMutation({
@@ -123,14 +147,18 @@ export default function EditLorePage() {
             Content{" "}
             <span className="text-muted-foreground text-xs">(HTML)</span>
           </Label>
-          <Textarea
-            id="content"
-            value={content ?? ""}
-            onChange={(e) => setContent(e.target.value)}
-            rows={14}
-            className="resize-y font-mono text-xs"
-            disabled={saving}
+          <div className="flex-1 mt-6">
+          <LoreEditor
+            initialContent={content ?? ""}
+            onSave={(html) => {
+              fetch(`/api/lore/${id}/content`, {
+                method: "PUT",
+                headers: { "Content-Type": "text/html" },
+                body: html,
+              });
+            }}
           />
+        </div>
         </div>
 
         {saveError && (
@@ -154,20 +182,28 @@ export default function EditLorePage() {
           </Button>
 
           <div className="flex gap-3">
-            <Button variant="outline" size="sm" asChild disabled={saving}>
-              <Link href={`/lore/${id}`}>
-                <X className="h-4 w-4 mr-1" />
-                Cancel
-              </Link>
+            <Button
+              variant="outline"
+              onClick={() => toggleDraft()}
+              disabled={saving || deleting || togglingDraft}
+              className="gap-2 border-amber-500/30 hover:bg-amber-500/10 text-amber-600/80"
+            >
+              {isDraft ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              {isDraft ? "Publish" : "Revert to Draft"}
             </Button>
             <Button
-              size="sm"
-              onClick={() => save()}
-              disabled={saving}
-              className="gap-1.5"
+              variant="outline"
+              onClick={() => router.push(`/lore/${id}`)}
+              disabled={deleting}
             >
-              <Save className="h-4 w-4" />
-              Save Changes
+              Back to Entry
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => save()}
+              disabled={saving || deleting || togglingDraft}
+            >
+              {saving ? "Saving Summary..." : "Save Title/Type"}
             </Button>
           </div>
         </div>
