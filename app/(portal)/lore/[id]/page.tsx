@@ -24,6 +24,7 @@ import {
   Clock,
   Network,
 } from "lucide-react";
+import { RelationshipGraph } from "@/components/portal/RelationshipGraph";
 import Link from "next/link";
 import { use } from "react";
 
@@ -253,6 +254,11 @@ export default function LoreDetailPage({
                 ))}
               </CardContent>
             </Card>
+          )}
+
+          {/* Relationship Map */}
+          {note && (
+            <RelationshipGraph noteId={id} noteTitle={note.title} />
           )}
 
           {/* Find Related */}

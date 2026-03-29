@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Network, RefreshCw, ArrowRight } from "lucide-react";
+import { Network, RefreshCw, ArrowRight, Plus, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
@@ -40,17 +38,16 @@ function RelationshipsContent() {
   const noteId = searchParams.get("noteId");
   const [text, setText] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [applied, setApplied] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!noteId) return;
-    // Fetch actual note content from AllCodex and populate the textarea
     fetch(`/api/lore/${noteId}/content`)
       .then((r) => {
         if (!r.ok) throw new Error(`Failed to fetch note: ${r.status}`);
         return r.text();
       })
       .then((html) => {
-        // Strip HTML tags to get plain text for the embedding query
         const plain = html
           .replace(/<[^>]+>/g, " ")
           .replace(/&nbsp;/g, " ")
@@ -63,7 +60,6 @@ function RelationshipsContent() {
         setText(plain);
       })
       .catch(() => {
-        // Fallback: leave textarea empty so user can paste manually
         setText("");
       });
   }, [noteId]);
@@ -78,8 +74,34 @@ function RelationshipsContent() {
       if (!r.ok) throw await r.json();
       return r.json();
     },
-    onSuccess: (data: { suggestions: Suggestion[] }) =>
-      setSuggestions(data.suggestions ?? []),
+    onSuccess: (data: { suggestions: Suggestion[] }) => {
+      setSuggestions(data.suggestions ?? []);
+      setApplied(new Set()); // reset applied state on new results
+    },
+  });
+
+  const { mutate: applyRelation, variables: applyingVars } = useMutation({
+    mutationFn: async ({ suggestion }: { suggestion: Suggestion; key: string }) => {
+      if (!noteId) throw new Error("No note ID");
+      const r = await fetch("/api/ai/relationships", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourceNoteId: noteId,
+          relations: [{
+            targetNoteId: suggestion.targetNoteId,
+            relationshipType: suggestion.relationshipType,
+            description: suggestion.description,
+          }],
+          bidirectional: true,
+        }),
+      });
+      if (!r.ok) throw new Error("Failed to apply relation");
+      return r.json();
+    },
+    onSuccess: (_, { key }) => {
+      setApplied((prev) => new Set(prev).add(key));
+    },
   });
 
   return (
@@ -149,6 +171,9 @@ function RelationshipsContent() {
           {suggestions.map((s, i) => {
             const colorClass =
               RELATION_COLORS[s.relationshipType] ?? RELATION_COLORS.other;
+            const key = `${s.targetNoteId}::${s.relationshipType}`;
+            const isApplied = applied.has(key);
+            const isApplying = applyingVars?.key === key;
             return (
               <div
                 key={i}
@@ -157,7 +182,7 @@ function RelationshipsContent() {
                 <div className="flex items-center gap-2 justify-between">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className={`text-xs capitalize ${colorClass}`}>
-                      {s.relationshipType}
+                      {s.relationshipType.replace(/_/g, " ")}
                     </Badge>
                     <Link
                       href={`/lore/${s.targetNoteId}`}
@@ -167,9 +192,34 @@ function RelationshipsContent() {
                       <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
-                  <span className="text-xs text-muted-foreground/50 font-mono">
-                    {s.targetNoteId}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground/50 font-mono hidden sm:inline">
+                      {s.targetNoteId}
+                    </span>
+                    {noteId && (
+                      <Button
+                        size="sm"
+                        variant={isApplied ? "secondary" : "outline"}
+                        className="h-7 px-2 gap-1 text-xs"
+                        disabled={isApplied || isApplying}
+                        onClick={() => applyRelation({ suggestion: s, key })}
+                      >
+                        {isApplied ? (
+                          <>
+                            <Check className="h-3 w-3" />
+                            Applied
+                          </>
+                        ) : isApplying ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <Plus className="h-3 w-3" />
+                            Apply
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-sm text-foreground/70 leading-relaxed">
                   {s.description}

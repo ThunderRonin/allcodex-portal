@@ -155,10 +155,10 @@ export async function checkConsistency(creds: AkCreds, noteIds?: string[]): Prom
   return res.json();
 }
 
-export async function suggestRelationships(creds: AkCreds, text: string): Promise<{ suggestions: RelationshipSuggestion[] }> {
+export async function suggestRelationships(creds: AkCreds, text: string, noteId?: string): Promise<{ suggestions: RelationshipSuggestion[] }> {
   const res = await akFetch(creds, "/suggest/relationships", {
     method: "POST",
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, ...(noteId ? { noteId } : {}) }),
   });
   return res.json();
 }
@@ -167,6 +167,25 @@ export async function akFetchAutocomplete(creds: AkCreds, q: string): Promise<an
   const res = await akFetch(creds, `/suggest/autocomplete?q=${encodeURIComponent(q)}`);
   const data = await res.json();
   return data.results ?? [];
+}
+
+export interface ApplyRelationsResult {
+  applied: number;
+  skipped: number;
+  errors: string[];
+}
+
+export async function applyRelationships(
+  creds: AkCreds,
+  sourceNoteId: string,
+  relations: Array<{ targetNoteId: string; relationshipType: string; description?: string }>,
+  bidirectional = true
+): Promise<ApplyRelationsResult> {
+  const res = await akFetch(creds, "/suggest/relationships/apply", {
+    method: "POST",
+    body: JSON.stringify({ sourceNoteId, relations, bidirectional }),
+  });
+  return res.json();
 }
 
 export async function getGaps(creds: AkCreds): Promise<GapResult> {
