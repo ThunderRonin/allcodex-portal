@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useAIToolsStore } from "@/lib/stores/ai-tools-store";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,9 +36,15 @@ const RELATION_COLORS: Record<string, string> = {
 function RelationshipsContent() {
   const searchParams = useSearchParams();
   const noteId = searchParams.get("noteId");
-  const [text, setText] = useState("");
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [applied, setApplied] = useState<Set<string>>(new Set());
+  const {
+    relationText: text,
+    setRelationText: setText,
+    suggestions,
+    setSuggestions,
+    appliedRelations,
+    addApplied,
+    resetApplied,
+  } = useAIToolsStore();
 
   useEffect(() => {
     if (!noteId) return;
@@ -76,7 +82,7 @@ function RelationshipsContent() {
     },
     onSuccess: (data: { suggestions: Suggestion[] }) => {
       setSuggestions(data.suggestions ?? []);
-      setApplied(new Set()); // reset applied state on new results
+      resetApplied(); // reset applied state on new results
     },
   });
 
@@ -100,7 +106,7 @@ function RelationshipsContent() {
       return r.json();
     },
     onSuccess: (_, { key }) => {
-      setApplied((prev) => new Set(prev).add(key));
+      addApplied(key);
     },
   });
 
@@ -172,7 +178,7 @@ function RelationshipsContent() {
             const colorClass =
               RELATION_COLORS[s.relationshipType] ?? RELATION_COLORS.other;
             const key = `${s.targetNoteId}::${s.relationshipType}`;
-            const isApplied = applied.has(key);
+            const isApplied = appliedRelations.includes(key);
             const isApplying = applyingVars?.key === key;
             return (
               <div

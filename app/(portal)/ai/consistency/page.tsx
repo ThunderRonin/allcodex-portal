@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useAIToolsStore } from "@/lib/stores/ai-tools-store";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,8 +43,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export default function ConsistencyPage() {
-  const [noteIdInput, setNoteIdInput] = useState("");
-  const [result, setResult] = useState<ConsistencyResult | null>(null);
+  const { noteIdInput, setNoteIdInput, consistencyResult: result, setConsistencyResult: setResult } = useAIToolsStore();
 
   const noteIds = noteIdInput
     .split(",")

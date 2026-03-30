@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useBrainDumpStore } from "@/lib/stores/brain-dump-store";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,18 +57,8 @@ interface HistoryEntry {
 }
 
 export default function BrainDumpPage() {
-  const [text, setText] = useState("");
-  const [result, setResult] = useState<BrainDumpResult | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const { text, setText, result, setResult, expandedIds, toggleExpanded } = useBrainDumpStore();
   const queryClient = useQueryClient();
-
-  function toggleExpand(id: string) {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
 
   const { data: history, isLoading: historyLoading, error: historyError } = useQuery<HistoryEntry[]>({
     queryKey: ["brain-dump-history"],
@@ -92,8 +82,8 @@ export default function BrainDumpPage() {
     onSuccess: (data: BrainDumpResult) => {
       setResult(data);
       setText("");
-      queryClient.invalidateQueries({ queryKey: ["brain-dump-history"] });
-      queryClient.invalidateQueries({ queryKey: ["lore"] });
+      void queryClient.invalidateQueries({ queryKey: ["brain-dump-history"] });
+      void queryClient.invalidateQueries({ queryKey: ["lore"] });
     },
   });
 
@@ -253,7 +243,7 @@ export default function BrainDumpPage() {
         ) : (
           <div className="space-y-2">
             {history.map((entry) => {
-              const isExpanded = expandedIds.has(entry.id);
+              const isExpanded = expandedIds.includes(entry.id);
               const needsTruncation = entry.rawText.length > 120;
               const hasMore = needsTruncation || !!entry.summary || !!entry.entities?.length;
               return (
@@ -335,7 +325,7 @@ export default function BrainDumpPage() {
                     )}
                     {hasMore && (
                       <button
-                        onClick={() => toggleExpand(entry.id)}
+                        onClick={() => toggleExpanded(entry.id)}
                         className="flex items-center gap-0.5 ml-auto text-muted-foreground/60 hover:text-foreground transition-colors"
                       >
                         {isExpanded ? (

@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,9 +49,35 @@ function getLoreType(note: Note): string {
   );
 }
 
-export default function LorePage() {
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>("All");
+function LorePageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const searchParam = searchParams.get("search") ?? "";
+  const categoryParam = searchParams.get("category") ?? "All";
+
+  // Local draft for immediate input response; debounced to URL after 300 ms
+  const [draftSearch, setDraftSearch] = useState(searchParam);
+
+  useEffect(() => {
+    if (draftSearch === searchParam) return;
+    const t = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (draftSearch) params.set("search", draftSearch);
+      else params.delete("search");
+      router.replace(`${pathname}?${params}`, { scroll: false });
+    }, 300);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftSearch]);
+
+  function handleCategorySelect(id: string | null) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (id && id !== "All") params.set("category", id);
+    else params.delete("category");
+    router.replace(`${pathname}?${params}`, { scroll: false });
+  }
 
   const query = "#lore";
 
@@ -64,11 +91,11 @@ export default function LorePage() {
   });
 
   const searched = Array.isArray(notes)
-    ? notes.filter((n) => n.title.toLowerCase().includes(search.toLowerCase()))
+    ? notes.filter((n) => n.title.toLowerCase().includes(draftSearch.toLowerCase()))
     : [];
 
-  const filtered = selectedCategory && selectedCategory !== "All"
-    ? searched.filter(n => getLoreType(n) === selectedCategory)
+  const filtered = categoryParam && categoryParam !== "All"
+    ? searched.filter(n => getLoreType(n) === categoryParam)
     : searched;
 
   return (
@@ -79,7 +106,7 @@ export default function LorePage() {
           Categories
         </div>
         <div className="h-[calc(100%-45px)]">
-          <LoreTree selectedId={selectedCategory} onSelectNode={setSelectedCategory} />
+          <LoreTree selectedId={categoryParam} onSelectNode={handleCategorySelect} />
         </div>
       </div>
 
@@ -112,8 +139,8 @@ export default function LorePage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Filter by title…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={draftSearch}
+            onChange={(e) => setDraftSearch(e.target.value)}
             className="pl-9"
           />
         </div>
@@ -133,8 +160,8 @@ export default function LorePage() {
             The chronicle is empty
           </h2>
           <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-            {search
-              ? `No entries matching "${search}"`
+            {draftSearch
+              ? `No entries matching "${draftSearch}"`
               : "Create your first lore entry to begin the chronicle"}
           </p>
         </div>
@@ -197,5 +224,13 @@ export default function LorePage() {
       )}
       </div>
     </div>
+  );
+}
+
+export default function LorePage() {
+  return (
+    <Suspense>
+      <LorePageContent />
+    </Suspense>
   );
 }

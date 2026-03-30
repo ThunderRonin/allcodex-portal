@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useAIToolsStore } from "@/lib/stores/ai-tools-store";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,7 +43,7 @@ const SEVERITY_CONFIG = {
 };
 
 export default function GapsPage() {
-  const [enabled, setEnabled] = useState(false);
+  const { gapsEnabled: enabled, setGapsEnabled: setEnabled } = useAIToolsStore();
 
   const { data, isLoading, error, refetch } = useQuery<{ gaps: Gap[] }>({
     queryKey: ["gaps"],

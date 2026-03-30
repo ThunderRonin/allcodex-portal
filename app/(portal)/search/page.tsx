@@ -41,11 +41,9 @@ function SearchContent() {
 
   const [query, setQuery] = useState(initialQ);
   const [mode, setMode] = useState<"rag" | "etapi">(initialMode);
-  const [submitted, setSubmitted] = useState(!!initialQ);
-  const [searchKey, setSearchKey] = useState(0);
 
-  const { data, isLoading } = useQuery<{ results: NoteResult[] } | NoteResult[]>({
-    queryKey: ["search", query, mode, searchKey],
+  const { data, isLoading, refetch } = useQuery<{ results: NoteResult[] } | NoteResult[]>({
+    queryKey: ["search", initialQ, initialMode],
     queryFn: async () => {
       if (mode === "rag") {
         const res = await fetch("/api/rag", {
@@ -61,7 +59,7 @@ function SearchContent() {
         return res.json();
       }
     },
-    enabled: submitted && !!query.trim(),
+    enabled: !!initialQ.trim(),
   });
 
   const results: NoteResult[] = (() => {
@@ -73,11 +71,13 @@ function SearchContent() {
   function handleSearch(e?: React.FormEvent) {
     e?.preventDefault();
     if (!query.trim()) return;
-    setSubmitted(true);
-    setSearchKey((k) => k + 1);
-    router.push(`/search?q=${encodeURIComponent(query)}&mode=${mode}`, {
-      scroll: false,
-    });
+    if (query === initialQ && mode === initialMode) {
+      void refetch();
+    } else {
+      router.push(`/search?q=${encodeURIComponent(query)}&mode=${mode}`, {
+        scroll: false,
+      });
+    }
   }
 
   return (
@@ -148,7 +148,7 @@ function SearchContent() {
         </div>
       )}
 
-      {!isLoading && submitted && results.length > 0 && (
+      {!isLoading && !!initialQ && results.length > 0 && (
         <div className="space-y-2">
           <p
             className="text-xs uppercase tracking-wider text-muted-foreground"
@@ -198,7 +198,7 @@ function SearchContent() {
         </div>
       )}
 
-      {!isLoading && submitted && results.length === 0 && (
+      {!isLoading && !!initialQ && results.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <Search className="h-10 w-10 mx-auto mb-3 opacity-20" />
           <p className="text-sm">No results found for &ldquo;{query}&rdquo;.</p>
@@ -210,7 +210,7 @@ function SearchContent() {
         </div>
       )}
 
-      {!submitted && (
+      {!initialQ && (
         <div className="text-center py-12 text-muted-foreground">
           <Search className="h-10 w-10 mx-auto mb-3 opacity-15" />
           <p className="text-sm">Enter a search query above.</p>
