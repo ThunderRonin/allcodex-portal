@@ -47,57 +47,79 @@
   --radius-4xl: calc(var(--radius) + 16px);
 }
 
-/* ── Grimoire Theme (dark fantasy — always on) ──────────────────────────────── */
+/* ── Grimoire Neon Theme (void-dark + electric accents — always on) ─────────── */
+/*
+ * Palette concept: a sorcerer's sanctum at midnight.
+ * Void black backgrounds shot through with electric violet glows.
+ * Neon amber marks interactive elements (the "arcane fire").
+ * Spectral teal signals AI and relational data.
+ * Hot rose signals warnings and GM-only secrets.
+ * Heavy contrast ratios throughout for readability during sessions.
+ */
 :root {
-  --radius: 0.5rem;
+  --radius: 0.6rem;
 
-  /* Core palette — deep ink + antique gold */
-  --background:          oklch(0.07 0.015 270);
-  --foreground:          oklch(0.92 0.025 75);
+  /* ── Base surfaces — void black with a touch of violet depth ── */
+  --background:          oklch(0.055 0.022 275);
+  --foreground:          oklch(0.95 0.012 80);
 
-  --card:                oklch(0.10 0.018 270);
-  --card-foreground:     oklch(0.92 0.025 75);
+  --card:                oklch(0.09 0.028 275);
+  --card-foreground:     oklch(0.95 0.012 80);
 
-  --popover:             oklch(0.10 0.018 270);
-  --popover-foreground:  oklch(0.92 0.025 75);
+  --popover:             oklch(0.10 0.030 278);
+  --popover-foreground:  oklch(0.95 0.012 80);
 
-  /* Gold — primary interactive color */
-  --primary:             oklch(0.73 0.13 72);
-  --primary-foreground:  oklch(0.08 0.01 272);
+  /* ── Neon amber — primary interactive ("arcane fire") ── */
+  --primary:             oklch(0.82 0.20 68);
+  --primary-foreground:  oklch(0.07 0.01 275);
 
-  --secondary:           oklch(0.18 0.04 270);
-  --secondary-foreground:oklch(0.85 0.02 75);
+  /* ── Electric violet — secondary surfaces ── */
+  --secondary:           oklch(0.17 0.055 285);
+  --secondary-foreground:oklch(0.90 0.025 285);
 
-  --muted:               oklch(0.14 0.02 270);
-  --muted-foreground:    oklch(0.58 0.03 75);
+  --muted:               oklch(0.12 0.025 278);
+  --muted-foreground:    oklch(0.55 0.030 280);
 
-  /* Arcane purple — accent */
-  --accent:              oklch(0.26 0.07 285);
-  --accent-foreground:   oklch(0.92 0.02 285);
+  /* ── Spectral teal — accent (AI features, relations, links) ── */
+  --accent:              oklch(0.72 0.20 195);
+  --accent-foreground:   oklch(0.07 0.01 275);
 
-  --destructive:         oklch(0.55 0.2 25);
+  /* ── Hot rose — destructive / GM-only warnings ── */
+  --destructive:         oklch(0.62 0.26 15);
   --destructive-foreground: oklch(0.98 0 0);
 
-  --border:              oklch(0.32 0.02 270);
-  --input:               oklch(0.25 0.02 270);
-  --ring:                oklch(0.73 0.13 72);
+  /* ── Borders glow subtly violet ── */
+  --border:              oklch(0.28 0.055 282);
+  --input:               oklch(0.14 0.035 280);
+  --ring:                oklch(0.82 0.20 68);
 
-  /* Charts */
-  --chart-1: oklch(0.73 0.13 72);
-  --chart-2: oklch(0.55 0.15 285);
-  --chart-3: oklch(0.60 0.18 160);
-  --chart-4: oklch(0.65 0.20 25);
-  --chart-5: oklch(0.70 0.12 200);
+  /* ── Extended semantic tokens ── */
+  --gm-only:             oklch(0.62 0.26 15);          /* hot rose  */
+  --gm-only-bg:          oklch(0.14 0.06 15);
+  --ai-feature:          oklch(0.72 0.20 195);          /* teal      */
+  --ai-feature-bg:       oklch(0.11 0.05 195);
+  --canon-safe:          oklch(0.78 0.22 145);          /* vivid green — "canon confirmed" */
+  --canon-safe-bg:       oklch(0.10 0.04 145);
+  --warning:             oklch(0.80 0.22 72);           /* amber     */
+  --warning-bg:          oklch(0.12 0.05 72);
+  --draft:               oklch(0.55 0.12 285);          /* muted violet */
 
-  /* Sidebar — slightly distinct from main bg */
-  --sidebar:                    oklch(0.085 0.016 270);
-  --sidebar-foreground:         oklch(0.85 0.025 75);
-  --sidebar-primary:            oklch(0.73 0.13 72);
-  --sidebar-primary-foreground: oklch(0.08 0.01 272);
-  --sidebar-accent:             oklch(0.15 0.03 270);
-  --sidebar-accent-foreground:  oklch(0.85 0.025 75);
-  --sidebar-border:             oklch(0.28 0.02 270);
-  --sidebar-ring:               oklch(0.73 0.13 72);
+  /* ── Charts — vibrant spread ── */
+  --chart-1: oklch(0.82 0.20 68);    /* neon amber  */
+  --chart-2: oklch(0.72 0.20 195);   /* spectral teal */
+  --chart-3: oklch(0.70 0.28 310);   /* electric violet */
+  --chart-4: oklch(0.78 0.22 145);   /* vivid green */
+  --chart-5: oklch(0.68 0.26 15);    /* hot rose */
+
+  /* ── Sidebar — electric violet-shifted version of bg ── */
+  --sidebar:                    oklch(0.07 0.030 278);
+  --sidebar-foreground:         oklch(0.90 0.018 80);
+  --sidebar-primary:            oklch(0.82 0.20 68);
+  --sidebar-primary-foreground: oklch(0.07 0.01 275);
+  --sidebar-accent:             oklch(0.14 0.045 282);
+  --sidebar-accent-foreground:  oklch(0.90 0.025 285);
+  --sidebar-border:             oklch(0.22 0.050 282);
+  --sidebar-ring:               oklch(0.82 0.20 68);
 }
 
 /* No separate .dark block — this is always dark */
