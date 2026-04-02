@@ -1,5 +1,8 @@
 # Plan A: Rich Text Editor + @-Mention Interlinking + Autolinker
 
+> **Status: ✅ COMPLETED** — Shipped in pre-Phase A work. See `components/editor/LoreEditor.tsx`, `components/editor/mention-extension.tsx`, `components/editor/AutolinkerDialog.tsx`.
+> This document is retained as a historical design spec.
+
 > Replace the raw HTML textarea with a full WYSIWYG editor, add inline `@`-mention cross-referencing, and an autolinker command.
 
 ---

@@ -1,5 +1,8 @@
 # Plan B: Template Picker UX + Category Tree + Draft/Published Toggle
 
+> **Status: ✅ COMPLETED** — All three features shipped across pre-Phase A and Phase B work. See `components/editor/TemplatePicker.tsx`, `components/portal/LoreTree.tsx`, and `#draft` label toggle in the edit page.
+> This document is retained as a historical design spec.
+
 > Three independent UI features to bring the Portal's organizational capabilities up to parity with World Anvil.
 
 ---
