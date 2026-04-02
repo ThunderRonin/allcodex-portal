@@ -187,20 +187,22 @@ export default function QuestsPage() {
         <h1 className="font-bold text-lg" style={{ fontFamily: "var(--font-cinzel)" }}>
           Quests &amp; Hooks
         </h1>
-        <Button
-          size="sm"
-          className="ml-auto gap-1.5"
-          onClick={() => setIsCreateOpen(true)}
-          disabled={isCreating || isCreateOpen}
-        >
-          <Plus className="h-4 w-4" />
-          New Quest
-        </Button>
-        {quests && (
-          <Badge variant="outline" className="text-xs">
-            {quests.length} total
-          </Badge>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setIsCreateOpen(true)}
+            disabled={isCreating}
+          >
+            <Plus className="h-4 w-4" />
+            New Quest
+          </Button>
+          {quests && (
+            <Badge variant="outline" className="text-xs">
+              {quests.length} total
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Filter tabs */}

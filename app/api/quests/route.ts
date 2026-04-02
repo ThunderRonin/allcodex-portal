@@ -3,6 +3,13 @@ import { createAttribute, createNote, searchNotes } from "@/lib/etapi-server";
 import { getEtapiCreds, getLoreRootNoteId } from "@/lib/get-creds";
 import { handleRouteError, notConfigured } from "@/lib/route-error";
 
+type QuestCreateResult = {
+  noteId?: string;
+  note?: {
+    noteId?: string;
+  };
+};
+
 export async function GET(_req: NextRequest) {
   try {
     const creds = await getEtapiCreds();
@@ -14,7 +21,7 @@ export async function GET(_req: NextRequest) {
   }
 }
 
-function asOptionalString(value: unknown) {
+function parseOptionalString(value: unknown) {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   return trimmed || undefined;
@@ -26,20 +33,20 @@ export async function POST(req: NextRequest) {
     if (!creds.url || !creds.token) return notConfigured("AllCodex");
 
     const body = await req.json();
-    const title = asOptionalString(body?.title);
+    const title = parseOptionalString(body?.title);
 
     if (!title) {
       return NextResponse.json({ error: "title is required" }, { status: 400 });
     }
 
-    const parentNoteId = asOptionalString(body?.parentNoteId) ?? await getLoreRootNoteId();
+    const parentNoteId = parseOptionalString(body?.parentNoteId) ?? await getLoreRootNoteId();
     const result = await createNote(creds, {
       parentNoteId,
       title,
-      content: asOptionalString(body?.content),
+      content: parseOptionalString(body?.content),
     });
 
-    const created = result as { noteId?: string; note?: { noteId?: string } };
+    const created = result as QuestCreateResult;
     const noteId = created.noteId ?? created.note?.noteId;
     if (!noteId) {
       return NextResponse.json({ error: "Quest note was created without a noteId." }, { status: 502 });
@@ -50,15 +57,15 @@ export async function POST(req: NextRequest) {
       noteId,
       type: "label",
       name: "questStatus",
-      value: asOptionalString(body?.status) ?? "active",
+      value: parseOptionalString(body?.status) ?? "active",
     });
 
-    const description = asOptionalString(body?.description);
+    const description = parseOptionalString(body?.description);
     if (description) {
       await createAttribute(creds, { noteId, type: "label", name: "description", value: description });
     }
 
-    const location = asOptionalString(body?.location);
+    const location = parseOptionalString(body?.location);
     if (location) {
       await createAttribute(creds, { noteId, type: "label", name: "location", value: location });
     }
