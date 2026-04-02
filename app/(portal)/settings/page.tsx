@@ -25,6 +25,8 @@ import {
   Scroll,
   UserPlus,
   LogIn,
+  Globe,
+  ExternalLink,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -525,6 +527,192 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
   );
 }
 
+// ── Share Config card ─────────────────────────────────────────────────────────
+
+function ShareConfigCard() {
+  const [noteId, setNoteId] = useState("");
+  const [current, setCurrent] = useState<{ noteId: string; title: string; alias: string | null; url: string | null } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/share")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.configured) setCurrent(d);
+      })
+      .catch(() => {});
+  }, []);
+
+  async function handleSave() {
+    if (!noteId.trim()) return;
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      const res = await fetch("/api/share", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ noteId: noteId.trim() }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error ?? "Save failed");
+      // Refresh current
+      const updated = await fetch("/api/share").then((r) => r.json());
+      if (updated.configured) setCurrent(updated);
+      setNoteId("");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card className="relative border-border/60 overflow-hidden col-span-full">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 border border-border/40">
+            <Globe className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <CardTitle style={{ fontFamily: "var(--font-cinzel)" }}>Share Configuration</CardTitle>
+            <CardDescription>Configure which note is the public share root (gets #shareRoot label).</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Current share root */}
+        {current && (
+          <div className="rounded-md border border-border/40 bg-muted/20 p-3 space-y-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Current share root</p>
+            <p className="text-sm font-medium">{current.title}</p>
+            <p className="text-xs font-mono text-muted-foreground">{current.noteId}</p>
+            {current.url && (
+              <a
+                href={current.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-primary/70 hover:text-primary transition-colors mt-1"
+              >
+                <ExternalLink className="h-3 w-3" />
+                {current.url}
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Set new share root */}
+        <div className="space-y-1.5">
+          <Label htmlFor="share-root-id">Set Share Root Note ID</Label>
+          <div className="flex gap-2">
+            <Input
+              id="share-root-id"
+              placeholder="Enter a note ID (e.g. abc123def456)"
+              value={noteId}
+              onChange={(e) => setNoteId(e.target.value)}
+              className="font-mono text-sm"
+              disabled={saving}
+            />
+            <Button onClick={handleSave} disabled={saving || !noteId.trim()} className="shrink-0 gap-2">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : "Save"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            This note will be marked with <code className="bg-muted px-1 rounded">#shareRoot</code>. Navigate
+            to <span className="font-mono">/share/</span> on your AllCodex instance to preview the share site.
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-xs text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-2">{error}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Portal Config card ────────────────────────────────────────────────────────
+
+function PortalConfigCard() {
+  const [loreRootId, setLoreRootId] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/config/portal")
+      .then((r) => r.json())
+      .then((d) => setLoreRootId(d.loreRootNoteId ?? ""))
+      .catch(() => {});
+  }, []);
+
+  async function handleSave() {
+    setLoading(true);
+    setError(null);
+    setSaved(false);
+    try {
+      const res = await fetch("/api/config/portal", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ loreRootNoteId: loreRootId }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className="relative border-border/60 overflow-hidden col-span-full">
+      <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 via-transparent to-transparent pointer-events-none" />
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-secondary border border-border/40">
+            <Scroll className="h-5 w-5 text-secondary-foreground" />
+          </div>
+          <div>
+            <CardTitle style={{ fontFamily: "var(--font-cinzel)" }}>Portal Configuration</CardTitle>
+            <CardDescription>Control how the Portal connects to your lore structure.</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="lore-root-id">Lore Root Note ID</Label>
+          <div className="flex gap-2">
+            <Input
+              id="lore-root-id"
+              placeholder="root (default) or a specific note ID"
+              value={loreRootId}
+              onChange={(e) => setLoreRootId(e.target.value)}
+              className="font-mono text-sm"
+              disabled={loading}
+            />
+            <Button onClick={handleSave} disabled={loading} className="shrink-0 gap-2">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : "Save"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            New lore entries will be created under this note. Leave blank or set to{" "}
+            <code className="bg-muted px-1 rounded">root</code> to use the AllCodex root.
+          </p>
+        </div>
+        {error && (
+          <p className="text-xs text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-2">{error}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -572,6 +760,8 @@ export default function SettingsPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <AllCodexCard initialStatus={status?.allcodex} />
           <AllKnowerCard initialStatus={status?.allknower} />
+          <PortalConfigCard />
+          <ShareConfigCard />
         </div>
       )}
 
