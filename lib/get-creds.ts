@@ -41,3 +41,12 @@ export async function isAkConfigured(): Promise<boolean> {
   const creds = await getAkCreds();
   return Boolean(creds.url && creds.token);
 }
+
+export async function getLoreRootNoteId(): Promise<string> {
+  const jar = await cookies();
+  return (
+    jar.get("lore_root_note_id")?.value ||
+    process.env.LORE_ROOT_NOTE_ID ||
+    "root"
+  );
+}
