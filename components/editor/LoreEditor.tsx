@@ -1,105 +1,128 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { EditorRoot, EditorContent, useEditor } from "novel";
-import { handleImageDrop, handleImagePaste } from "novel";
-import { defaultExtensions } from "./extensions";
+import { useEffect, useRef, useState } from "react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import {
+  useCreateBlockNote,
+  SuggestionMenuController,
+  getDefaultReactSlashMenuItems,
+} from "@blocknote/react";
+import { filterSuggestionItems } from "@blocknote/core";
+import "@blocknote/shadcn/style.css";
+import { cn, debounce } from "@/lib/utils";
+import {
+  loreEditorSchema,
+  getMentionMenuItems,
+  MentionMenuItem,
+  type MentionSuggestion,
+} from "./mention";
 import { AutolinkerDialog } from "./AutolinkerDialog";
-import { SlashCommand } from "./slash-command";
-import { BubbleMenu } from "./bubble-menu";
-import { uploadFn } from "./image-upload";
-import { cn } from "@/lib/utils";
-import { debounce } from "@/lib/utils";
+
+type EditorType = (typeof loreEditorSchema)["BlockNoteEditor"];
 
 interface LoreEditorProps {
   initialContent?: string;
   onSave?: (html: string) => void;
   className?: string;
-  extensions?: any[];
   showSaveStatus?: boolean;
 }
 
-interface TailoredEditorProps {
-  content?: string;
-  extensions?: any[];
-  saveStatus: string;
-  setSaveStatus: (status: "Saved" | "Saving..." | "Unsaved") => void;
-  onSave?: (html: string) => void;
+const EMPTY_DOCUMENT = [{ type: "paragraph" as const }];
+
+async function uploadImageFile(file: File) {
+  if (!file.type.includes("image/")) {
+    throw new Error("Only image uploads are supported");
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error("Images must be 10MB or smaller");
+  }
+
+  const response = await fetch("/api/lore/upload-image", {
+    method: "POST",
+    headers: {
+      "content-type": file.type || "application/octet-stream",
+      "x-vercel-filename": file.name || "image.png",
+    },
+    body: file,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to upload image");
+  }
+
+  const data = await response.json();
+  return data.url as string;
 }
 
-const TailoredEditor = ({ content, extensions, saveStatus, setSaveStatus, onSave }: TailoredEditorProps) => {
-  const { editor } = useEditor();
+export const LoreEditor = ({
+  initialContent,
+  onSave,
+  className,
+  showSaveStatus = true,
+}: LoreEditorProps) => {
+  const editor = useCreateBlockNote({
+    schema: loreEditorSchema,
+    uploadFile: uploadImageFile,
+  });
+  const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "Unsaved">("Saved");
+  const appliedContentRef = useRef<string | null>(null);
+  const emittedContentRef = useRef<string | null>(null);
+  const hydratingRef = useRef(false);
   const [debouncedSave] = useState(() =>
     debounce((html: string) => {
+      emittedContentRef.current = html;
       onSave?.(html);
       setSaveStatus("Saved");
     }, 750)
   );
 
   useEffect(() => {
-    if (editor && content !== undefined && editor.isEmpty) {
-      editor.commands.setContent(content);
+    const nextContent = initialContent ?? "";
+
+    if (
+      appliedContentRef.current === nextContent ||
+      emittedContentRef.current === nextContent
+    ) {
+      return;
     }
-  }, [editor, content]);
 
-  return (
-    <EditorContent
-      immediatelyRender={false}
-      extensions={[...defaultExtensions, ...(extensions || [])]}
-      className="w-full max-w-none p-4 sm:p-8 relative z-10"
-      editorProps={{
-        handleDOMEvents: {
-          keydown: () => {
-            if (saveStatus === "Saved") setSaveStatus("Unsaved");
-            return false;
-          },
-          // @ts-ignore
-          drop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
-          // @ts-ignore
-          paste: (view, event, _slice) => handleImagePaste(view, event, uploadFn),
-        },
-        attributes: {
-          class: "novel-editor prose prose-invert prose-p:my-1 prose-headings:my-2 prose-h1:text-primary prose-a:text-primary focus:outline-none max-w-none min-h-[400px] w-full cursor-text",
-        },
-      }}
-      onUpdate={({ editor }) => {
-        setSaveStatus("Saving...");
-        debouncedSave(editor.getHTML());
-      }}
-    >
-      <SlashCommand />
-      <BubbleMenu />
-    </EditorContent>
-  );
-};
+    hydratingRef.current = true;
 
-export const LoreEditor = ({
-  initialContent,
-  onSave,
-  className,
-  extensions = [],
-  showSaveStatus = true,
-}: LoreEditorProps) => {
-  const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "Unsaved">("Saved");
-  const [content, setContent] = useState<string | undefined>(initialContent);
+    try {
+      const blocks = nextContent.trim()
+        ? editor.tryParseHTMLToBlocks(nextContent)
+        : EMPTY_DOCUMENT;
 
-  // When initialContent changes from undefined to a string (data loaded), set it once
-  useEffect(() => {
-    if (initialContent && content === undefined) {
-      setContent(initialContent);
+      editor.replaceBlocks(editor.document, blocks.length > 0 ? blocks : EMPTY_DOCUMENT);
+      appliedContentRef.current = nextContent;
+      setSaveStatus("Saved");
+    } catch {
+      editor.replaceBlocks(editor.document, EMPTY_DOCUMENT);
+      appliedContentRef.current = "";
+      setSaveStatus("Unsaved");
+    } finally {
+      queueMicrotask(() => {
+        hydratingRef.current = false;
+      });
     }
-  }, [initialContent]);
+  }, [editor, initialContent]);
 
   return (
     <div 
-      className={cn("relative w-full border border-border/80 rounded-xl bg-card/60 shadow-inner group transition-colors hover:border-border overflow-hidden cursor-text", className)}
+      className={cn(
+        "relative w-full overflow-hidden rounded-[1.5rem] border border-border/80 bg-card/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-border",
+        "[&_.bn-container]:min-h-[480px] [&_.bn-container]:bg-transparent [&_.bn-container]:px-0 [&_.bn-container]:py-0",
+        "[&_.bn-editor]:min-h-[440px] [&_.bn-editor]:bg-transparent [&_.bn-editor]:px-6 [&_.bn-editor]:pb-8 [&_.bn-editor]:pt-4 [&_.bn-editor]:text-[15px] [&_.bn-editor]:leading-7 [&_.bn-editor]:text-foreground",
+        "[&_.bn-editor_[data-content-type='heading']]:font-semibold [&_.bn-editor_a]:text-primary [&_.bn-editor_a]:underline-offset-4",
+        "[&_.bn-side-menu]:text-muted-foreground [&_.bn-formatting-toolbar]:border-border/80 [&_.bn-formatting-toolbar]:bg-popover/95",
+        className
+      )}
       onClick={() => {
-        const editorDOM = document.querySelector('.ProseMirror') as HTMLElement;
+        const editorDOM = document.querySelector(".bn-editor") as HTMLElement | null;
         if (editorDOM) editorDOM.focus();
       }}
     >
-
-
       {showSaveStatus && (
         <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
           <div
@@ -113,16 +136,73 @@ export const LoreEditor = ({
           </div>
         </div>
       )}
-      
-      <EditorRoot>
-        <TailoredEditor
-          content={content}
-          extensions={extensions}
-          saveStatus={saveStatus}
-          setSaveStatus={setSaveStatus}
-          onSave={onSave}
+
+      <BlockNoteView
+        editor={editor}
+        theme="dark"
+        className="w-full"
+        slashMenu={false}
+        onChange={() => {
+          if (hydratingRef.current) {
+            return;
+          }
+
+          setSaveStatus("Saving...");
+          debouncedSave(editor.blocksToHTMLLossy(editor.document));
+        }}
+      >
+        {/* Custom slash menu with autolinker command */}
+        <SuggestionMenuController
+          triggerCharacter="/"
+          getItems={async (query) =>
+            filterSuggestionItems(
+              [
+                ...getDefaultReactSlashMenuItems(editor),
+                {
+                  title: "Autolink Lore",
+                  onItemClick: () => {
+                    window.dispatchEvent(
+                      new CustomEvent("open-autolink-dialog", {
+                        detail: { editor },
+                      })
+                    );
+                  },
+                  aliases: ["autolink", "link", "mention", "scan"],
+                  group: "Lore",
+                  subtext: "Scan for lore terms and auto-link them",
+                },
+              ],
+              query
+            )
+          }
         />
-      </EditorRoot>
+        {/* @mention suggestion menu */}
+        <SuggestionMenuController
+          triggerCharacter="@"
+          getItems={async (query) => {
+            const suggestions = await getMentionMenuItems(editor, query);
+            return suggestions.map((item) => ({
+              title: item.title,
+              onItemClick: () => {
+                editor.insertInlineContent([
+                  {
+                    type: "mention",
+                    props: {
+                      noteId: item.noteId,
+                      title: item.title,
+                      loreType: item.loreType,
+                    },
+                  },
+                  " ",
+                ]);
+              },
+              badge: item.loreType,
+              group: "Lore",
+            }));
+          }}
+        />
+      </BlockNoteView>
+
       <AutolinkerDialog />
     </div>
   );

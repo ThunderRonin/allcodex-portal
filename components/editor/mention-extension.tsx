@@ -1,7 +1,8 @@
 import Mention from "@tiptap/extension-mention";
-import { ReactRenderer } from "@tiptap/react";
+import type { SuggestionKeyDownProps, SuggestionProps } from "@tiptap/suggestion";
 import tippy, { Instance } from "tippy.js";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { createRoot, Root } from "react-dom/client";
 import { Badge } from "@/components/ui/badge";
 
 export interface MentionSuggestion {
@@ -10,7 +11,23 @@ export interface MentionSuggestion {
   loreType: string;
 }
 
-const MentionList = forwardRef((props: any, ref) => {
+interface MentionCommand {
+  id: string;
+  label: string;
+}
+
+type MentionRenderProps = SuggestionProps<MentionSuggestion, MentionCommand>;
+
+interface MentionListProps {
+  items: MentionSuggestion[];
+  command: (payload: MentionCommand) => void;
+}
+
+interface MentionListHandle {
+  onKeyDown: (props: SuggestionKeyDownProps) => boolean;
+}
+
+const MentionList = forwardRef<MentionListHandle, MentionListProps>((props, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selectItem = (index: number) => {
@@ -21,14 +38,17 @@ const MentionList = forwardRef((props: any, ref) => {
   };
 
   const upHandler = () => {
+    if (props.items.length === 0) return;
     setSelectedIndex((selectedIndex + props.items.length - 1) % props.items.length);
   };
 
   const downHandler = () => {
+    if (props.items.length === 0) return;
     setSelectedIndex((selectedIndex + 1) % props.items.length);
   };
 
   const enterHandler = () => {
+    if (props.items.length === 0) return;
     selectItem(selectedIndex);
   };
 
@@ -57,7 +77,7 @@ const MentionList = forwardRef((props: any, ref) => {
       {props.items.length ? (
         props.items.map((item: MentionSuggestion, index: number) => (
           <button
-            key={index}
+            key={item.noteId}
             className={`flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors ${
               index === selectedIndex ? "bg-accent text-accent-foreground" : "text-popover-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
@@ -96,44 +116,75 @@ export const mentionExtension = Mention.configure({
       return res.json();
     },
     render: () => {
-      let reactRenderer: ReactRenderer;
-      let popup: Instance[];
+      let popup: Instance[] = [];
+      let popupRoot: Root | null = null;
+      let popupElement: HTMLDivElement | null = null;
+      let mentionListHandle: MentionListHandle | null = null;
+
+      const renderMentionList = (props: MentionRenderProps) => {
+        if (!popupElement || !popupRoot) {
+          popupElement = document.createElement("div");
+          popupRoot = createRoot(popupElement);
+        }
+
+        if (!popupRoot) {
+          return;
+        }
+
+        popupRoot.render(
+          <MentionList
+            ref={(instance) => {
+              mentionListHandle = instance;
+            }}
+            items={props.items}
+            command={props.command}
+          />,
+        );
+      };
+
+      const getReferenceClientRect = (clientRect: MentionRenderProps["clientRect"]) => {
+        return () => clientRect?.() ?? new DOMRect();
+      };
 
       return {
-        onStart: (props) => {
+        onStart: (props: MentionRenderProps) => {
           if (!props.clientRect) return;
-          reactRenderer = new ReactRenderer(MentionList, {
-            props,
-            editor: props.editor,
-          });
+
+          renderMentionList(props);
+
+          if (!popupElement) return;
 
           popup = tippy("body", {
-            getReferenceClientRect: props.clientRect as any,
+            getReferenceClientRect: getReferenceClientRect(props.clientRect),
             appendTo: () => document.body,
-            content: reactRenderer.element,
+            content: popupElement,
             showOnCreate: true,
             interactive: true,
             trigger: "manual",
             placement: "bottom-start",
           });
         },
-        onUpdate(props) {
-          reactRenderer.updateProps(props);
+        onUpdate(props: MentionRenderProps) {
+          renderMentionList(props);
           if (!props.clientRect) return;
           popup?.[0]?.setProps({
-            getReferenceClientRect: props.clientRect as any,
+            getReferenceClientRect: getReferenceClientRect(props.clientRect),
           });
         },
-        onKeyDown(props) {
+        onKeyDown(props: SuggestionKeyDownProps) {
           if (props.event.key === "Escape") {
             popup?.[0]?.hide();
             return true;
           }
-          return (reactRenderer.ref as any)?.onKeyDown(props);
+          return mentionListHandle?.onKeyDown(props) ?? false;
         },
         onExit() {
           popup?.[0]?.destroy();
-          reactRenderer?.destroy();
+          popupRoot?.unmount();
+          popupElement?.remove();
+          popupRoot = null;
+          popupElement = null;
+          mentionListHandle = null;
         },
       };
     },
