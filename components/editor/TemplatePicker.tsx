@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { 
   User, MapPin, Shield, Bug, CalendarDays, BookOpen, Diamond, 
-  Wand2, Building, Type, ListTree, AlignLeft
+  Wand2, Building, Type, ListTree, AlignLeft,
+  Swords, Clock, Film, Network, Dna, BookMarked, Globe, Flame, Church
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -84,6 +85,62 @@ export const LORE_TEMPLATES: TemplateDef[] = [
     description: "Crunchy mechanics and stats for combat.",
     attributes: ["CR", "AC", "HP", "Attributes"],
     icon: ListTree
+  },
+  // ── Session-runtime ──────────────────────────────────────────────────────────
+  {
+    value: "session", label: "Session", templateId: "_template_session",
+    description: "A play session with recap, active hooks, and GM notes.",
+    attributes: ["Session Date", "Players", "Status", "Active Hooks"],
+    icon: Clock
+  },
+  {
+    value: "quest", label: "Quest", templateId: "_template_quest",
+    description: "A mission, bounty, or storyline hook with rewards and consequences.",
+    attributes: ["Status", "Quest Giver", "Reward", "Location"],
+    icon: Swords
+  },
+  {
+    value: "scene", label: "Scene", templateId: "_template_scene",
+    description: "A single encounter, dramatic beat, or scene.",
+    attributes: ["Location", "Participants", "Outcome", "GM Notes"],
+    icon: Film
+  },
+  // ── Societal & Metaphysical ──────────────────────────────────────────────────
+  {
+    value: "organization", label: "Organization", templateId: "_template_organization",
+    description: "A guild, company, or formal body that isn't a military faction.",
+    attributes: ["Type", "Leader", "Headquarters", "Purpose"],
+    icon: Network
+  },
+  {
+    value: "race", label: "Race / Species", templateId: "_template_race",
+    description: "A sentient or notable species, sub-race, or lineage.",
+    attributes: ["Homeland", "Lifespan", "Traits", "Culture"],
+    icon: Dna
+  },
+  {
+    value: "myth", label: "Myth / Legend", templateId: "_template_myth",
+    description: "A story, prophecy, or legend whose truth may be disputed.",
+    attributes: ["Type", "Origin", "Truth Status", "Related Entities"],
+    icon: BookMarked
+  },
+  {
+    value: "cosmology", label: "Cosmology", templateId: "_template_cosmology",
+    description: "The planar structure, cosmic forces, and creation lore of your world.",
+    attributes: ["Planes", "Cosmic Forces", "Afterlife", "Creation Myth"],
+    icon: Globe
+  },
+  {
+    value: "deity", label: "Deity", templateId: "_template_deity",
+    description: "A god, demigod, or divine being with domains and worshippers.",
+    attributes: ["Domain", "Alignment", "Symbol", "Worshippers"],
+    icon: Flame
+  },
+  {
+    value: "religion", label: "Religion", templateId: "_template_religion",
+    description: "A faith system with tenets, practices, and holy texts.",
+    attributes: ["Primary Deity", "Tenets", "Practices", "Holy Text"],
+    icon: Church
   },
   {
     value: "lore", label: "General Lore", templateId: "",

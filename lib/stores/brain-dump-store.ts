@@ -1,24 +1,42 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import type { ProposedEntity } from "@/lib/allknower-server";
 
-interface BrainDumpResult {
-  notesCreated: number;
-  notesUpdated: number;
+export type DumpMode = "auto" | "review" | "inbox";
+
+export interface BrainDumpResultNormalized {
+  mode: "auto";
   summary: string;
-  entities?: Array<{
-    action: "created" | "updated";
-    noteId: string;
-    title: string;
-    type: string;
+  created: Array<{ noteId: string; title: string; type: string }>;
+  updated: Array<{ noteId: string; title: string; type: string }>;
+  skipped: Array<{ title: string; reason: string }>;
+  duplicates?: Array<{
+    proposedTitle: string;
+    proposedType: string;
+    matches: Array<{ noteId: string; title: string; score: number }>;
   }>;
+}
+
+export interface BrainDumpReviewState {
+  summary: string;
+  proposedEntities: ProposedEntity[];
+  approvedIds: Set<number>;
 }
 
 interface BrainDumpState {
   text: string;
-  result: BrainDumpResult | null;
+  dumpMode: DumpMode;
+  result: BrainDumpResultNormalized | null;
+  reviewState: BrainDumpReviewState | null;
+  inboxItems: string[];
   expandedIds: string[];
   setText: (text: string) => void;
-  setResult: (result: BrainDumpResult | null) => void;
+  setDumpMode: (mode: DumpMode) => void;
+  setResult: (result: BrainDumpResultNormalized | null) => void;
+  setReviewState: (state: BrainDumpReviewState | null) => void;
+  toggleReviewApproval: (idx: number) => void;
+  addToInbox: (text: string) => void;
+  removeFromInbox: (idx: number) => void;
   toggleExpanded: (id: string) => void;
 }
 
@@ -26,10 +44,31 @@ export const useBrainDumpStore = create<BrainDumpState>()(
   persist(
     (set, get) => ({
       text: "",
+      dumpMode: "auto",
       result: null,
+      reviewState: null,
+      inboxItems: [],
       expandedIds: [],
       setText: (text) => set({ text }),
+      setDumpMode: (dumpMode) => set({ dumpMode }),
       setResult: (result) => set({ result }),
+      setReviewState: (reviewState) => set({ reviewState }),
+      toggleReviewApproval: (idx) => {
+        const { reviewState } = get();
+        if (!reviewState) return;
+        const next = new Set(reviewState.approvedIds);
+        if (next.has(idx)) next.delete(idx);
+        else next.add(idx);
+        set({ reviewState: { ...reviewState, approvedIds: next } });
+      },
+      addToInbox: (text) => {
+        set({ inboxItems: [...get().inboxItems, text], text: "" });
+      },
+      removeFromInbox: (idx) => {
+        const items = [...get().inboxItems];
+        items.splice(idx, 1);
+        set({ inboxItems: items });
+      },
       toggleExpanded: (id) => {
         const { expandedIds } = get();
         set({
@@ -42,8 +81,12 @@ export const useBrainDumpStore = create<BrainDumpState>()(
     {
       name: "brain-dump-ui",
       storage: createJSONStorage(() => localStorage),
-      // Only persist the draft text — results and expanded rows are session-ephemeral
-      partialize: (state) => ({ text: state.text }),
+      partialize: (state) => ({
+        text: state.text,
+        dumpMode: state.dumpMode,
+        inboxItems: state.inboxItems,
+      }),
     }
   )
 );
+
