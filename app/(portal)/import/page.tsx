@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -88,8 +87,10 @@ function EntryPreviewRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-colors ${
-        selected ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/40 border border-transparent"
+      className={`flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors border-b border-border/15 ${
+        selected
+          ? "bg-primary/10 border-l-2 border-l-primary"
+          : "hover:bg-card/50 border-l-2 border-l-transparent"
       }`}
       onClick={onToggle}
     >
@@ -102,7 +103,7 @@ function EntryPreviewRow({
       </button>
       <span className="flex-1 text-sm font-medium truncate">{entry.name}</span>
       {entry.cr !== undefined && (
-        <Badge variant="outline" className="text-[10px] px-1.5 font-mono shrink-0">
+        <Badge variant="outline" className="text-[10px] px-1.5 font-mono shrink-0 rounded-none">
           CR {entry.cr}
         </Badge>
       )}
@@ -301,7 +302,7 @@ export default function ImportPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">Upload JSON file</label>
                 <div
-                  className="relative flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border/60 hover:border-primary/50 bg-muted/10 hover:bg-muted/20 transition-colors cursor-pointer p-8"
+                  className="relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-primary/40 hover:border-primary/70 bg-muted/10 hover:bg-muted/20 transition-colors cursor-pointer p-8"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <FileJson className="h-8 w-8 text-muted-foreground/40" />
@@ -327,26 +328,26 @@ export default function ImportPage() {
 
               {/* Preview */}
               {parsedEntries.length > 0 && !importResult && (
-                <Card className="border-border/50">
-                  <CardHeader className="px-4 py-3 pb-2">
+                <div className="border border-border/30 bg-card/40">
+                  <div className="px-4 py-3 border-b border-border/20">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-sm">
+                      <span className="text-sm font-semibold">
                         Preview — {parsedEntries.length} entries
-                      </CardTitle>
-                      <Badge variant="secondary" className="text-xs ml-auto">
+                      </span>
+                      <Badge variant="secondary" className="text-xs ml-auto rounded-none">
                         {selected.size} selected
                       </Badge>
-                      <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={toggleAll}>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs rounded-none" onClick={toggleAll}>
                         {selected.size === parsedEntries.length ? "Deselect all" : "Select all"}
                       </Button>
                       <button onClick={reset} className="text-muted-foreground hover:text-foreground">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                  </CardHeader>
-                  <CardContent className="px-4 py-0 pb-3">
+                  </div>
+                  <div className="px-0 py-0">
                     <ScrollArea className="max-h-72">
-                      <div className="space-y-0.5">
+                      <div className="space-y-0">
                         {parsedEntries.map((entry, i) => (
                           <EntryPreviewRow
                             key={i}
@@ -357,11 +358,11 @@ export default function ImportPage() {
                         ))}
                       </div>
                     </ScrollArea>
-                    <div className="pt-3">
+                    <div className="pt-3 px-4 pb-4">
                       <Button
                         onClick={handleImport}
                         disabled={selected.size === 0 || importMutation.isPending}
-                        className="w-full"
+                        className="w-full rounded-none"
                       >
                         {importMutation.isPending ? (
                           <>
@@ -379,22 +380,22 @@ export default function ImportPage() {
                         </p>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
 
               {/* Result */}
               {importResult && (
-                <Card className="border-emerald-900/40 bg-emerald-950/20">
-                  <CardHeader className="px-4 py-3 pb-1">
+                <div className="border border-[var(--accent)]/30 bg-[var(--accent)]/5 rounded-none border-l-2 border-l-[var(--accent)]">
+                  <div className="px-4 py-3 border-b border-[var(--accent)]/20">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                      <CardTitle className="text-sm text-emerald-300">Import complete</CardTitle>
+                      <CheckCircle2 className="h-4 w-4 text-[var(--accent)]" />
+                      <span className="text-sm font-semibold text-[var(--accent)]">Import complete</span>
                     </div>
-                  </CardHeader>
-                  <CardContent className="px-4 py-3 space-y-3">
+                  </div>
+                  <div className="px-4 py-3 space-y-3">
                     <div className="flex gap-4 text-sm">
-                      <span className="text-emerald-300 font-semibold">{importResult.created} created</span>
+                      <span className="text-[var(--accent)] font-semibold">{importResult.created} created</span>
                       {importResult.skipped > 0 && (
                         <span className="text-muted-foreground">{importResult.skipped} skipped</span>
                       )}
@@ -413,15 +414,15 @@ export default function ImportPage() {
                       </div>
                     )}
                     <div className="flex gap-2 pt-1">
-                      <Button size="sm" variant="outline" onClick={reset}>
+                      <Button size="sm" variant="outline" onClick={reset} className="rounded-none">
                         Import another file
                       </Button>
-                      <Button size="sm" variant="ghost" asChild>
+                      <Button size="sm" variant="ghost" asChild className="rounded-none">
                         <a href="/statblocks">View Statblock Library →</a>
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
             </TabsContent>
 
@@ -442,7 +443,7 @@ export default function ImportPage() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Upload Azgaar JSON export</label>
                   <div
-                    className="relative flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border/60 hover:border-primary/50 bg-muted/10 hover:bg-muted/20 transition-colors cursor-pointer p-8"
+                    className="relative flex flex-col items-center justify-center gap-3 border-2 border-dashed border-primary/40 hover:border-primary/70 bg-muted/10 hover:bg-muted/20 transition-colors cursor-pointer p-8"
                     onClick={() => azgaarFileInputRef.current?.click()}
                   >
                     <Map className="h-8 w-8 text-muted-foreground/40" />
@@ -475,17 +476,17 @@ export default function ImportPage() {
 
               {/* Preview + options */}
               {azgaarPreview && !azgaarImportResult && (
-                <Card className="border-border/50">
-                  <CardHeader className="px-4 py-3 pb-2">
+                <div className="border border-border/30 bg-card/40">
+                  <div className="px-4 py-3 border-b border-border/20">
                     <div className="flex items-center gap-2">
                       <Map className="h-4 w-4 text-primary" />
-                      <CardTitle className="text-sm flex-1">{azgaarPreview.mapName}</CardTitle>
+                      <span className="text-sm font-semibold flex-1">{azgaarPreview.mapName}</span>
                       <button onClick={resetAzgaar} className="text-muted-foreground hover:text-foreground">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                  </CardHeader>
-                  <CardContent className="px-4 py-3 space-y-5">
+                  </div>
+                  <div className="px-4 py-3 space-y-5">
                     {/* Entity counts summary */}
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
                       {[
@@ -528,7 +529,7 @@ export default function ImportPage() {
                     </div>
 
                     <Button
-                      className="w-full"
+                      className="w-full rounded-none"
                       disabled={azgaarImportMutation.isPending || !azgaarMapData}
                       onClick={() =>
                         azgaarMapData &&
@@ -551,24 +552,24 @@ export default function ImportPage() {
                         {(azgaarImportMutation.error as Error)?.message ?? "Import failed"}
                       </p>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
 
               {/* Result */}
               {azgaarImportResult && (
-                <Card className="border-emerald-900/40 bg-emerald-950/20">
-                  <CardHeader className="px-4 py-3 pb-1">
+                <div className="border border-[var(--accent)]/30 bg-[var(--accent)]/5 rounded-none border-l-2 border-l-[var(--accent)]">
+                  <div className="px-4 py-3 border-b border-[var(--accent)]/20">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                      <CardTitle className="text-sm text-emerald-300">
+                      <CheckCircle2 className="h-4 w-4 text-[var(--accent)]" />
+                      <span className="text-sm font-semibold text-[var(--accent)]">
                         Import complete — {azgaarImportResult.mapName}
-                      </CardTitle>
+                      </span>
                     </div>
-                  </CardHeader>
-                  <CardContent className="px-4 py-3 space-y-3">
+                  </div>
+                  <div className="px-4 py-3 space-y-3">
                     <div className="flex gap-4 text-sm">
-                      <span className="text-emerald-300 font-semibold">{azgaarImportResult.totals.created} created</span>
+                      <span className="text-[var(--accent)] font-semibold">{azgaarImportResult.totals.created} created</span>
                       {azgaarImportResult.totals.skipped > 0 && (
                         <span className="text-muted-foreground">{azgaarImportResult.totals.skipped} skipped</span>
                       )}
@@ -586,8 +587,8 @@ export default function ImportPage() {
                           ["Notes", azgaarImportResult.notes],
                         ] as [string, AzgaarBucket][]
                       ).map(([label, bucket]) => bucket.created.length + bucket.errors.length > 0 ? (
-                        <div key={label} className="rounded border border-border/40 bg-muted/20 px-2 py-1.5">
-                          <div className="font-semibold text-emerald-300">{bucket.created.length}</div>
+                        <div key={label} className="border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-2 py-1.5">
+                          <div className="font-semibold text-[var(--accent)]">{bucket.created.length}</div>
                           <div className="text-muted-foreground">{label}</div>
                         </div>
                       ) : null)}
@@ -619,11 +620,11 @@ export default function ImportPage() {
                         ))}
                       </div>
                     )}
-                    <Button size="sm" variant="outline" onClick={resetAzgaar}>
+                    <Button size="sm" variant="outline" onClick={resetAzgaar} className="rounded-none">
                       Import another map
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
             </TabsContent>
 
