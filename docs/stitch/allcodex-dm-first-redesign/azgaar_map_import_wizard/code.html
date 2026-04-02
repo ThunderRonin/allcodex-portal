@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | Azgaar FMG Import</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&amp;family=Inter:wght@300;400;600;700&amp;family=Newsreader:ital,wght@0,400;0,600;1,400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "tertiary-fixed": "#55fcd0",
+                "inverse-on-surface": "#322f3a",
+                "on-secondary-fixed-variant": "#6700b5",
+                "primary": "#ffc381",
+                "on-primary": "#482900",
+                "on-primary-fixed": "#2b1700",
+                "outline-variant": "#534435",
+                "primary-container": "#f5a032",
+                "surface": "#14121c",
+                "error": "#ffb4ab",
+                "error-container": "#93000a",
+                "on-tertiary-fixed-variant": "#00513f",
+                "surface-container-high": "#2b2834",
+                "on-primary-fixed-variant": "#673d00",
+                "surface-container-highest": "#36333f",
+                "outline": "#a08d7c",
+                "inverse-primary": "#885200",
+                "on-tertiary-fixed": "#002118",
+                "surface-container": "#211e29",
+                "surface-dim": "#14121c",
+                "on-secondary-fixed": "#2b0052",
+                "surface-bright": "#3b3743",
+                "secondary-container": "#7701d0",
+                "on-background": "#e6e0ef",
+                "surface-container-lowest": "#0f0d17",
+                "tertiary-container": "#00caa2",
+                "surface-variant": "#36333f",
+                "primary-fixed": "#ffddbb",
+                "tertiary": "#37e7bc",
+                "on-tertiary-container": "#004f3e",
+                "inverse-surface": "#e6e0ef",
+                "on-error": "#690005",
+                "primary-fixed-dim": "#ffb868",
+                "on-error-container": "#ffdad6",
+                "on-secondary-container": "#dbb8ff",
+                "on-surface-variant": "#d8c3af",
+                "on-secondary": "#480082",
+                "surface-container-low": "#1c1a25",
+                "secondary-fixed": "#efdbff",
+                "secondary-fixed-dim": "#dcb8ff",
+                "on-primary-container": "#643b00",
+                "surface-tint": "#ffb868",
+                "tertiary-fixed-dim": "#29dfb5",
+                "on-tertiary": "#00382b",
+                "secondary": "#dcb8ff",
+                "on-surface": "#e6e0ef",
+                "background": "#14121c"
+              },
+              fontFamily: {
+                "headline": ["Newsreader"],
+                "body": ["Inter"],
+                "label": ["Inter"],
+                "cinzel": ["Cinzel"]
+              },
+              borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-amber { filter: drop-shadow(0 0 8px rgba(255, 195, 129, 0.4)); }
+        .glow-violet { filter: drop-shadow(0 0 12px rgba(119, 1, 208, 0.2)); }
+        .glow-teal { filter: drop-shadow(0 0 8px rgba(55, 231, 188, 0.4)); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f0d17; }
+        ::-webkit-scrollbar-thumb { background: #36333f; }
+      </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen selection:bg-primary/30">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#14121c] border-b border-[#dcb8ff]/10 shadow-[0_0_15px_rgba(119,1,208,0.1)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-['Cinzel'] font-bold text-[#ffc381]">AllCodex</span>
+</div>
+<div class="hidden md:flex gap-8 font-['Newsreader'] text-[#e6e0ef]">
+<a class="text-[#e6e0ef]/70 hover:text-[#dcb8ff] transition-colors" href="#">Library</a>
+<a class="text-[#ffc381] font-bold transition-colors" href="#">Studio</a>
+<a class="text-[#e6e0ef]/70 hover:text-[#dcb8ff] transition-colors" href="#">Nexus</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffc381] cursor-pointer hover:scale-95 duration-150">account_circle</span>
+<span class="material-symbols-outlined text-[#ffc381] cursor-pointer hover:scale-95 duration-150">settings</span>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-64 bg-[#1c1a25] border-r border-[#dcb8ff]/15 shadow-[4px_0_24px_rgba(72,0,130,0.1)] flex flex-col pt-20 pb-6 z-40">
+<div class="px-6 mb-8">
+<h3 class="font-['Inter'] uppercase tracking-widest text-[10px] text-[#ffc381] mb-1">STUDIO</h3>
+<p class="font-['Inter'] uppercase tracking-widest text-[8px] text-[#e6e0ef]/40">ALCHEMICAL TOOLS</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 gap-3 text-[#e6e0ef]/50 hover:text-[#dcb8ff] hover:bg-[#36333f]/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-lg">book_2</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Lore Builder</span>
+</a>
+<a class="flex items-center px-6 py-3 gap-3 text-[#e6e0ef]/50 hover:text-[#dcb8ff] hover:bg-[#36333f]/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-lg">swords</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Statblocks</span>
+</a>
+<a class="flex items-center px-6 py-3 gap-3 text-[#e6e0ef]/50 hover:text-[#dcb8ff] hover:bg-[#36333f]/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-lg">map</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Map Editor</span>
+</a>
+<a class="flex items-center px-6 py-3 gap-3 bg-[#36333f] text-[#ffc381] border-l-4 border-[#f5a032] transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-lg">upload_file</span>
+<span class="font-['Inter'] uppercase tracking-widest text-[10px]">Import</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-1 border-t border-[#dcb8ff]/10 pt-4">
+<a class="flex items-center px-2 py-2 gap-3 text-[#e6e0ef]/50 hover:text-[#dcb8ff] text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-sm">history_edu</span> Chronicle
+            </a>
+<a class="flex items-center px-2 py-2 gap-3 text-[#e6e0ef]/50 hover:text-[#dcb8ff] text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-sm">auto_awesome</span> AI Tools
+            </a>
+<button class="w-full mt-4 bg-gradient-to-br from-[#ffc381] to-[#f5a032] text-[#482900] font-['Cinzel'] font-bold py-3 text-xs tracking-widest hover:brightness-110 transition-all">
+                TRANSMUTE
+            </button>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 pt-24 px-12 pb-20 max-w-7xl mx-auto">
+<!-- Header Section -->
+<header class="flex justify-between items-end mb-12 border-b border-outline-variant/20 pb-8">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h1 class="text-5xl font-cinzel font-bold text-primary-container glow-amber tracking-tight">Import from Azgaar FMG</h1>
+<div class="px-2 py-1 border border-tertiary/40 text-tertiary text-[10px] font-bold tracking-[0.2em] uppercase glow-teal">
+                        Azgaar FMG
+                    </div>
+</div>
+<p class="font-headline text-xl text-on-surface-variant italic">Bulk-import your Azgaar Fantasy Map Generator world as structured lore entries</p>
+</div>
+<div class="text-right">
+<span class="block text-[10px] text-primary tracking-[0.3em] uppercase opacity-60">Session Sigil</span>
+<span class="font-cinzel text-on-surface">ALPHA-09-IMPRT</span>
+</div>
+</header>
+<!-- Step Indicator -->
+<div class="grid grid-cols-4 gap-0 mb-16 relative">
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-outline-variant/30 -z-10"></div>
+<!-- Step 1 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-10 h-10 bg-primary-container text-on-primary flex items-center justify-center font-bold text-sm glow-amber">01</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-primary">Upload</span>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-highest border-2 border-primary-container text-primary flex items-center justify-center font-bold text-sm glow-amber">02</div>
+<span class="text-[10px] font-bold tracking-widest uppercase text-primary">Preview</span>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center gap-3 opacity-40">
+<div class="w-10 h-10 bg-surface-container-highest border border-outline text-on-surface-variant flex items-center justify-center font-bold text-sm">03</div>
+<span class="text-[10px] font-bold tracking-widest uppercase">Select</span>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center gap-3 opacity-40">
+<div class="w-10 h-10 bg-surface-container-highest border border-outline text-on-surface-variant flex items-center justify-center font-bold text-sm">04</div>
+<span class="text-[10px] font-bold tracking-widest uppercase">Import</span>
+</div>
+</div>
+<!-- Layout Grid -->
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Left Column: Upload & Configuration -->
+<div class="col-span-12 lg:col-span-7 space-y-10">
+<!-- Upload Zone -->
+<section class="bg-surface-container-low border-2 border-dashed border-secondary-container p-8 relative overflow-hidden group">
+<div class="absolute inset-0 bg-secondary-container/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex flex-col items-center justify-center h-48 text-center gap-4 relative z-10">
+<span class="material-symbols-outlined text-5xl text-primary glow-amber" data-icon="cloud_upload">cloud_upload</span>
+<div>
+<h2 class="font-cinzel text-2xl text-on-surface mb-1">Drop your .map file here</h2>
+<p class="text-sm text-on-surface-variant italic">or <span class="text-tertiary cursor-pointer hover:underline">browse alchemical records</span></p>
+</div>
+<p class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/40 mt-2">Supports Azgaar FMG .map exports (JSON)</p>
+</div>
+</section>
+<!-- Entity Selection Card -->
+<section class="bg-surface-container-low border-l-4 border-primary-container p-8">
+<h3 class="font-cinzel text-lg text-primary-fixed-dim mb-6 uppercase tracking-wider">Entity Manifest</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Burgs -->
+<label class="flex items-start gap-4 cursor-pointer group">
+<input checked="" class="mt-1 bg-surface-container-highest border-outline text-primary focus:ring-primary focus:ring-offset-surface-dim" type="checkbox"/>
+<div>
+<span class="block text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Settlements / Burgs (847)</span>
+<span class="text-[10px] text-on-surface-variant italic">Imported as Location notes</span>
+</div>
+</label>
+<!-- States -->
+<label class="flex items-start gap-4 cursor-pointer group">
+<input checked="" class="mt-1 bg-surface-container-highest border-outline text-primary focus:ring-primary focus:ring-offset-surface-dim" type="checkbox"/>
+<div>
+<span class="block text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">States / Nations (12)</span>
+<span class="text-[10px] text-on-surface-variant italic">Imported as Faction notes</span>
+</div>
+</label>
+<!-- Provinces -->
+<label class="flex items-start gap-4 cursor-pointer group">
+<input checked="" class="mt-1 bg-surface-container-highest border-outline text-primary focus:ring-primary focus:ring-offset-surface-dim" type="checkbox"/>
+<div>
+<span class="block text-sm font-semibold text-on-surface group-hover:text-primary transition-colors">Provinces (34)</span>
+<span class="text-[10px] text-on-surface-variant italic">Imported as Location (region) notes</span>
+</div>
+</label>
+<!-- Rivers -->
+<label class="flex items-start gap-4 cursor-pointer group">
+<input class="mt-1 bg-surface-container-highest border-outline text-primary focus:ring-primary focus:ring-offset-surface-dim" type="checkbox"/>
+<div>
+<span class="block text-sm font-semibold text-on-surface-variant/60 group-hover:text-primary transition-colors">Rivers (89)</span>
+<span class="text-[10px] text-on-surface-variant/40 italic">Imported as Location notes (optional)</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Preview Table -->
+<section class="bg-surface-container-low overflow-hidden">
+<div class="px-8 py-4 border-b border-outline-variant/30 flex justify-between items-center">
+<h3 class="font-cinzel text-sm text-primary tracking-widest uppercase">Sampling Lore Transmutation</h3>
+<span class="text-[10px] text-on-surface-variant italic">Showing 5 of 905 entries</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container text-[10px] uppercase tracking-widest text-on-surface-variant/70 border-b border-outline-variant/10">
+<th class="px-8 py-3 font-normal">Name</th>
+<th class="px-4 py-3 font-normal">Type</th>
+<th class="px-4 py-3 font-normal">AllCodex Type</th>
+<th class="px-8 py-3 font-normal text-right">Action</th>
+</tr>
+</thead>
+<tbody class="text-sm font-body divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-container-highest/30 transition-colors">
+<td class="px-8 py-4 text-on-surface font-semibold tracking-wide">Ironkeep</td>
+<td class="px-4 py-4 text-on-surface-variant">Burg (Capital)</td>
+<td class="px-4 py-4 text-tertiary font-bold tracking-tighter">Location</td>
+<td class="px-8 py-4 text-right text-primary text-xs uppercase tracking-widest font-bold">Create</td>
+</tr>
+<tr class="hover:bg-surface-container-highest/30 transition-colors">
+<td class="px-8 py-4 text-on-surface font-semibold tracking-wide">Northern Plains</td>
+<td class="px-4 py-4 text-on-surface-variant">Province</td>
+<td class="px-4 py-4 text-tertiary font-bold tracking-tighter">Location (Region)</td>
+<td class="px-8 py-4 text-right text-primary text-xs uppercase tracking-widest font-bold">Create</td>
+</tr>
+<tr class="hover:bg-surface-container-highest/30 transition-colors">
+<td class="px-8 py-4 text-on-surface font-semibold tracking-wide">Kingdom of Valdur</td>
+<td class="px-4 py-4 text-on-surface-variant">State</td>
+<td class="px-4 py-4 text-tertiary font-bold tracking-tighter">Faction</td>
+<td class="px-8 py-4 text-right text-primary text-xs uppercase tracking-widest font-bold">Create</td>
+</tr>
+<tr class="hover:bg-surface-container-highest/30 transition-colors opacity-50">
+<td class="px-8 py-4 text-on-surface font-semibold tracking-wide">River Ash</td>
+<td class="px-4 py-4 text-on-surface-variant">River</td>
+<td class="px-4 py-4 text-tertiary font-bold tracking-tighter">Location</td>
+<td class="px-8 py-4 text-right text-on-surface-variant text-xs uppercase tracking-widest">Skip</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Right Column: Status & Sidebar Controls -->
+<div class="col-span-12 lg:col-span-5 space-y-8">
+<!-- File Success Banner -->
+<div class="bg-tertiary/10 border border-tertiary/30 p-6 flex items-start gap-4">
+<span class="material-symbols-outlined text-tertiary glow-teal" data-icon="check_circle">check_circle</span>
+<div class="flex-1">
+<h4 class="font-cinzel text-sm text-tertiary font-bold tracking-wide">File Decrypted Successfully</h4>
+<div class="mt-2 space-y-1">
+<p class="text-xs text-on-surface">my-world.map <span class="text-on-surface-variant">— 2.4 MB</span></p>
+<p class="text-[10px] text-on-surface-variant italic">847 locations, 12 states, 34 provinces, 8 religions</p>
+</div>
+</div>
+</div>
+<!-- Code Snippet Hint -->
+<div class="bg-surface-container-lowest p-4 border border-outline-variant/10">
+<p class="text-[9px] uppercase tracking-widest text-on-surface-variant mb-3">Manifest Structure Preview</p>
+<code class="text-[11px] text-primary-fixed/60 font-mono block">
+                        { <br/>
+                          "pack": { <br/>
+                            "burgs": [847 entries...], <br/>
+                            "states": [12 nations...], <br/>
+                            "religions": [8 faiths...] <br/>
+                          } <br/>
+                        }
+                    </code>
+</div>
+<!-- Import Configuration -->
+<section class="bg-surface-container border-t-2 border-secondary p-8 space-y-6">
+<h3 class="font-cinzel text-sm text-on-surface tracking-[0.2em] uppercase">Configuration</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Lore Root Folder</label>
+<input class="w-full bg-surface-container-low border-0 border-b border-outline-variant focus:border-tertiary focus:ring-0 text-sm text-on-surface" type="text" value="/World/Azgaar-Exports"/>
+</div>
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Tag Entities With</label>
+<input class="w-full bg-surface-container-low border-0 border-b border-outline-variant focus:border-tertiary focus:ring-0 text-sm text-on-surface" type="text" value="#azgaar-import"/>
+</div>
+<div class="flex items-center justify-between pt-2">
+<span class="text-xs text-on-surface-variant">Generate AI summaries after import</span>
+<div class="w-10 h-5 bg-tertiary/20 rounded-full relative cursor-pointer border border-tertiary/40">
+<div class="absolute right-0.5 top-0.5 w-4 h-3.5 bg-tertiary glow-teal"></div>
+</div>
+</div>
+</div>
+<!-- Final Actions -->
+<div class="pt-6 space-y-3">
+<button class="w-full bg-primary-container text-on-primary font-cinzel font-bold py-4 text-sm tracking-[0.2em] glow-amber hover:brightness-110 transition-all">
+                            IMPORT 905 ENTITIES
+                        </button>
+<button class="w-full border border-tertiary text-tertiary font-cinzel font-bold py-4 text-sm tracking-[0.2em] hover:bg-tertiary hover:text-on-tertiary transition-all">
+                            DRY RUN FIRST
+                        </button>
+<button class="w-full text-on-surface-variant text-[10px] font-bold uppercase tracking-[0.2em] hover:text-on-surface transition-colors">
+                            Back to Studio
+                        </button>
+</div>
+<!-- Progress Area -->
+<div class="pt-6 border-t border-outline-variant/10">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Ritual Status</span>
+<span class="text-[10px] text-primary font-bold">15%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-low overflow-hidden">
+<div class="w-[15%] h-full bg-primary-container glow-amber"></div>
+</div>
+<p class="text-[10px] text-on-surface-variant italic mt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[12px] animate-pulse" data-icon="auto_fix_high">auto_fix_high</span>
+                            Creating location notes... 127/847
+                        </p>
+</div>
+</section>
+<!-- Decorative Asset -->
+<div class="relative h-48 overflow-hidden grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
+<img alt="ancient parchment map" class="w-full h-full object-cover" data-alt="Close-up of a hyper-detailed ancient parchment map with mystical sigils and glowing amber ley lines, cinematic dramatic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUZ8wzqIvTDh83iAzcIod5Jaby_Ev0iaXKyaMZ4T0Eg72RCPFTGHnvefX4r3a8zC8Y8UDCZh9Q51-yjmrxh-5CusGEkMWvGnYRzMir8wQ4pUfMAV3lBMGssmytaCACOjGSq9DJ1C1HNrAcUqo-DZLgaGe8KJuxan5xgxt3HpJCwKz6vN06xI7rPcCe6usBRRcXE1TqwsFW60W7AU3ikPluHatxOLECs43jEh8owvsuhgQVFNqRzMFp_dDQHp1DXskTFhfBc8ANaLk"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim to-transparent"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Background Decoration -->
+<div class="fixed inset-0 pointer-events-none -z-50 overflow-hidden">
+<div class="absolute -top-[10%] -left-[10%] w-1/2 h-1/2 bg-secondary-container/10 blur-[150px]"></div>
+<div class="absolute -bottom-[10%] -right-[10%] w-1/2 h-1/2 bg-on-secondary/10 blur-[150px]"></div>
+</div>
+</body></html>

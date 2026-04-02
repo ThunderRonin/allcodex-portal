@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | The Archivist's Manuscript</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#d8c3af",
+                        "inverse-on-surface": "#322f3a",
+                        "tertiary-fixed": "#55fcd0",
+                        "surface-container-high": "#2b2834",
+                        "tertiary-fixed-dim": "#28dfb5",
+                        "secondary": "#dcb8ff",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#004f3e",
+                        "primary-container": "#f5a032",
+                        "on-primary-fixed-variant": "#673d00",
+                        "on-tertiary-fixed": "#002118",
+                        "on-primary-fixed": "#2b1700",
+                        "surface-dim": "#14121c",
+                        "on-primary-container": "#643b00",
+                        "secondary-container": "#7701d0",
+                        "inverse-primary": "#885200",
+                        "on-background": "#e6e0ef",
+                        "secondary-fixed": "#efdbff",
+                        "outline-variant": "#534435",
+                        "on-surface": "#e6e0ef",
+                        "error-container": "#93000a",
+                        "tertiary": "#37e7bc",
+                        "outline": "#a08d7c",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0f0d17",
+                        "primary-fixed": "#ffddbb",
+                        "surface-container-low": "#1c1a25",
+                        "tertiary-container": "#00caa2",
+                        "on-secondary-container": "#dcb7ff",
+                        "background": "#14121c",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#e6e0ef",
+                        "primary-fixed-dim": "#ffb868",
+                        "surface": "#14121c",
+                        "primary": "#ffc381",
+                        "surface-variant": "#36333f",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "surface-container-highest": "#36333f",
+                        "surface-bright": "#3b3743",
+                        "on-primary": "#482900",
+                        "surface-container": "#211e29",
+                        "on-tertiary": "#00382b",
+                        "on-secondary": "#480081",
+                        "surface-tint": "#ffb868"
+                    },
+                    fontFamily: {
+                        "headline": ["Cinzel", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #14121c;
+            color: #e6e0ef;
+            font-family: 'Newsreader', serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f0d17;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #f5a032;
+        }
+        .block-hover:hover .drag-handle {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopNavBar Implementation -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#1c1a25]">
+<div class="flex items-center space-x-4">
+<span class="font-serif text-2xl font-bold tracking-widest text-amber-500 uppercase">AllCodex</span>
+<div class="h-6 w-px bg-outline-variant/30 mx-2"></div>
+<nav class="hidden md:flex items-center space-x-4 text-sm font-label uppercase tracking-widest text-on-surface-variant/60">
+<span>Lore</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span>Characters</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-primary">Aelarion the Undying</span>
+</nav>
+</div>
+<div class="flex items-center space-x-6">
+<div class="hidden md:flex items-center space-x-2 bg-tertiary/10 px-3 py-1 text-tertiary text-xs font-label font-bold uppercase tracking-tighter">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Saved</span>
+</div>
+<div class="flex items-center space-x-3">
+<button class="px-4 py-2 font-label text-xs uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors duration-200">Cancel</button>
+<button class="bg-primary-container text-on-primary-container px-6 py-2 font-label text-xs font-bold uppercase tracking-widest active:opacity-80 transition-all">Save Entry</button>
+</div>
+</div>
+</header>
+<!-- SideNavBar Implementation (Integrated as Property Panel) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] flex flex-col z-40 bg-[#0f0d17] w-16 md:w-64 border-r border-outline-variant/10">
+<div class="p-6 border-b border-outline-variant/10">
+<div class="flex items-center space-x-3 mb-6">
+<div class="w-8 h-8 bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">auto_fix_high</span>
+</div>
+<div class="hidden md:block">
+<h3 class="font-headline text-primary text-sm leading-none">Aethelgard</h3>
+<p class="font-label text-[10px] text-on-surface-variant/50 uppercase tracking-tighter">High Fantasy Realm</p>
+</div>
+</div>
+<button class="w-full py-3 bg-secondary/10 border border-secondary/20 text-secondary font-label text-xs uppercase tracking-widest hover:bg-secondary/20 transition-all flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-sm">add</span>
+<span class="hidden md:inline">New Codex Entry</span>
+</button>
+</div>
+<nav class="flex-1 py-4 overflow-y-auto custom-scrollbar">
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-4 hover:bg-[#2b2834] hover:text-white cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="book_5">book_5</span>
+<span class="hidden md:inline font-label text-sm">Lore Index</span>
+</div>
+<div class="text-amber-400 font-bold border-l-4 border-amber-400 pl-5 py-3 bg-[#1c1a25] flex items-center space-x-4 translate-x-1 transition-all">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="hidden md:inline font-label text-sm">Entities</span>
+</div>
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-4 hover:bg-[#2b2834] hover:text-white cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="hidden md:inline font-label text-sm">Locations</span>
+</div>
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-4 hover:bg-[#2b2834] hover:text-white cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="auto_fix_high">auto_fix_high</span>
+<span class="hidden md:inline font-label text-sm">Magic Systems</span>
+</div>
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-4 hover:bg-[#2b2834] hover:text-white cursor-pointer transition-all">
+<span class="material-symbols-outlined" data-icon="swords">swords</span>
+<span class="hidden md:inline font-label text-sm">Artifacts</span>
+</div>
+</nav>
+<div class="mt-auto p-4 border-t border-outline-variant/10">
+<div class="flex items-center space-x-4 text-[#e6e0ef]/50 px-2 py-2 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">inventory_2</span>
+<span class="hidden md:inline font-label text-[10px] uppercase tracking-widest">Archive</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="mt-16 ml-16 md:ml-64 mb-16 flex flex-col md:flex-row flex-1">
+<!-- Left Column: Block Editor Canvas -->
+<section class="flex-1 p-8 lg:p-16 max-w-5xl mx-auto w-full">
+<h1 class="font-headline text-5xl md:text-7xl text-primary font-black mb-12 tracking-tight" style="text-shadow: 0 0 12px rgba(245, 160, 50, 0.4);">
+                Aelarion the Undying
+            </h1>
+<div class="space-y-8">
+<!-- H2 Block -->
+<div class="group relative block-hover">
+<div class="drag-handle opacity-0 absolute -left-10 top-1/2 -translate-y-1/2 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+<span class="material-symbols-outlined text-primary/60 hover:text-primary cursor-pointer text-sm">add</span>
+</div>
+<h2 class="font-headline text-3xl text-secondary border-b border-secondary/20 pb-2 mb-4">Origins &amp; History</h2>
+</div>
+<!-- Paragraph Block -->
+<div class="group relative block-hover">
+<div class="drag-handle opacity-0 absolute -left-10 top-0 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+<span class="material-symbols-outlined text-primary/60 hover:text-primary cursor-pointer text-sm">add</span>
+</div>
+<p class="text-xl leading-relaxed text-on-surface/90 font-body first-letter:text-5xl first-letter:font-headline first-letter:text-primary first-letter:mr-3 first-letter:float-left">
+                        Once the high-seer of the Obsidian Citadel, Aelarion sacrificed his mortality during the Great Conjunction of the Twin Suns. His flesh was woven with the threads of the Void, ensuring his spirit could never truly depart the realm of Aethelgard. For three millennia, he has sat upon the Frost-Throne, watching empires crumble into dust while his own power only grew in the suffocating silence of his tomb.
+                    </p>
+</div>
+<!-- Blockquote Block -->
+<div class="group relative block-hover pl-8 border-l-4 border-secondary/50 py-2 italic bg-secondary/5">
+<div class="drag-handle opacity-0 absolute -left-10 top-1/2 -translate-y-1/2 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<p class="text-2xl font-body text-secondary-fixed/80">"Time is a cage forged by the fearful. I have simply learned to step between the bars."</p>
+<cite class="block mt-4 font-label text-xs uppercase tracking-widest text-secondary/60">— The Manuscript of Shadows, Page 666</cite>
+</div>
+<!-- Bullet List Block -->
+<div class="group relative block-hover space-y-3 pl-2">
+<div class="drag-handle opacity-0 absolute -left-10 top-1 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<div class="flex items-start space-x-4">
+<span class="w-1.5 h-1.5 mt-2.5 bg-primary"></span>
+<p class="text-lg">Immunity to all necrotic and psychic manipulation.</p>
+</div>
+<div class="flex items-start space-x-4">
+<span class="w-1.5 h-1.5 mt-2.5 bg-primary"></span>
+<p class="text-lg">Bound to the Soul-Phylactery hidden within the Rift.</p>
+</div>
+</div>
+<!-- Table Block -->
+<div class="group relative block-hover overflow-hidden">
+<div class="drag-handle opacity-0 absolute -left-10 top-4 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest border-b-2 border-primary/20">
+<th class="p-4 text-left font-label text-xs uppercase tracking-widest text-primary">Attribute</th>
+<th class="p-4 text-left font-label text-xs uppercase tracking-widest text-primary">Value</th>
+<th class="p-4 text-left font-label text-xs uppercase tracking-widest text-primary">Source</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr>
+<td class="p-4 font-label text-sm text-on-surface">Mana Reserves</td>
+<td class="p-4 font-body text-lg italic text-on-surface-variant">Infinite (Void-Linked)</td>
+<td class="p-4 font-label text-[10px] text-secondary">Arcane Ledger v3</td>
+</tr>
+<tr>
+<td class="p-4 font-label text-sm text-on-surface">True Name</td>
+<td class="p-4 font-body text-lg italic text-on-surface-variant">Xal'vath-A'kar</td>
+<td class="p-4 font-label text-[10px] text-secondary">The Lost Scrolls</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Image Block -->
+<div class="group relative block-hover">
+<div class="drag-handle opacity-0 absolute -left-10 top-1/2 -translate-y-1/2 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<div class="aspect-video bg-surface-container-high border border-outline-variant/20 overflow-hidden relative group/img">
+<img alt="Ethereal lich sitting on a throne of obsidian and ice" class="w-full h-full object-cover opacity-80 group-hover/img:scale-105 transition-transform duration-700" data-alt="ancient skeletal sorcerer sitting on a crystalline throne of dark obsidian in a cavernous hall lit by dim spectral violet light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBghmW2aBrtSlGOtF0YGU8IqwpZHOpO9XJRkzAVbFOviRTNXQi6PjO-qKS_yi6GHRScq9WwFUS8o5xUpVVvPnWdvT-6L3YjxTz8M-8CioVSTrZB5MJOGdP2qTpXZKyKq-KoV0qBoYSKDaoG0qJJ0ObW-IMf0Lg_ozoPTNwOJ0yVx5TNulTBiWU2JH_SXVSFxeM8HtwEy6Gt-yEKA5v9ThMNBjvbDoZZRAq7cSpflaGs7VZqPvF5eyBzDrC3NuYHmm0u0CMBPn_VNiQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-60"></div>
+</div>
+<p class="mt-3 text-center font-body text-sm text-on-surface-variant/50 italic">The Frozen Hall of the Obsidian Citadel</p>
+</div>
+<!-- AI Callout Block -->
+<div class="group relative block-hover bg-tertiary/5 border-l-4 border-tertiary p-6">
+<div class="drag-handle opacity-0 absolute -left-10 top-1/2 -translate-y-1/2 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<div class="flex items-center space-x-2 mb-4">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">heart_connect</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-tertiary font-bold">AI Scribe Insight</span>
+</div>
+<p class="font-body text-on-surface italic">Aelarion's influence is strongest during the New Moon. Consider adding a 'Lunar Phase' mechanic to this character's stat block for regional effects.</p>
+</div>
+<!-- Divider -->
+<div class="group relative block-hover py-8">
+<div class="drag-handle opacity-0 absolute -left-10 top-1/2 -translate-y-1/2 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<hr class="border-t-2 border-primary/20"/>
+</div>
+<!-- Checklist Block -->
+<div class="group relative block-hover space-y-4">
+<div class="drag-handle opacity-0 absolute -left-10 top-1 flex items-center space-x-1 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-grab">drag_indicator</span>
+</div>
+<div class="flex items-center space-x-4">
+<div class="w-6 h-6 border-2 border-primary flex items-center justify-center bg-primary/20">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="text-lg text-on-surface/50 line-through">Establish historical timeline</span>
+</div>
+<div class="flex items-center space-x-4">
+<div class="w-6 h-6 border-2 border-outline-variant hover:border-primary transition-colors"></div>
+<span class="text-lg text-on-surface">Link to Shadowfell Citadel location</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Column: Sidebar Panel -->
+<aside class="w-full md:w-[280px] bg-surface-container-lowest p-6 border-l border-outline-variant/10 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar">
+<h4 class="font-label text-xs font-bold uppercase tracking-widest text-primary border-b border-primary/30 pb-2 mb-8">Entry Properties</h4>
+<div class="space-y-10">
+<!-- Field -->
+<div>
+<label class="font-label text-[10px] uppercase tracking-tighter text-on-surface-variant/40 block mb-2">Lore Type</label>
+<div class="border-b border-outline-variant/40 py-2 flex justify-between items-center group cursor-pointer">
+<span class="text-on-surface font-body italic text-lg">Character</span>
+<span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-primary transition-colors">arrow_drop_down</span>
+</div>
+</div>
+<!-- Field -->
+<div>
+<label class="font-label text-[10px] uppercase tracking-tighter text-on-surface-variant/40 block mb-2">Status</label>
+<div class="border-b border-outline-variant/40 py-2 flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="text-on-surface font-label text-sm uppercase tracking-widest">Draft</span>
+</div>
+</div>
+<!-- Field Tags -->
+<div>
+<label class="font-label text-[10px] uppercase tracking-tighter text-on-surface-variant/40 block mb-4">Tags</label>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary font-label text-[10px] uppercase tracking-widest">NPC</span>
+<span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary font-label text-[10px] uppercase tracking-widest">Villain</span>
+<span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 text-tertiary font-label text-[10px] uppercase tracking-widest">Undead</span>
+<button class="px-3 py-1 border border-dashed border-outline-variant text-on-surface-variant/40 hover:border-primary hover:text-primary transition-all text-[10px]">+</button>
+</div>
+</div>
+<!-- Field Inputs -->
+<div class="space-y-6">
+<div>
+<label class="font-label text-[10px] uppercase tracking-tighter text-on-surface-variant/40 block mb-1">Alignment</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface font-body py-1 italic" type="text" value="Lawful Evil"/>
+</div>
+<div>
+<label class="font-label text-[10px] uppercase tracking-tighter text-on-surface-variant/40 block mb-1">Challenge Rating</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/40 focus:ring-0 focus:border-primary text-on-surface font-label py-1" type="text" value="15"/>
+</div>
+</div>
+<!-- Linked Sections -->
+<div>
+<label class="font-label text-[10px] uppercase tracking-tighter text-on-surface-variant/40 block mb-4">Linked Entities</label>
+<div class="space-y-3">
+<div class="flex items-center space-x-3 group cursor-pointer">
+<span class="material-symbols-outlined text-sm text-secondary">map</span>
+<span class="font-label text-xs text-on-surface group-hover:text-secondary transition-colors underline decoration-secondary/30 underline-offset-4">Shadowfell Citadel</span>
+</div>
+<div class="flex items-center space-x-3 group cursor-pointer">
+<span class="material-symbols-outlined text-sm text-secondary">group</span>
+<span class="font-label text-xs text-on-surface group-hover:text-secondary transition-colors underline decoration-secondary/30 underline-offset-4">The Pallid Host</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- BottomNavBar Implementation (Block Controls) -->
+<footer class="fixed bottom-0 left-0 w-full md:left-64 md:w-[calc(100%-16rem)] h-16 bg-surface-container flex items-center justify-between px-6 z-50 border-t border-outline-variant/10">
+<div class="flex items-center space-x-1">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="format_bold">format_bold</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="format_italic">format_italic</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="title">title</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="link">link</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="image">image</span>
+</button>
+<div class="w-px h-6 bg-outline-variant/30 mx-2"></div>
+<button class="flex items-center space-x-2 px-3 py-2 bg-tertiary/10 text-tertiary hover:bg-tertiary/20 transition-all group">
+<span class="material-symbols-outlined text-sm" data-icon="psychic_bridge">heart_connect</span>
+<span class="font-label text-[10px] uppercase tracking-widest font-bold">AI Write</span>
+</button>
+</div>
+<div class="hidden lg:block">
+<p class="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant/40">
+                Type <span class="text-primary font-bold">/</span> to insert a block
+            </p>
+</div>
+<div class="flex items-center space-x-4">
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant/60">1,247 words</span>
+<div class="w-px h-4 bg-outline-variant/30"></div>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant/60">English (Manuscript)</span>
+</div>
+</footer>
+<!-- Absolute FAB Placeholder if needed based on rules -->
+<!-- Suppression: Suppressing FAB on Details/Editor screen per JSON rules -->
+</body></html>

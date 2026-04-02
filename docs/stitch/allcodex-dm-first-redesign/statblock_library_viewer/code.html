@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | Statblock Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,wght@0,300;0,400;0,600;1,400&amp;family=Inter:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#0f0d17",
+                        "inverse-primary": "#885200",
+                        "on-tertiary-container": "#004f3e",
+                        "surface-container-highest": "#36333f",
+                        "secondary-container": "#7701d0",
+                        "on-background": "#e6e0ef",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#002118",
+                        "surface": "#14121c",
+                        "primary-container": "#f5a032",
+                        "on-primary-container": "#643b00",
+                        "tertiary-fixed-dim": "#28dfb5",
+                        "on-primary-fixed-variant": "#673d00",
+                        "on-surface": "#e6e0ef",
+                        "tertiary": "#37e7bc",
+                        "on-secondary": "#480081",
+                        "surface-bright": "#3b3743",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "background": "#14121c",
+                        "surface-container": "#211e29",
+                        "on-surface-variant": "#d8c3af",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#00caa2",
+                        "primary-fixed": "#ffddbb",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "on-secondary-container": "#dcb7ff",
+                        "surface-container-low": "#1c1a25",
+                        "primary": "#ffc381",
+                        "surface-dim": "#14121c",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#2c0051",
+                        "inverse-on-surface": "#322f3a",
+                        "surface-variant": "#36333f",
+                        "outline": "#a08d7c",
+                        "outline-variant": "#534435",
+                        "secondary": "#dcb8ff",
+                        "primary-fixed-dim": "#ffb868",
+                        "inverse-surface": "#e6e0ef",
+                        "surface-tint": "#ffb868",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "on-tertiary": "#00382b",
+                        "secondary-fixed": "#efdbff",
+                        "tertiary-fixed": "#55fcd0",
+                        "on-primary": "#482900",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#2b1700",
+                        "surface-container-high": "#2b2834"
+                    },
+                    fontFamily: {
+                        "headline": ["Cinzel"],
+                        "body": ["Newsreader"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .statblock-accent {
+            clip-path: polygon(0 0, 100% 0, 100% 95%, 95% 100%, 0 100%);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0f0d17; }
+        ::-webkit-scrollbar-thumb { background: #36333f; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffc381; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-secondary-container selection:text-white">
+<!-- SIDEBAR NAVIGATION -->
+<nav class="fixed left-0 top-0 h-screen flex flex-col py-6 bg-[#0f0d17] w-64 border-r-0 shadow-[0_0_20px_rgba(119,1,208,0.05)] z-50">
+<div class="px-6 mb-10">
+<h1 class="text-2xl font-bold tracking-tighter text-[#ffc381] uppercase font-headline">AllCodex</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-on-surface/40 font-label">Archivist Level 12</p>
+</div>
+<div class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 text-[#e6e0ef]/60 hover:text-[#e6e0ef] hover:bg-[#1c1a25] transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined mr-4">menu_book</span>
+<span class="font-label text-sm uppercase tracking-wider">Grimoire</span>
+</a>
+<!-- Active Tab: Bestiary (closest match to Statblock Library) -->
+<a class="flex items-center px-6 py-3 text-[#ffc381] border-r-2 border-[#ffc381] bg-[#1c1a25] font-bold group" href="#">
+<span class="material-symbols-outlined mr-4">pets</span>
+<span class="font-label text-sm uppercase tracking-wider">Bestiary</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#e6e0ef]/60 hover:text-[#e6e0ef] hover:bg-[#1c1a25] transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined mr-4">swords</span>
+<span class="font-label text-sm uppercase tracking-wider">Armory</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#e6e0ef]/60 hover:text-[#e6e0ef] hover:bg-[#1c1a25] transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined mr-4">auto_stories</span>
+<span class="font-label text-sm uppercase tracking-wider">Almanac</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#e6e0ef]/60 hover:text-[#e6e0ef] hover:bg-[#1c1a25] transition-colors duration-300 group" href="#">
+<span class="material-symbols-outlined mr-4">history</span>
+<span class="font-label text-sm uppercase tracking-wider">Chronicles</span>
+</a>
+</div>
+<div class="px-6 py-4">
+<button class="w-full py-3 bg-primary-container text-on-primary font-label text-xs uppercase tracking-widest font-bold active:scale-95 transition-transform">
+                Forge New Entry
+            </button>
+</div>
+<div class="mt-auto border-t border-white/5 pt-4 space-y-1">
+<a class="flex items-center px-6 py-2 text-[#e6e0ef]/60 hover:text-[#e6e0ef] hover:bg-[#1c1a25] transition-colors duration-300" href="#">
+<span class="material-symbols-outlined mr-4 text-lg">settings</span>
+<span class="font-label text-xs uppercase tracking-wider">Settings</span>
+</a>
+<a class="flex items-center px-6 py-2 text-[#e6e0ef]/60 hover:text-[#e6e0ef] hover:bg-[#1c1a25] transition-colors duration-300" href="#">
+<span class="material-symbols-outlined mr-4 text-lg">fort</span>
+<span class="font-label text-xs uppercase tracking-wider">Sanctum</span>
+</a>
+<div class="px-6 mt-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest border border-primary/20">
+<img alt="User profile sigil" class="w-full h-full object-cover" data-alt="Stylized portrait of a fantasy archivist with glowing eyes and runic tattoos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOq6UTXCgvyGhYHCb-11vvLmDuTF3j1aQmjjsIA2uwXCnFr_RJlgn6AZKtQL0fJf8Nvxu2idqsRPjP52k05xyuwM16ChG7qarYkp3Uo5Dwyg8TONjPnsWDJ8R8y1jEws0w0-_BnyFEBmBYE8pTkA6t4Ypfx5fODxLGhbgpa7fo_bA8pYRRCECcrCCK38QEnHgpq-lBcEdhbvgXXJKLZI4eYLltT5HO2B55lj-r1jvfCiJt4ffO_ro0JWsyPeSIg7b5M5r_QaOaomk"/>
+</div>
+<div class="leading-none">
+<p class="text-[10px] font-bold text-primary font-label uppercase">Vax'ildan</p>
+<p class="text-[8px] text-on-surface/40 font-label">Master of Keys</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- TOP NAVBAR (OFFSET BY SIDEBAR) -->
+<header class="fixed top-0 left-64 right-0 bg-[#14121c]/80 backdrop-blur-md z-40 flex justify-between items-center px-8 py-4 shadow-[0_4px_30px_rgba(10,8,18,0.5)]">
+<div class="flex items-center space-x-8">
+<nav class="flex space-x-6">
+<a class="font-label text-xs uppercase tracking-widest text-[#e6e0ef]/70 hover:text-[#ffc381] transition-all" href="#">Library</a>
+<a class="font-label text-xs uppercase tracking-widest text-[#ffc381] border-b-2 border-[#ffc381] pb-1" href="#">Compendium</a>
+<a class="font-label text-xs uppercase tracking-widest text-[#e6e0ef]/70 hover:text-[#ffc381] transition-all" href="#">Session</a>
+</nav>
+</div>
+<div class="flex items-center space-x-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary text-sm">search</span>
+<input class="bg-surface-container-lowest border-b border-outline-variant focus:border-primary transition-colors pl-10 pr-4 py-1 text-xs font-label uppercase tracking-tighter w-64 outline-none" placeholder="QUERY CODEX..." type="text"/>
+</div>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-secondary hover:text-primary cursor-pointer transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-secondary hover:text-primary cursor-pointer transition-colors" data-icon="auto_fix_high">auto_fix_high</span>
+</div>
+</div>
+</header>
+<!-- MAIN CONTENT WRAPPER -->
+<main class="ml-64 pt-20 flex min-h-screen">
+<!-- INNER LEFT PANEL: STATBLOCK LIBRARY -->
+<aside class="w-[280px] bg-surface-container-lowest flex flex-col border-r border-outline-variant/10">
+<div class="p-6 pb-4">
+<h2 class="font-headline text-xl text-primary mb-4">Statblock Library</h2>
+<div class="relative mb-4">
+<input class="w-full bg-surface-container border border-primary/30 py-2 px-3 text-xs font-label focus:border-primary outline-none text-on-surface" placeholder="Search statblocks..." type="text"/>
+</div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="px-2 py-1 bg-primary text-on-primary font-label text-[10px] font-bold cursor-pointer">All</span>
+<span class="px-2 py-1 bg-surface-container-high text-on-surface/60 font-label text-[10px] cursor-pointer hover:text-primary transition-colors">Creature</span>
+<span class="px-2 py-1 bg-surface-container-high text-on-surface/60 font-label text-[10px] cursor-pointer hover:text-primary transition-colors">NPC</span>
+<span class="px-2 py-1 bg-surface-container-high text-on-surface/60 font-label text-[10px] cursor-pointer hover:text-primary transition-colors">Spell</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low p-2 border border-outline-variant/20 cursor-pointer group">
+<span class="text-[10px] font-label uppercase tracking-widest text-on-surface/50">System: D&amp;D 5e</span>
+<span class="material-symbols-outlined text-xs text-primary group-hover:rotate-180 transition-transform">expand_more</span>
+</div>
+</div>
+<!-- List of Statblocks -->
+<div class="flex-1 overflow-y-auto">
+<!-- Row 1: Selected -->
+<div class="p-4 bg-surface-container-low border-l-2 border-primary cursor-pointer relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary/5"></div>
+<div class="relative flex flex-col gap-1">
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-bold text-primary font-label tracking-tighter">CR 11</span>
+<span class="text-[8px] bg-tertiary-container/20 text-tertiary px-1 font-label uppercase tracking-widest">Homebrew</span>
+</div>
+<h4 class="font-headline text-primary text-sm group-hover:underline">Elder Vayne</h4>
+<p class="text-[9px] font-label text-on-surface/40 uppercase tracking-wider">Humanoid · Master Archivist</p>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="p-4 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-outline-variant/5 group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-on-surface/40 font-label tracking-tighter">CR 8</span>
+<span class="text-[8px] bg-tertiary-container/10 text-tertiary/60 px-1 font-label uppercase tracking-widest">Homebrew</span>
+</div>
+<h4 class="font-headline text-on-surface/80 text-sm group-hover:text-primary transition-colors">Elder Lich</h4>
+<p class="text-[9px] font-label text-on-surface/30 uppercase tracking-wider">Undead · Voidtouched</p>
+</div>
+<!-- Row 3 -->
+<div class="p-4 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-outline-variant/5 group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-on-surface/40 font-label tracking-tighter">CR 2</span>
+<span class="text-[8px] bg-secondary-container/10 text-secondary/60 px-1 font-label uppercase tracking-widest">5e SRD</span>
+</div>
+<h4 class="font-headline text-on-surface/80 text-sm group-hover:text-primary transition-colors">Guard Captain</h4>
+<p class="text-[9px] font-label text-on-surface/30 uppercase tracking-wider">Humanoid · Garrison</p>
+</div>
+<!-- Row 4 -->
+<div class="p-4 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-outline-variant/5 group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-on-surface/40 font-label tracking-tighter">CR 1/2</span>
+<span class="text-[8px] bg-tertiary-container/10 text-tertiary/60 px-1 font-label uppercase tracking-widest">Homebrew</span>
+</div>
+<h4 class="font-headline text-on-surface/80 text-sm group-hover:text-primary transition-colors">Pale Court Agent</h4>
+<p class="text-[9px] font-label text-on-surface/30 uppercase tracking-wider">Humanoid · Infiltrator</p>
+</div>
+</div>
+<div class="p-6">
+<button class="w-full py-3 border border-primary text-primary font-label text-[10px] uppercase tracking-[0.2em] hover:bg-primary/5 transition-colors">
+                    Create Homebrew
+                </button>
+</div>
+</aside>
+<!-- MAIN VIEW: STATBLOCK VIEWER -->
+<section class="flex-1 bg-surface flex flex-col overflow-y-auto">
+<div class="p-12 max-w-4xl mx-auto w-full">
+<!-- Header -->
+<div class="mb-10 flex justify-between items-end">
+<div>
+<div class="flex items-center gap-4 mb-2">
+<h2 class="text-5xl font-black font-headline text-primary tracking-tight">Elder Vayne</h2>
+<span class="px-3 py-1 border border-tertiary/30 text-tertiary text-[10px] font-label uppercase tracking-widest bg-tertiary/5">Homebrew NPC</span>
+</div>
+<p class="font-body italic text-lg text-on-surface/70 mb-2">Medium Humanoid (Human), Lawful Evil</p>
+<a class="text-tertiary font-label text-xs uppercase tracking-widest hover:underline flex items-center gap-2" href="#">
+                            Linked lore entry <span class="material-symbols-outlined text-xs">trending_flat</span>
+</a>
+</div>
+</div>
+<!-- Statblock Card -->
+<div class="bg-surface-container-high border-y-4 border-x border-secondary/30 relative p-8 shadow-[0_0_40px_rgba(119,1,208,0.1)]">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-primary/50"></div>
+<!-- DEFENSE ROW -->
+<div class="flex gap-8 mb-6 pb-6 border-b border-outline-variant/20">
+<div>
+<p class="text-[10px] font-label uppercase tracking-widest text-primary/60">Armor Class</p>
+<p class="text-xl font-headline text-on-surface">14 <span class="text-xs font-body opacity-50">(studded leather)</span></p>
+</div>
+<div class="w-px h-10 bg-primary/20 rotate-12"></div>
+<div>
+<p class="text-[10px] font-label uppercase tracking-widest text-primary/60">Hit Points</p>
+<p class="text-xl font-headline text-on-surface">104 <span class="text-xs font-body opacity-50">(16d8 + 32)</span></p>
+</div>
+<div class="w-px h-10 bg-primary/20 rotate-12"></div>
+<div>
+<p class="text-[10px] font-label uppercase tracking-widest text-primary/60">Speed</p>
+<p class="text-xl font-headline text-on-surface">30 ft.</p>
+</div>
+</div>
+<!-- ABILITY SCORES -->
+<div class="grid grid-cols-6 gap-2 mb-8 bg-surface-container-lowest/50 p-4 border border-outline-variant/10">
+<div class="text-center">
+<p class="text-[10px] font-label uppercase text-primary/60">STR</p>
+<p class="text-lg font-headline text-primary">11 <span class="text-xs opacity-60">(+0)</span></p>
+</div>
+<div class="text-center">
+<p class="text-[10px] font-label uppercase text-primary/60">DEX</p>
+<p class="text-lg font-headline text-primary">15 <span class="text-xs opacity-60">(+2)</span></p>
+</div>
+<div class="text-center">
+<p class="text-[10px] font-label uppercase text-primary/60">CON</p>
+<p class="text-lg font-headline text-primary">14 <span class="text-xs opacity-60">(+2)</span></p>
+</div>
+<div class="text-center">
+<p class="text-[10px] font-label uppercase text-primary/60">INT</p>
+<p class="text-lg font-headline text-primary">19 <span class="text-xs opacity-60">(+4)</span></p>
+</div>
+<div class="text-center">
+<p class="text-[10px] font-label uppercase text-primary/60">WIS</p>
+<p class="text-lg font-headline text-primary">16 <span class="text-xs opacity-60">(+3)</span></p>
+</div>
+<div class="text-center">
+<p class="text-[10px] font-label uppercase text-primary/60">CHA</p>
+<p class="text-lg font-headline text-primary">14 <span class="text-xs opacity-60">(+2)</span></p>
+</div>
+</div>
+<!-- TRAITS -->
+<div class="space-y-1 mb-8">
+<p class="text-sm font-body"><strong class="font-headline text-primary uppercase text-xs tracking-wider">Saving Throws</strong> <span class="text-on-surface/80">Con +6, Int +8, Wis +7</span></p>
+<p class="text-sm font-body"><strong class="font-headline text-primary uppercase text-xs tracking-wider">Skills</strong> <span class="text-on-surface/80">Arcana +12, Deception +8, History +12, Perception +7</span></p>
+<p class="text-sm font-body"><strong class="font-headline text-primary uppercase text-xs tracking-wider">Damage Immunities</strong> <span class="text-on-surface/80">Psychic; Necrotic from nonmagical attacks</span></p>
+<p class="text-sm font-body"><strong class="font-headline text-primary uppercase text-xs tracking-wider">Senses</strong> <span class="text-on-surface/80">Truesight 60 ft., passive Perception 17</span></p>
+<p class="text-sm font-body"><strong class="font-headline text-primary uppercase text-xs tracking-wider">Languages</strong> <span class="text-on-surface/80">Common, Abyssal, Celestial, Draconic, Undercommon</span></p>
+<p class="text-sm font-body"><strong class="font-headline text-primary uppercase text-xs tracking-wider">Challenge</strong> <span class="text-on-surface/80">11 (7,200 XP)</span></p>
+</div>
+<!-- SPECIAL TRAITS -->
+<div class="space-y-4 mb-8">
+<div class="relative pl-4 border-l-2 border-secondary/40">
+<h5 class="italic font-headline text-on-surface mb-1">Spellcasting</h5>
+<p class="text-sm text-on-surface/70 leading-relaxed">
+                                Vayne is a 12th-level spellcaster. His spellcasting ability is Intelligence (spell save DC 16, +8 to hit with spell attacks). He has the following wizard spells prepared:
+                                <br/><span class="italic opacity-60">Cantrips: Chill Touch, Mage Hand, Prestidigitation, Ray of Frost</span>
+</p>
+</div>
+<div class="relative pl-4 border-l-2 border-secondary/40">
+<h5 class="italic font-headline text-on-surface mb-1">Legendary Resistance (3/Day)</h5>
+<p class="text-sm text-on-surface/70 leading-relaxed">
+                                If Vayne fails a saving throw, he can choose to succeed instead.
+                            </p>
+</div>
+</div>
+<!-- ACTIONS -->
+<div class="mb-8">
+<h4 class="font-headline text-primary border-b border-primary/20 pb-1 mb-4 uppercase tracking-widest text-sm">Actions</h4>
+<div class="space-y-4">
+<div>
+<h5 class="italic font-headline text-on-surface mb-1">Multiattack</h5>
+<p class="text-sm text-on-surface/70">Vayne makes two Death Bolt attacks.</p>
+</div>
+<div>
+<h5 class="italic font-headline text-on-surface mb-1">Death Bolt</h5>
+<p class="text-sm text-on-surface/70">
+<span class="italic">Ranged Spell Attack:</span> +8 to hit, range 120 ft., one target. <span class="italic">Hit:</span> <span class="text-primary font-bold">22 (4d8 + 4)</span> necrotic damage.
+                                </p>
+</div>
+<div>
+<h5 class="italic font-headline text-on-surface mb-1">Dark Grasp (Recharge 5-6)</h5>
+<p class="text-sm text-on-surface/70">
+                                    Vayne conjures a skeletal hand at a point he can see within 60 ft. Each creature in a 10ft radius must make a DC 16 Str save or take <span class="text-primary font-bold">18 (4d6 + 4)</span> necrotic damage and be restrained.
+                                </p>
+</div>
+</div>
+</div>
+<!-- LEGENDARY ACTIONS -->
+<div class="bg-secondary/5 p-6 border border-secondary/20">
+<h4 class="font-headline text-secondary pb-1 mb-4 uppercase tracking-widest text-sm">Legendary Actions</h4>
+<p class="text-xs italic text-secondary/60 mb-4">Vayne can take 3 legendary actions, choosing from the options below.</p>
+<div class="space-y-3">
+<div>
+<strong class="italic font-headline text-on-surface text-sm">Teleport.</strong>
+<span class="text-sm text-on-surface/70 ml-1">Vayne magically teleports up to 30 feet to an unoccupied space he can see.</span>
+</div>
+<div>
+<strong class="italic font-headline text-on-surface text-sm">Cantrip.</strong>
+<span class="text-sm text-on-surface/70 ml-1">Vayne casts a cantrip.</span>
+</div>
+<div>
+<strong class="italic font-headline text-on-surface text-sm">Gaze of the Void (Costs 2 Actions).</strong>
+<span class="text-sm text-on-surface/70 ml-1">Vayne targets one creature he can see within 30 feet. The target must succeed on a DC 16 Wisdom saving throw or be frightened until the end of its next turn.</span>
+</div>
+</div>
+</div>
+<div class="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-br from-transparent to-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/30 text-4xl">auto_stories</span>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT STICKY PANEL -->
+<aside class="w-[180px] bg-surface-container-lowest border-l border-outline-variant/10 p-6 flex flex-col gap-6">
+<div class="relative w-full aspect-square bg-surface-container border-2 border-primary/20 flex flex-col items-center justify-center group overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
+<p class="text-[10px] font-label uppercase tracking-[0.3em] text-primary/60 mb-1">Challenge</p>
+<p class="text-4xl font-headline text-primary drop-shadow-[0_0_10px_rgba(255,195,129,0.5)]">11</p>
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+</div>
+<div class="space-y-3">
+<button class="w-full py-2 bg-tertiary-container/20 text-tertiary border border-tertiary/40 font-label text-[10px] uppercase tracking-widest hover:bg-tertiary-container/30 transition-all">
+                    Open Full Note
+                </button>
+<button class="w-full py-2 bg-primary text-on-primary font-label text-[10px] uppercase tracking-widest font-bold shadow-[0_4px_15px_rgba(245,160,50,0.3)] hover:translate-y-[-1px] active:translate-y-[0px] transition-all">
+                    Add to Session
+                </button>
+<button class="w-full py-2 border border-outline-variant text-on-surface/60 font-label text-[10px] uppercase tracking-widest hover:text-primary hover:border-primary transition-all">
+                    Edit Statblock
+                </button>
+</div>
+<div class="pt-6 border-t border-outline-variant/10 space-y-4">
+<div>
+<p class="text-[8px] font-label uppercase tracking-widest text-on-surface/40 mb-2">Metadata</p>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-primary">bookmark</span>
+<span class="text-[10px] font-label text-on-surface/70">Humanoid</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-secondary">database</span>
+<span class="text-[10px] font-label text-on-surface/70">Custom_Vault_01</span>
+</div>
+</div>
+</div>
+<div>
+<p class="text-[8px] font-label uppercase tracking-widest text-on-surface/40 mb-2">Visual Insight</p>
+<div class="aspect-video bg-surface-container-high border border-outline-variant/20 overflow-hidden">
+<img alt="Visual representation" class="w-full h-full object-cover opacity-50" data-alt="Abstract geometric patterns in amber and violet representing magical sigils and ley lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3QnjM1uvdfFKY4mKMMon2e7_dId_cZs6PqKpel6FhhuCOVLO2Ba2J5L27lxR4kmUa-ZAVV3qw4RkqR8O7mhRcbQRVBoqXEF12kJv998QZutdOUvNf-0qIPQukngCAUBZA2w1lTDWxrDYdaToaEXAyf2UTAVcebaC5bDcm3vCvoVSixw2UwJoPizGJePoinoy5TEfkz-T7R_rHwMSDYjsXY0BX8TNqzYVtJfcUWjl_VrpUg5jXfdUHC24Iy07p-4V1F52BdMWeGKk"/>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 text-center">
+<p class="text-[8px] font-label text-on-surface/20 uppercase tracking-widest">Modified: 3 days ago</p>
+</div>
+</aside>
+</main>
+</body></html>

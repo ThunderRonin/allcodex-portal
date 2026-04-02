@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex — Session 7 Entry Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for the Grimoire aesthetic */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #7701d0; }
+        
+        .violet-glow-border {
+            border: 1px solid rgba(220, 184, 255, 0.2);
+            box-shadow: 0 0 15px rgba(119, 1, 208, 0.1);
+        }
+        .spectral-glow {
+            box-shadow: 0 0 30px rgba(220, 184, 255, 0.05);
+        }
+        .hot-rose-glow {
+            box-shadow: 0 0 20px rgba(240, 64, 96, 0.15);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "on-primary": "#482900",
+                "on-surface": "#e5e2e1",
+                "surface-container-highest": "#353534",
+                "on-secondary-fixed": "#290947",
+                "error-container": "#93000a",
+                "primary-container": "#734912",
+                "surface-variant": "#353534",
+                "on-secondary-container": "#caa7ec",
+                "inverse-on-surface": "#313030",
+                "on-primary-fixed": "#2b1700",
+                "on-tertiary": "#00382b",
+                "tertiary-fixed-dim": "#29dfb5",
+                "surface-container": "#201f1f",
+                "surface-tint": "#f6bb7a",
+                "secondary-container": "#573976",
+                "on-secondary": "#3f225e",
+                "secondary-fixed": "#efdbff",
+                "tertiary-container": "#005e4a",
+                "background": "#131313",
+                "on-tertiary-container": "#28dfb4",
+                "surface": "#131313",
+                "tertiary-fixed": "#55fcd0",
+                "surface-container-high": "#2a2a2a",
+                "on-tertiary-fixed": "#002118",
+                "surface-container-low": "#1c1b1b",
+                "tertiary": "#29dfb5",
+                "on-secondary-fixed-variant": "#573976",
+                "secondary": "#dcb8ff",
+                "secondary-fixed-dim": "#dcb8ff",
+                "on-tertiary-fixed-variant": "#00513f",
+                "primary-fixed": "#ffddbb",
+                "on-primary-container": "#f6bb7a",
+                "on-surface-variant": "#cfc2d7",
+                "outline-variant": "#4c4354",
+                "outline": "#988ca0",
+                "surface-dim": "#131313",
+                "error": "#ffb4ab",
+                "primary": "#f6bb7a",
+                "primary-fixed-dim": "#f6bb7a",
+                "inverse-primary": "#81551d",
+                "surface-container-lowest": "#0e0e0e",
+                "on-error-container": "#ffdad6",
+                "surface-bright": "#3a3939",
+                "inverse-surface": "#e5e2e1",
+                "on-background": "#e5e2e1",
+                "on-primary-fixed-variant": "#663e06",
+                "on-error": "#690005"
+              },
+              fontFamily: {
+                "headline": ["Cinzel"],
+                "body": ["Newsreader"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-secondary/30">
+<!-- Top Navigation Anchor -->
+<header class="flex justify-between items-center w-full px-6 py-4 border-b-2 border-[#7701d0] bg-[#131313] sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<span class="font-['Cinzel'] text-xl font-bold text-[#ffc381] tracking-widest uppercase">AllCodex</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-[#ffc381] font-bold font-label text-sm uppercase tracking-wider transition-colors duration-300" href="#">Brain Dump</a>
+<a class="text-[#e5e2e1]/60 font-label text-sm uppercase tracking-wider hover:text-[#37e7bc] transition-colors duration-300" href="#">Session 7 Entry</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#e5e2e1]/60 hover:text-[#37e7bc] transition-all">notifications</button>
+<button class="material-symbols-outlined text-[#ffc381] hover:scale-110 transition-all">account_circle</button>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- Side Navigation Anchor -->
+<aside class="flex flex-col fixed left-0 top-[74px] h-[calc(100vh-74px)] w-64 border-r-2 border-[#7701d0]/40 bg-[#0e0e0e] z-40 hidden md:flex">
+<div class="p-6 border-b border-[#37e7bc]/20">
+<h2 class="font-['Cinzel'] text-[#ffc381] text-lg font-bold">The Living Grimoire</h2>
+<p class="font-['Inter'] uppercase tracking-wider text-[10px] text-[#e5e2e1]/40">Digital Alchemist</p>
+</div>
+<nav class="flex-1 py-4">
+<a class="flex items-center gap-4 px-6 py-3 text-[#e5e2e1]/40 font-['Inter'] uppercase tracking-wider text-[12px] hover:bg-[#131313] hover:text-[#ffc381] transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined group-hover:text-[#ffc381]">auto_stories</span>
+                    Chronicle
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-[#37e7bc] bg-[#2a2a2a] border-l-4 border-[#37e7bc] font-['Inter'] uppercase tracking-wider text-[12px] transition-all duration-300" href="#">
+<span class="material-symbols-outlined">palette</span>
+                    Studio
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-[#e5e2e1]/40 font-['Inter'] uppercase tracking-wider text-[12px] hover:bg-[#131313] hover:text-[#ffc381] transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined group-hover:text-[#ffc381]">auto_awesome</span>
+                    AI Tools
+                </a>
+<a class="flex items-center gap-4 px-6 py-3 text-[#e5e2e1]/40 font-['Inter'] uppercase tracking-wider text-[12px] hover:bg-[#131313] hover:text-[#ffc381] transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined group-hover:text-[#ffc381]">settings</span>
+                    System
+                </a>
+</nav>
+<div class="p-6">
+<button class="w-full py-3 bg-primary text-on-primary font-label font-bold uppercase tracking-widest text-xs hover:shadow-[0_0_15px_rgba(246,187,122,0.4)] transition-all active:scale-95">
+                    New Ritual
+                </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-8 bg-surface">
+<!-- Breadcrumbs & Meta -->
+<div class="mb-10">
+<a class="inline-flex items-center gap-2 text-tertiary font-label text-xs uppercase tracking-widest mb-6 hover:translate-x-[-4px] transition-transform" href="#">
+<span class="material-symbols-outlined text-sm">arrow_back</span> Back to History
+                </a>
+<h1 class="font-headline text-5xl mb-4 tracking-[0.05em]">
+<span class="text-primary font-bold">Brain Dump</span>
+<span class="text-on-surface/40 mx-4">›</span>
+<span class="text-tertiary">Session 7 Entry</span>
+</h1>
+<div class="flex flex-wrap gap-x-6 gap-y-2 font-label text-xs text-on-surface/50 uppercase tracking-widest">
+<span>March 28, 2026 at 20:35</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant mt-1.5"></span>
+<span>1,422 tokens</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant mt-1.5"></span>
+<span class="text-tertiary">4 created, 1 updated</span>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+<!-- Left Column: Input & Summary -->
+<div class="lg:col-span-5 space-y-12">
+<section>
+<h3 class="font-headline text-tertiary text-xl mb-4 flex items-center gap-3">
+                            Original Input
+                        </h3>
+<div class="bg-surface-container-lowest border-l-2 border-tertiary p-6 relative overflow-hidden group">
+<p class="font-body text-lg leading-relaxed text-on-surface/80">
+                                The party arrived at Blackrock Keep under the veil of the Northern Campaign. Elder Vayne met us at the gate—he seemed distant, almost as if the Blood Compact had already taken root in his mind. I suspect he’s working against the party now, which is weird because he was always the loyal servant in the earlier records. We found the Pale Cipher in the lower vault. Maren should have been there to see it, but he's been dead since Year 298. Or was it 301?
+                            </p>
+<div class="mt-6">
+<button class="text-tertiary font-label text-xs uppercase tracking-widest border-b border-tertiary/30 hover:border-tertiary transition-colors">Show full text</button>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center gap-3 mb-4">
+<h3 class="font-headline text-tertiary text-xl">AI Summary</h3>
+<span class="material-symbols-outlined text-tertiary text-sm" data-weight="fill">auto_awesome</span>
+</div>
+<div class="bg-secondary-container/10 p-6 border border-tertiary/20 spectral-glow">
+<p class="font-body text-lg italic leading-relaxed text-on-surface/90">
+                                "Analysis indicates a shift in Elder Vayne's allegiance during the Northern Campaign infiltration. The discovery of the Pale Cipher at Blackrock Keep serves as a primary narrative anchor, though temporal anomalies regarding Lord Maren's demise suggest a memory corruption or historical rewriting in progress."
+                            </p>
+</div>
+</section>
+</div>
+<!-- Right Column: Extracted Entities -->
+<div class="lg:col-span-7">
+<h3 class="font-headline text-primary text-xl mb-6 uppercase tracking-wider">Extracted Entities</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Entity 1: Elder Vayne (Contradiction) -->
+<div class="bg-surface-container-high border border-secondary/20 violet-glow-border relative overflow-hidden flex flex-col">
+<div class="bg-error/10 border-b border-error/30 px-4 py-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-xs" data-weight="fill">warning</span>
+<span class="text-[10px] uppercase font-label font-bold text-error tracking-widest">Contradiction Detected</span>
+</div>
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-headline text-xl text-on-surface">Elder Vayne</h4>
+<span class="text-[10px] font-label px-2 py-0.5 border border-primary/40 text-primary uppercase">Updated</span>
+</div>
+<div class="text-[10px] font-label text-on-surface/40 uppercase tracking-widest mb-4">Character</div>
+<div class="mb-4">
+<div class="flex justify-between text-[10px] font-label text-on-surface/60 mb-1 uppercase tracking-tighter">
+<span>Confidence</span>
+<span class="text-primary">88%</span>
+</div>
+<div class="h-1 bg-surface-container w-full">
+<div class="h-full bg-primary" style="width: 88%"></div>
+</div>
+</div>
+<p class="text-[11px] font-body text-error leading-tight mb-4 italic">"Contradicts loyalty claim in Session 4 notes"</p>
+</div>
+<div class="p-4 border-t border-outline-variant/20 flex justify-between items-center">
+<button class="text-tertiary font-label text-[10px] uppercase tracking-widest hover:text-primary transition-colors">Open Note →</button>
+<button class="text-on-surface/30 font-label text-[10px] uppercase tracking-widest hover:text-on-surface transition-colors">View Relations</button>
+</div>
+</div>
+<!-- Entity 2: Blackrock Keep -->
+<div class="bg-surface-container-high border border-secondary/20 violet-glow-border relative overflow-hidden flex flex-col">
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-headline text-xl text-on-surface">Blackrock Keep</h4>
+<span class="text-[10px] font-label px-2 py-0.5 border border-tertiary/40 text-tertiary uppercase">Created</span>
+</div>
+<div class="text-[10px] font-label text-on-surface/40 uppercase tracking-widest mb-4">Location</div>
+<div class="mb-4">
+<div class="flex justify-between text-[10px] font-label text-on-surface/60 mb-1 uppercase tracking-tighter">
+<span>Confidence</span>
+<span class="text-tertiary">95%</span>
+</div>
+<div class="h-1 bg-surface-container w-full">
+<div class="h-full bg-tertiary" style="width: 95%"></div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/20 flex justify-between items-center">
+<button class="text-tertiary font-label text-[10px] uppercase tracking-widest">Open Note →</button>
+<button class="text-on-surface/30 font-label text-[10px] uppercase tracking-widest">View Relations</button>
+</div>
+</div>
+<!-- Entity 3: Blood Compact (Possible Duplicate) -->
+<div class="bg-surface-container-high border border-secondary/20 violet-glow-border relative overflow-hidden flex flex-col">
+<div class="bg-error/10 border-b border-error/30 px-4 py-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-xs" data-weight="fill">history</span>
+<span class="text-[10px] uppercase font-label font-bold text-error tracking-widest">Possible Duplicate</span>
+</div>
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-headline text-xl text-on-surface">Blood Compact</h4>
+<span class="text-[10px] font-label px-2 py-0.5 border border-tertiary/40 text-tertiary uppercase">Created</span>
+</div>
+<div class="text-[10px] font-label text-on-surface/40 uppercase tracking-widest mb-4">Faction</div>
+<div class="mb-4">
+<div class="flex justify-between text-[10px] font-label text-on-surface/60 mb-1 uppercase tracking-tighter">
+<span>Confidence</span>
+<span class="text-tertiary">79%</span>
+</div>
+<div class="h-1 bg-surface-container w-full">
+<div class="h-full bg-tertiary" style="width: 79%"></div>
+</div>
+</div>
+<p class="text-[11px] font-body text-error leading-tight mb-4 italic">"Possible duplicate: Blackrock Compact"</p>
+</div>
+<div class="p-4 border-t border-outline-variant/20 flex justify-between items-center">
+<button class="text-tertiary font-label text-[10px] uppercase tracking-widest">Open Note →</button>
+<button class="text-on-surface/30 font-label text-[10px] uppercase tracking-widest">View Relations</button>
+</div>
+</div>
+<!-- Entity 4: Pale Cipher -->
+<div class="bg-surface-container-high border border-secondary/20 violet-glow-border relative overflow-hidden flex flex-col">
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-headline text-xl text-on-surface">Pale Cipher</h4>
+<span class="text-[10px] font-label px-2 py-0.5 border border-tertiary/40 text-tertiary uppercase">Created</span>
+</div>
+<div class="text-[10px] font-label text-on-surface/40 uppercase tracking-widest mb-4">Item</div>
+<div class="mb-4">
+<div class="flex justify-between text-[10px] font-label text-on-surface/60 mb-1 uppercase tracking-tighter">
+<span>Confidence</span>
+<span class="text-tertiary">91%</span>
+</div>
+<div class="h-1 bg-surface-container w-full">
+<div class="h-full bg-tertiary" style="width: 91%"></div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/20 flex justify-between items-center">
+<button class="text-tertiary font-label text-[10px] uppercase tracking-widest">Open Note →</button>
+<button class="text-on-surface/30 font-label text-[10px] uppercase tracking-widest">View Relations</button>
+</div>
+</div>
+<!-- Entity 5: Northern Campaign -->
+<div class="bg-surface-container-high border border-secondary/20 violet-glow-border relative overflow-hidden flex flex-col md:col-span-2">
+<div class="p-5 flex-1">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-headline text-xl text-on-surface">Northern Campaign</h4>
+<span class="text-[10px] font-label px-2 py-0.5 border border-primary/40 text-primary uppercase">Updated</span>
+</div>
+<div class="text-[10px] font-label text-on-surface/40 uppercase tracking-widest mb-4">Event</div>
+<div class="mb-4">
+<div class="flex justify-between text-[10px] font-label text-on-surface/60 mb-1 uppercase tracking-tighter">
+<span>Confidence</span>
+<span class="text-primary">96%</span>
+</div>
+<div class="h-1 bg-surface-container w-full">
+<div class="h-full bg-primary" style="width: 96%"></div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/20 flex justify-between items-center">
+<button class="text-tertiary font-label text-[10px] uppercase tracking-widest">Open Note →</button>
+<button class="text-on-surface/30 font-label text-[10px] uppercase tracking-widest">View Relations</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Contradiction Panel (Footer-Sticky Style) -->
+<section class="mt-20 hot-rose-glow border border-error bg-surface-container-lowest p-0 relative">
+<div class="bg-error px-6 py-3 flex justify-between items-center">
+<h2 class="font-headline text-on-error font-bold text-lg flex items-center gap-3">
+<span class="material-symbols-outlined" data-weight="fill">warning</span>
+                        2 Contradictions Need Review
+                    </h2>
+<div class="flex gap-4">
+<button class="px-4 py-1.5 bg-on-error text-error font-label text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors">Resolve All</button>
+<button class="px-4 py-1.5 border border-on-error text-on-error font-label text-[10px] font-bold uppercase tracking-widest hover:bg-on-error/10 transition-colors">Ignore</button>
+</div>
+</div>
+<div class="divide-y divide-error/20">
+<!-- Contradiction Row 1 -->
+<div class="p-6 grid grid-cols-1 md:grid-cols-12 items-center gap-6">
+<div class="md:col-span-3">
+<h5 class="font-headline text-primary text-lg">Elder Vayne</h5>
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-widest">Character Allegiance</span>
+</div>
+<div class="md:col-span-7 flex items-center gap-4 text-on-surface/80 font-body text-base">
+<span class="px-2 py-1 bg-surface-container text-on-surface/60 border border-outline-variant/30 italic text-sm">"loyal servant"</span>
+<span class="material-symbols-outlined text-primary">trending_flat</span>
+<span class="px-2 py-1 bg-primary/10 text-primary border border-primary/30 italic text-sm">"working against the party"</span>
+</div>
+<div class="md:col-span-2 text-right">
+<button class="w-full md:w-auto px-6 py-2 border border-tertiary text-tertiary font-label text-[10px] uppercase tracking-widest hover:bg-tertiary hover:text-on-tertiary transition-all">Resolve</button>
+</div>
+</div>
+<!-- Contradiction Row 2 -->
+<div class="p-6 grid grid-cols-1 md:grid-cols-12 items-center gap-6">
+<div class="md:col-span-3">
+<h5 class="font-headline text-primary text-lg">Timeline</h5>
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-widest">Temporal Conflict</span>
+</div>
+<div class="md:col-span-7 flex items-center gap-4 text-on-surface/80 font-body text-base">
+<span class="px-2 py-1 bg-surface-container text-on-surface/60 border border-outline-variant/30 italic text-sm">"Lord Maren died Year 298"</span>
+<span class="material-symbols-outlined text-primary">trending_flat</span>
+<span class="px-2 py-1 bg-primary/10 text-primary border border-primary/30 italic text-sm">"Lord Maren alive in Year 301"</span>
+</div>
+<div class="md:col-span-2 text-right">
+<button class="w-full md:w-auto px-6 py-2 border border-tertiary text-tertiary font-label text-[10px] uppercase tracking-widest hover:bg-tertiary hover:text-on-tertiary transition-all">Resolve</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#131313] border-t border-[#7701d0]/30 z-50 flex justify-around items-center h-16 px-4">
+<a class="flex flex-col items-center gap-1 text-[#e5e2e1]/40" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="text-[8px] uppercase tracking-tighter">Chronicle</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#37e7bc]" href="#">
+<span class="material-symbols-outlined">palette</span>
+<span class="text-[8px] uppercase tracking-tighter font-bold">Studio</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#e5e2e1]/40" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="text-[8px] uppercase tracking-tighter">AI Tools</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-[#e5e2e1]/40" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[8px] uppercase tracking-tighter">System</span>
+</a>
+</nav>
+</body></html>

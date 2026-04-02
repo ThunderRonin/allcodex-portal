@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | Chronicle Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;600&amp;family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#dcb8ff",
+                        "background": "#14121c",
+                        "on-secondary-fixed": "#2c0051",
+                        "surface-tint": "#ffb868",
+                        "primary-fixed-dim": "#ffb868",
+                        "inverse-on-surface": "#322f3a",
+                        "on-tertiary-container": "#004f3e",
+                        "inverse-surface": "#e6e0ef",
+                        "surface-variant": "#36333f",
+                        "primary": "#ffc381",
+                        "primary-container": "#f5a032",
+                        "secondary-fixed": "#efdbff",
+                        "on-secondary-container": "#dcb7ff",
+                        "surface-container-high": "#2b2834",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "on-secondary": "#480081",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "error": "#ffb4ab",
+                        "on-background": "#e6e0ef",
+                        "surface-container-highest": "#36333f",
+                        "outline-variant": "#534435",
+                        "surface-container-lowest": "#0f0d17",
+                        "surface-dim": "#14121c",
+                        "on-tertiary-fixed": "#002118",
+                        "surface-bright": "#3b3743",
+                        "surface-container": "#211e29",
+                        "inverse-primary": "#885200",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "on-primary": "#482900",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#55fcd0",
+                        "on-primary-fixed-variant": "#673d00",
+                        "tertiary-container": "#00caa2",
+                        "primary-fixed": "#ffddbb",
+                        "on-surface": "#e6e0ef",
+                        "on-error": "#690005",
+                        "surface": "#14121c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#7701d0",
+                        "on-primary-container": "#643b00",
+                        "tertiary-fixed-dim": "#28dfb5",
+                        "tertiary": "#37e7bc",
+                        "surface-container-low": "#1c1a25",
+                        "outline": "#a08d7c",
+                        "on-surface-variant": "#d8c3af",
+                        "on-primary-fixed": "#2b1700",
+                        "on-tertiary": "#00382b"
+                    },
+                    fontFamily: {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Crimson Text", "serif"],
+                        "label": ["Inter", "sans-serif"],
+                        "brand": ["Cinzel", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .drag-handle { opacity: 0; transition: opacity 0.2s ease; }
+        .block-row:hover .drag-handle { opacity: 1; }
+        .block-row:hover .block-add { opacity: 1; }
+        .block-add { opacity: 0; transition: opacity 0.2s ease; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f0d17; }
+        ::-webkit-scrollbar-thumb { background: #534435; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffc381; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<!-- Top Navigation Anchor (Shared Component) -->
+<header class="bg-[#0a0812] font-['Cinzel'] uppercase tracking-widest text-sm fixed top-0 w-full z-50 flex justify-between items-center px-8 h-16 w-full">
+<div class="text-2xl font-bold text-[#ffc381] drop-shadow-[0_0_8px_rgba(245,160,34,0.4)]">AllCodex</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] hover:opacity-100 transition-all" href="#">Grimoire</a>
+<a class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] hover:opacity-100 transition-all" href="#">Bestiary</a>
+<a class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] hover:opacity-100 transition-all" href="#">Map</a>
+<a class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] hover:opacity-100 transition-all" href="#">Timeline</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] transition-all"><span class="material-symbols-outlined">history</span></button>
+<button class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] transition-all"><span class="material-symbols-outlined">settings</span></button>
+</div>
+</header>
+<!-- Side Navigation Anchor (Shared Component) -->
+<aside class="bg-[#0f0d17] font-['Crimson_Text'] text-lg fixed left-0 top-16 h-full w-64 flex flex-col py-6 gap-4 z-40 hidden xl:flex">
+<div class="px-6 pb-4 border-b border-outline-variant/10">
+<h2 class="text-xl font-['Cinzel'] text-[#ffc381]">Chronicle Editor</h2>
+<p class="text-xs opacity-50 uppercase tracking-widest">Manuscript Mode</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="text-[#ffc381] font-bold border-l-4 border-[#ffc381] pl-4 py-2 hover:bg-[#1c1a25] transition-colors flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">edit_note</span> Drafts
+            </a>
+<a class="text-[#e6e0ef] opacity-50 pl-4 py-2 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-colors flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">auto_awesome</span> Lore Tags
+            </a>
+<a class="text-[#e6e0ef] opacity-50 pl-4 py-2 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-colors flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">groups</span> Entities
+            </a>
+<a class="text-[#e6e0ef] opacity-50 pl-4 py-2 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-colors flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">auto_stories</span> Geography
+            </a>
+<a class="text-[#e6e0ef] opacity-50 pl-4 py-2 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-colors flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">electric_bolt</span> Mechanics
+            </a>
+</nav>
+<div class="mt-auto px-6 py-4 flex flex-col gap-4">
+<button class="bg-primary-container text-on-primary font-label text-sm font-bold py-2 px-4 w-full uppercase tracking-tighter">New Entry</button>
+<div class="flex items-center justify-between text-xs opacity-40">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">help_outline</span> Help</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">ios_share</span> Export</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="xl:pl-64 pt-16 pb-12 min-h-screen">
+<!-- Editor Toolbar -->
+<div class="sticky top-16 z-30 bg-surface-container-lowest border-b border-outline-variant/10 px-8 py-2 flex items-center gap-6 overflow-x-auto">
+<div class="flex items-center gap-1 pr-4 border-r border-outline-variant/20">
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">undo</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">redo</span></button>
+</div>
+<div class="flex items-center gap-1 pr-4 border-r border-outline-variant/20">
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-label uppercase tracking-widest text-on-surface-variant hover:bg-surface-container-low transition-colors">
+                    Paragraph <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+<div class="flex items-center gap-1 pr-4 border-r border-outline-variant/20">
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">format_bold</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">format_italic</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">format_underlined</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">strikethrough_s</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">code</span></button>
+<button class="p-1.5 text-primary bg-primary/10 transition-colors"><span class="material-symbols-outlined">border_color</span></button>
+</div>
+<div class="flex items-center gap-1 pr-4 border-r border-outline-variant/20">
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">format_list_numbered</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">checklist</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">format_quote</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">terminal</span></button>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">link</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">image</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">table_chart</span></button>
+</div>
+</div>
+<!-- Editor & Sidebar Split -->
+<div class="flex flex-col lg:flex-row w-full h-full">
+<!-- EDITOR AREA -->
+<section class="flex-grow p-8 md:p-16 lg:p-24 max-w-4xl mx-auto w-full">
+<div class="space-y-6">
+<!-- H1 Block -->
+<div class="block-row group relative flex items-start gap-2 -ml-12">
+<div class="flex flex-col gap-1 mt-2">
+<button class="drag-handle text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">drag_indicator</span></button>
+<button class="block-add text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">add</span></button>
+</div>
+<h1 class="font-headline text-5xl md:text-6xl text-primary font-bold tracking-tight outline-none w-full" contenteditable="true">
+                            The Obsidian Throne
+                        </h1>
+</div>
+<!-- Paragraph Block -->
+<div class="block-row group relative flex items-start gap-2 -ml-12">
+<div class="flex flex-col gap-1 mt-1">
+<button class="drag-handle text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">drag_indicator</span></button>
+<button class="block-add text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">add</span></button>
+</div>
+<div class="text-xl text-on-surface leading-relaxed w-full outline-none" contenteditable="true">
+                            Forged in the heart of the Cursed Caldera during the Second Interregnum, the Obsidian Throne is more than a seat of power; it is a siphon for the souls of those who kneel before it. Its surface is perpetually cold, etched with pulsating violet runes that hum with a low, dissonant frequency.
+                        </div>
+</div>
+<!-- Image Block -->
+<div class="block-row group relative flex flex-col gap-2 -ml-12">
+<div class="flex items-center gap-2">
+<div class="flex flex-col gap-1">
+<button class="drag-handle text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">drag_indicator</span></button>
+<button class="block-add text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">add</span></button>
+</div>
+<div class="w-full h-64 bg-surface-container-high overflow-hidden relative group/img">
+<img class="w-full h-full object-cover opacity-60" data-alt="a majestic obsidian throne in a dark gothic hall with violet glowing runes and atmospheric fog and dark purple lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgPb8OtZGZCAC3CNqbHkf5HCocG5Nyn9AbMtBLu4lzN0oIZlSd8LEugh8caxvsh-arnpQrtGgzF0PCQ0FHqQg2ZCpwIyTLsaGIY8duCNbFToO6ZcPULR68ILffhWPqglIkcdMlluGPptLop0bk596qUcKIylNqDohSf7PFTmUYT-qyxw-zio40roe03JalkBKrFWUQA6GTkO3Y6OlTaMbxfk9wIE1ClGHetuhO9D89eP2d5EetHaAoGedU0YYCW5yJKiCjPUFN6V8"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-40"></div>
+</div>
+</div>
+</div>
+<!-- Blockquote Block -->
+<div class="block-row group relative flex items-start gap-2 -ml-12">
+<div class="flex flex-col gap-1 mt-1">
+<button class="drag-handle text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">drag_indicator</span></button>
+<button class="block-add text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">add</span></button>
+</div>
+<blockquote class="border-l-4 border-secondary/50 pl-6 py-2 italic text-2xl font-headline text-on-surface-variant w-full outline-none" contenteditable="true">
+                            "He who sits upon the void shall find the void staring back through his own eyes." — Archmage Valerius
+                        </blockquote>
+</div>
+<!-- Table Block -->
+<div class="block-row group relative flex items-start gap-2 -ml-12">
+<div class="flex flex-col gap-1 mt-4">
+<button class="drag-handle text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">drag_indicator</span></button>
+<button class="block-add text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">add</span></button>
+</div>
+<div class="w-full overflow-hidden bg-surface-container-low mt-4">
+<table class="w-full text-sm font-label uppercase tracking-widest text-left">
+<thead class="bg-[#0f0d17] text-tertiary">
+<tr>
+<th class="px-4 py-3 border-b border-outline-variant/10">Attribute</th>
+<th class="px-4 py-3 border-b border-outline-variant/10">Value</th>
+<th class="px-4 py-3 border-b border-outline-variant/10">Modifier</th>
+</tr>
+</thead>
+<tbody class="text-on-surface-variant">
+<tr class="border-b border-outline-variant/10">
+<td class="px-4 py-3">Corruption Level</td>
+<td class="px-4 py-3">Infinite</td>
+<td class="px-4 py-3">+4 Sanity Loss</td>
+</tr>
+<tr class="border-b border-outline-variant/10">
+<td class="px-4 py-3">Material</td>
+<td class="px-4 py-3">Star-Iron Glass</td>
+<td class="px-4 py-3">Invulnerable</td>
+</tr>
+<tr>
+<td class="px-4 py-3">Alignment</td>
+<td class="px-4 py-3">True Chaos</td>
+<td class="px-4 py-3">N/A</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Checklist Block -->
+<div class="block-row group relative flex items-start gap-2 -ml-12">
+<div class="flex flex-col gap-1 mt-1">
+<button class="drag-handle text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">drag_indicator</span></button>
+<button class="block-add text-on-surface-variant/30 hover:text-primary"><span class="material-symbols-outlined">add</span></button>
+</div>
+<div class="w-full">
+<h3 class="font-headline text-2xl text-secondary mb-4">Worldbuilding To-dos</h3>
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<div class="w-5 h-5 border border-primary flex items-center justify-center bg-primary/10">
+<span class="material-symbols-outlined text-[16px] text-primary">check</span>
+</div>
+<span class="text-on-surface-variant line-through">Define the throne's origin</span>
+</li>
+<li class="flex items-center gap-3">
+<div class="w-5 h-5 border border-outline-variant"></div>
+<span class="text-on-surface">Map the Blackrock Keep layout</span>
+</li>
+<li class="flex items-center gap-3">
+<div class="w-5 h-5 border border-outline-variant"></div>
+<span class="text-on-surface">List the 'Dead Kings' spirits</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- New Block Zone -->
+<div class="h-24 border-t border-dashed border-outline-variant/20 flex items-center justify-center group/new cursor-text">
+<span class="text-xs font-label uppercase tracking-widest opacity-20 group-hover/new:opacity-100 group-hover/new:text-primary transition-all">Type '/' for commands</span>
+</div>
+</div>
+</section>
+<!-- METADATA SIDEBAR -->
+<section class="lg:w-[400px] border-l border-outline-variant/10 bg-surface-container-lowest p-6 flex flex-col gap-8">
+<div>
+<h4 class="text-xs font-label uppercase tracking-[0.2em] text-tertiary mb-6">Promoted Fields</h4>
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="text-[10px] font-label uppercase text-on-surface/40 tracking-widest">Lore Type</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border-b border-outline-variant text-on-surface py-2 px-0 focus:border-primary focus:ring-0 appearance-none font-label text-sm">
+<option>Item</option>
+<option>Location</option>
+<option>Character</option>
+<option>Artifact</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 top-2 opacity-40 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-label uppercase text-on-surface/40 tracking-widest">Entry Status</label>
+<div class="flex flex-wrap gap-2">
+<span class="bg-tertiary/10 text-tertiary px-3 py-1 text-[10px] font-label uppercase font-bold tracking-tighter">Verified</span>
+<span class="bg-primary/10 text-primary px-3 py-1 text-[10px] font-label uppercase font-bold tracking-tighter border border-primary/20">Draft</span>
+<button class="text-on-surface/30 hover:text-primary"><span class="material-symbols-outlined">add_circle</span></button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-label uppercase text-on-surface/40 tracking-widest">Alignment</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border-b border-outline-variant text-on-surface py-2 px-0 focus:border-primary focus:ring-0 appearance-none font-label text-sm">
+<option>True Neutral</option>
+<option>Chaotic Evil</option>
+<option>Lawful Evil</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-[10px] font-label uppercase text-on-surface/40 tracking-widest">CR Rating</label>
+<input class="w-full bg-surface-container-low border-b border-outline-variant text-on-surface py-2 px-0 focus:border-primary focus:ring-0 font-label text-sm" type="number" value="25"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-label uppercase text-on-surface/40 tracking-widest">Sanity Cost</label>
+<input class="w-full bg-surface-container-low border-b border-outline-variant text-on-surface py-2 px-0 focus:border-primary focus:ring-0 font-label text-sm" type="text" value="1d20+10"/>
+</div>
+</div>
+<div class="space-y-3">
+<label class="text-[10px] font-label uppercase text-on-surface/40 tracking-widest">Linked Locations</label>
+<div class="flex flex-col gap-2">
+<div class="bg-surface-container px-3 py-2 flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-xs font-label text-secondary">Blackrock Keep</span>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">close</span>
+</div>
+<div class="bg-surface-container px-3 py-2 flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-xs font-label text-secondary">Iron Wastes</span>
+<span class="material-symbols-outlined text-xs opacity-0 group-hover:opacity-100">close</span>
+</div>
+<button class="text-xs font-label uppercase tracking-widest text-primary/60 hover:text-primary flex items-center gap-2 mt-1">
+<span class="material-symbols-outlined text-sm">link</span> Link Entity
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant/10 pt-6">
+<h4 class="text-[10px] font-label uppercase tracking-widest text-on-surface/40 mb-3">AI Suggestions</h4>
+<div class="p-3 bg-tertiary-container/5 border border-tertiary/10 text-xs text-tertiary/80 font-body leading-relaxed">
+                        "Consider linking the <span class="underline decoration-tertiary/30">Abyssal Shard</span> which shares the same star-iron glass properties."
+                    </div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer Action Bar -->
+<footer class="bg-[#0f0d17] fixed bottom-0 w-full z-50 h-14 border-t border-[#37e7bc]/10 shadow-[0_-4px_12px_rgba(0,202,162,0.1)] flex justify-between items-center px-6">
+<div class="flex items-center gap-6 flex-grow max-w-2xl">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></div>
+<span class="text-[10px] font-label uppercase tracking-widest text-primary">Unsaved</span>
+</div>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-body text-on-surface-variant w-full placeholder:text-on-surface/20" placeholder="Briefly describe changes..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[10px] font-label uppercase tracking-widest text-on-surface/40 hover:text-primary transition-all">Cancel</button>
+<button class="bg-primary-container text-on-primary text-[10px] font-bold font-label uppercase tracking-[0.2em] px-8 py-2.5">Save Chronicle</button>
+</div>
+</footer>
+</body></html>

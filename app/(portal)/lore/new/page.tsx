@@ -5,9 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { LoreEditor } from "@/components/editor/LoreEditor";
-import { Save, X, BookOpen } from "lucide-react";
+import { Save, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { TemplatePicker, TemplateDef } from "@/components/editor/TemplatePicker";
 import { PromotedFields } from "@/components/editor/PromotedFields";
@@ -65,107 +64,67 @@ function NewLoreContent() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <BookOpen className="h-5 w-5 text-primary" />
-        <div>
-          <h1
-            className="text-2xl font-bold text-primary"
-            style={{ fontFamily: "var(--font-cinzel)" }}
+    <div className="mx-auto w-full max-w-[1500px] space-y-8">
+      <div className="flex flex-col gap-4 border-b border-border/60 pb-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-3">
+          <div className="text-[11px] uppercase tracking-[0.35em] text-primary/70" style={{ fontFamily: "var(--font-cinzel)" }}>
+            Archivist&apos;s Manuscript
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-primary md:text-3xl" style={{ fontFamily: "var(--font-cinzel)" }}>
+              New Lore Entry
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Draft a new codex manuscript with block-based structure from the start.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="outline" asChild disabled={isPending} className="gap-2">
+            <Link href="/lore">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Lore
+            </Link>
+          </Button>
+          <Button variant="outline" asChild disabled={isPending} className="gap-2">
+            <Link href="/lore">
+              <X className="h-4 w-4" />
+              Cancel
+            </Link>
+          </Button>
+          <Button
+            onClick={() => createNote()}
+            disabled={!title.trim() || isPending}
+            className="gap-2"
           >
-            New Lore Entry
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Add a new entry to the chronicle.
-          </p>
+            <Save className="h-4 w-4" />
+            {isPending ? "Creating Entry..." : "Create Entry"}
+          </Button>
         </div>
       </div>
 
-      <div className="space-y-4 rounded-lg border border-border bg-card/80 p-5">
-        <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            placeholder="e.g. Aldric Stonehaven"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
-            <Label>Template</Label>
-            
-            {!template ? (
-              <Button 
-                variant="outline" 
-                className="w-full h-10 border-dashed justify-start text-muted-foreground"
-                onClick={() => setIsPickerOpen(true)}
-                disabled={isPending}
-              >
-                + Choose a template...
-              </Button>
-            ) : (
-              <div className="relative rounded-lg border border-border bg-card p-3 shadow-sm flex items-start gap-3 group">
-                <div className="rounded-md bg-primary/10 p-2 text-primary shrink-0">
-                  <template.icon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-sm text-foreground">{template.label}</h4>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{template.description}</p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 px-2 text-xs absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setIsPickerOpen(true)}
-                  disabled={isPending}
-                >
-                  Change
-                </Button>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="space-y-6">
+          <div className="rounded-[1.75rem] border border-border/70 bg-card/50 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.18)] sm:p-8">
+            <div className="mb-6 border-b border-border/50 pb-6">
+              <div className="mb-3 text-xs uppercase tracking-[0.3em] text-muted-foreground" style={{ fontFamily: "var(--font-cinzel)" }}>
+                Canon Entry Title
               </div>
-            )}
-            <TemplatePicker 
-              open={isPickerOpen} 
-              onOpenChange={setIsPickerOpen} 
-              onSelect={setTemplate} 
-            />
-          </div>
+              <Input
+                id="title"
+                placeholder="e.g. Aelarion the Undying"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                disabled={isPending}
+                className="h-auto border-none bg-transparent px-0 py-0 text-4xl font-bold text-primary shadow-none focus-visible:ring-0 md:text-5xl"
+                style={{ fontFamily: "var(--font-cinzel)" }}
+              />
+              <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+                Start with a blank manuscript or paste existing HTML. The editor preserves the current AllCodex HTML storage contract while giving you block-level composition.
+              </p>
+            </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="parentId">
-              Parent Note ID{" "}
-              <span className="text-muted-foreground text-xs">(optional)</span>
-            </Label>
-            <Input
-              id="parentId"
-              placeholder="root or note ID"
-              value={parentId}
-              onChange={(e) => setParentId(e.target.value)}
-              disabled={isPending}
-              className="font-mono text-sm"
-            />
-          </div>
-        </div>
-
-        {template && (
-          <PromotedFields 
-            template={template} 
-            values={attributeValues} 
-            onChange={(key, value) => setAttributeValues(prev => ({ ...prev, [key]: value }))} 
-            disabled={isPending}
-          />
-        )}
-
-        <div className="space-y-1.5">
-          <Label htmlFor="content">
-            Initial Content{" "}
-            <span className="text-muted-foreground text-xs">
-              (optional, plain text or HTML)
-            </span>
-          </Label>
-          <div className="flex-1 mt-6">
             <LoreEditor
               initialContent={content}
               onSave={setContent}
@@ -173,31 +132,87 @@ function NewLoreContent() {
               showSaveStatus={false}
             />
           </div>
-        </div>
 
-        {error && (
-          <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-            {error}
+          {error && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {error}
+            </div>
+          )}
+        </section>
+
+        <aside className="space-y-4 xl:sticky xl:top-6 self-start">
+          <div className="rounded-[1.5rem] border border-border/70 bg-card/60 p-5">
+            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground" style={{ fontFamily: "var(--font-cinzel)" }}>
+              Entry Properties
+            </div>
+
+            <div className="mt-4 space-y-4 text-sm">
+              <div>
+                <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Template</div>
+                {!template ? (
+                  <Button
+                    variant="outline"
+                    className="mt-2 w-full justify-start border-dashed text-muted-foreground"
+                    onClick={() => setIsPickerOpen(true)}
+                    disabled={isPending}
+                  >
+                    + Choose a template...
+                  </Button>
+                ) : (
+                  <div className="mt-2 rounded-xl border border-border/60 bg-background/30 p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-md bg-primary/10 p-2 text-primary shrink-0">
+                        <template.icon className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-foreground">{template.label}</h4>
+                        <p className="mt-1 text-sm text-muted-foreground">{template.description}</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-3 px-0 text-xs uppercase tracking-[0.25em] text-primary hover:bg-transparent"
+                      onClick={() => setIsPickerOpen(true)}
+                      disabled={isPending}
+                    >
+                      Change Template
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Parent Note</div>
+                <Input
+                  id="parentId"
+                  placeholder="root or note ID"
+                  value={parentId}
+                  onChange={(e) => setParentId(e.target.value)}
+                  disabled={isPending}
+                  className="mt-2 font-mono text-sm"
+                />
+              </div>
+            </div>
           </div>
-        )}
 
-        <div className="flex gap-3 justify-end pt-2">
-          <Button variant="outline" size="sm" asChild disabled={isPending}>
-            <Link href="/lore">
-              <X className="h-4 w-4 mr-1" />
-              Cancel
-            </Link>
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => createNote()}
-            disabled={!title.trim() || isPending}
-            className="gap-1.5"
-          >
-            <Save className="h-4 w-4" />
-            Create Entry
-          </Button>
-        </div>
+          {template && (
+            <div className="rounded-[1.5rem] border border-border/70 bg-card/60 p-5">
+              <PromotedFields
+                template={template}
+                values={attributeValues}
+                onChange={(key, value) => setAttributeValues((prev) => ({ ...prev, [key]: value }))}
+                disabled={isPending}
+              />
+            </div>
+          )}
+        </aside>
+
+        <TemplatePicker
+          open={isPickerOpen}
+          onOpenChange={setIsPickerOpen}
+          onSelect={setTemplate}
+        />
       </div>
     </div>
   );

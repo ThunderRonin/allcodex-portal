@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Editor } from "@tiptap/core";
 import { Loader2 } from "lucide-react";
+import { loreEditorSchema } from "./mention";
+
+type LoreEditor = (typeof loreEditorSchema)["BlockNoteEditor"];
 
 interface AutolinkMatch {
   term: string;
@@ -18,11 +20,11 @@ export function AutolinkerDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [matches, setMatches] = useState<AutolinkMatch[]>([]);
-  const [editorRef, setEditorRef] = useState<Editor | null>(null);
+  const [editorRef, setEditorRef] = useState<LoreEditor | null>(null);
 
   useEffect(() => {
     const handleOpen = async (e: Event) => {
-      const customEvent = e as CustomEvent<{ editor: Editor }>;
+      const customEvent = e as CustomEvent<{ editor: LoreEditor }>;
       const editor = customEvent.detail.editor;
       setEditorRef(editor);
       setOpen(true);
@@ -30,7 +32,7 @@ export function AutolinkerDialog() {
       setMatches([]);
 
       try {
-        const html = editor.getHTML();
+        const html = editor.blocksToHTMLLossy(editor.document);
         // Use DOM parser to get clean plain text without HTML tags
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = html;
@@ -44,7 +46,7 @@ export function AutolinkerDialog() {
 
         if (res.ok) {
           const data = await res.json();
-          setMatches(data.matches.map((m: any) => ({ ...m, selected: true })));
+          setMatches(data.matches.map((m: AutolinkMatch) => ({ ...m, selected: true })));
         }
       } catch (err) {
         console.error("Autolinker failed", err);
@@ -66,21 +68,17 @@ export function AutolinkerDialog() {
       return;
     }
 
-    // Replace text in the DOM wrapper to preserve other marks and avoid linking inside already-linked text
-    const html = editorRef.getHTML();
+    // Get current content as HTML, apply autolinks in DOM, then re-parse into BlockNote
+    const html = editorRef.blocksToHTMLLossy(editorRef.document);
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
 
     // Helper to walk text nodes and skip A tags
     const walkTextNodes = (node: Node) => {
       if (node.nodeType === Node.TEXT_NODE) {
-        let text = node.textContent || "";
+        const text = node.textContent || "";
 
-        // Create a wrapper for newly formatted text
-        const fragment = document.createDocumentFragment();
-        
         // Find all occurrences of all selected terms in this text node
-        // Because matches are sorted by length descending on the backend, longer phrases match first
         const occurrences: Array<{ start: number; end: number; term: string; noteId: string }> = [];
         
         for (const match of selectedMatches) {
@@ -89,12 +87,9 @@ export function AutolinkerDialog() {
           let pos = 0;
           
           while ((pos = lowerText.indexOf(lowerTerm, pos)) !== -1) {
-            // Check if this position is already covered by a longer match
             const isCovered = occurrences.some((occ) => pos >= occ.start && pos < occ.end);
             
             if (!isCovered) {
-              // Word boundary check to prevent matching partial words ("king" inside "kingdom" etc is handled by length sort + check,
-              // but we also want to avoid linking "king" if it's part of "kingston")
               const isStartBoundary = pos === 0 || /[\s\p{P}]/u.test(text[pos - 1]);
               const endPos = pos + match.term.length;
               const isEndBoundary = endPos === text.length || /[\s\p{P}]/u.test(text[endPos]);
@@ -108,45 +103,35 @@ export function AutolinkerDialog() {
         }
 
         if (occurrences.length > 0) {
-          // Sort occurrences by start position
           occurrences.sort((a, b) => a.start - b.start);
           
+          const fragment = document.createDocumentFragment();
           let lastEnd = 0;
           for (const occ of occurrences) {
-            // Add preceding text
             if (occ.start > lastEnd) {
               fragment.appendChild(document.createTextNode(text.substring(lastEnd, occ.start)));
             }
-            // Add the link
             const a = document.createElement("a");
-            
-            // Format for novel / tiptap internal representation (and our portal routing)
             a.href = `/lore/${occ.noteId}`;
-            // Also append lore-mention class for consistency
-            a.className = "lore-mention"; // Optional, standard links in tiptap also work
-            
+            a.className = "lore-mention";
+            a.setAttribute("data-note-id", occ.noteId);
             a.textContent = text.substring(occ.start, occ.end);
             fragment.appendChild(a);
             
             lastEnd = occ.end;
           }
-          // Add remaining text
           if (lastEnd < text.length) {
             fragment.appendChild(document.createTextNode(text.substring(lastEnd)));
           }
 
-          // Replace original text node with our new fragment
           if (node.parentNode) {
             node.parentNode.replaceChild(fragment, node);
           }
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // Skip existing links
         if ((node as Element).tagName === "A") {
           return;
         }
-        // Recurse down children
-        // We have to iterate backwards or copy children because we might replace them
         const children = Array.from(node.childNodes);
         for (const child of children) {
           walkTextNodes(child);
@@ -156,7 +141,9 @@ export function AutolinkerDialog() {
 
     walkTextNodes(tempDiv);
     
-    editorRef.commands.setContent(tempDiv.innerHTML);
+    // Re-parse the autolinked HTML back into BlockNote blocks
+    const newBlocks = editorRef.tryParseHTMLToBlocks(tempDiv.innerHTML);
+    editorRef.replaceBlocks(editorRef.document, newBlocks);
     setOpen(false);
   };
 

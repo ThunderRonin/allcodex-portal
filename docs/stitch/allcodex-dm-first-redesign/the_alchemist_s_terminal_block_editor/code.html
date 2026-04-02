@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-surface-variant": "#d8c3af",
+            "inverse-on-surface": "#322f3a",
+            "tertiary-fixed": "#55fcd0",
+            "surface-container-high": "#2b2834",
+            "tertiary-fixed-dim": "#28dfb5",
+            "secondary": "#dcb8ff",
+            "on-tertiary-fixed-variant": "#00513f",
+            "error": "#ffb4ab",
+            "on-tertiary-container": "#004f3e",
+            "primary-container": "#f5a032",
+            "on-primary-fixed-variant": "#673d00",
+            "on-tertiary-fixed": "#002118",
+            "on-primary-fixed": "#2b1700",
+            "surface-dim": "#14121c",
+            "on-primary-container": "#643b00",
+            "secondary-container": "#7701d0",
+            "inverse-primary": "#885200",
+            "on-background": "#e6e0ef",
+            "secondary-fixed": "#efdbff",
+            "outline-variant": "#534435",
+            "on-surface": "#e6e0ef",
+            "error-container": "#93000a",
+            "tertiary": "#37e7bc",
+            "outline": "#a08d7c",
+            "on-error": "#690005",
+            "surface-container-lowest": "#0f0d17",
+            "primary-fixed": "#ffddbb",
+            "surface-container-low": "#1c1a25",
+            "tertiary-container": "#00caa2",
+            "on-secondary-container": "#dcb7ff",
+            "background": "#14121c",
+            "on-error-container": "#ffdad6",
+            "inverse-surface": "#e6e0ef",
+            "primary-fixed-dim": "#ffb868",
+            "surface": "#14121c",
+            "primary": "#ffc381",
+            "surface-variant": "#36333f",
+            "secondary-fixed-dim": "#dcb8ff",
+            "on-secondary-fixed": "#2c0051",
+            "on-secondary-fixed-variant": "#6700b5",
+            "surface-container-highest": "#36333f",
+            "surface-bright": "#3b3743",
+            "on-primary": "#482900",
+            "surface-container": "#211e29",
+            "on-tertiary": "#00382b",
+            "on-secondary": "#480081",
+            "surface-tint": "#ffb868"
+          },
+          fontFamily: {
+            "headline": ["Cinzel"],
+            "body": ["Newsreader"],
+            "label": ["Inter"]
+          },
+          borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f0d17; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #534435; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ffc381; }
+    .glow-border { box-shadow: 0 0 10px rgba(220, 184, 255, 0.1); }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<!-- TOPBAR: Mandatory Structure from JSON mapping -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#0f0d17] border-b border-white/5">
+<div class="flex items-center space-x-4">
+<div class="flex items-center text-on-surface-variant font-label text-sm">
+<span>Lore</span>
+<span class="material-symbols-outlined text-xs mx-1">chevron_right</span>
+<span>Characters</span>
+<span class="material-symbols-outlined text-xs mx-1">chevron_right</span>
+<span class="text-primary font-bold">Aelarion the Undying</span>
+</div>
+</div>
+<div class="flex items-center space-x-6">
+<span class="text-primary-container text-xs font-label animate-pulse italic">Saving...</span>
+<div class="flex items-center space-x-3">
+<button class="px-4 py-2 text-on-surface-variant font-label text-sm hover:text-white transition-colors duration-200 uppercase tracking-widest">
+          Cancel
+        </button>
+<button class="bg-primary-container text-on-primary-container px-6 py-2 font-label text-sm font-bold uppercase tracking-widest active:scale-95 transition-transform duration-150">
+          Save Entry
+        </button>
+</div>
+<div class="flex items-center border-l border-white/10 pl-6 space-x-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">history</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">share</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">settings</span>
+</div>
+</div>
+</header>
+<!-- SIDENAV: Lore Index and Navigation -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] flex flex-col z-40 bg-[#0f0d17] w-64 border-r border-white/5">
+<div class="p-6">
+<div class="font-headline text-primary text-xl font-bold tracking-widest uppercase mb-1">Aethelgard</div>
+<div class="font-label text-[10px] text-on-surface-variant uppercase tracking-tighter opacity-70">High Fantasy Realm</div>
+</div>
+<nav class="flex-1 mt-4">
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-3 hover:bg-[#1c1a25] transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg">book_5</span>
+<span class="font-label text-sm">Lore Index</span>
+</div>
+<div class="text-primary font-bold border-l-4 border-primary pl-5 py-3 bg-[#1c1a25] flex items-center space-x-3 cursor-default">
+<span class="material-symbols-outlined text-lg">group</span>
+<span class="font-label text-sm">Entities</span>
+</div>
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-3 hover:bg-[#1c1a25] transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg">map</span>
+<span class="font-label text-sm">Locations</span>
+</div>
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-3 hover:bg-[#1c1a25] transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg">auto_fix_high</span>
+<span class="font-label text-sm">Magic Systems</span>
+</div>
+<div class="text-[#e6e0ef]/70 pl-6 py-3 flex items-center space-x-3 hover:bg-[#1c1a25] transition-all cursor-pointer">
+<span class="material-symbols-outlined text-lg">swords</span>
+<span class="font-label text-sm">Artifacts</span>
+</div>
+</nav>
+<div class="p-4 border-t border-white/5">
+<button class="w-full bg-surface-container-high border border-primary/20 text-primary py-2 font-label text-xs uppercase tracking-widest hover:bg-primary/10 transition-colors">
+        + New Codex Entry
+      </button>
+</div>
+<div class="p-4 bg-surface-container-low/50">
+<div class="flex items-center space-x-3 text-[#e6e0ef]/50 px-2 py-2 hover:text-white transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">inventory_2</span>
+<span class="font-label text-[11px] uppercase tracking-wider">Archive</span>
+</div>
+<div class="flex items-center space-x-3 text-[#e6e0ef]/50 px-2 py-2 hover:text-white transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">delete</span>
+<span class="font-label text-[11px] uppercase tracking-wider">Trash</span>
+</div>
+</div>
+</aside>
+<!-- MAIN EDITOR CANVAS -->
+<main class="ml-64 pt-16 min-h-screen flex">
+<!-- LEFT: EDITOR AREA -->
+<section class="flex-1 px-16 py-12 overflow-y-auto custom-scrollbar bg-surface relative">
+<div class="max-w-3xl mx-auto">
+<!-- AI Insight Banner -->
+<div class="mb-12 p-4 bg-tertiary-container/10 border-l-2 border-tertiary flex items-start space-x-4">
+<span class="material-symbols-outlined text-tertiary mt-0.5">heart_connect</span>
+<div>
+<h4 class="font-label text-xs font-bold text-tertiary uppercase tracking-widest mb-1">Spectral AI Suggestion</h4>
+<p class="text-on-surface-variant text-sm italic">Historical records indicate Aelarion was sighted in the Northern Crags. Link to "Whispering Wastes"?</p>
+</div>
+<button class="text-[10px] uppercase font-bold text-tertiary px-3 py-1 border border-tertiary/30 hover:bg-tertiary/20">Accept Link</button>
+</div>
+<!-- Headline -->
+<h1 class="font-headline text-6xl text-primary font-bold mb-8 leading-tight tracking-tight outline-none" contenteditable="true" spellcheck="false" style="text-shadow: 0 0 12px rgba(245, 160, 50, 0.2);">
+          Aelarion the Undying
+        </h1>
+<!-- Editor Content -->
+<div class="space-y-6 text-xl leading-relaxed text-on-surface/90">
+<p class="font-body opacity-60 italic border-l border-white/10 pl-6 text-lg">
+            "Death is but a locked door, and I have found the skeleton key." — Attributed to the First Sage.
+          </p>
+<p class="outline-none min-h-[1.5em]" contenteditable="true">
+            The legend of the Undying begins in the Fourth Era, during the eclipse of the Silver Sun. Unlike the traditional liches of the void, Aelarion did not sacrifice his soul to an artifact, but rather anchored his physical form to the ley lines of the world itself.
+          </p>
+<!-- Slash Menu Portal -->
+<div class="relative py-2">
+<div class="flex items-center text-primary-container font-label text-lg">
+<span class="animate-pulse">|</span>
+<span class="ml-1 opacity-40">Type / for commands...</span>
+</div>
+<!-- THE SLASH MENU -->
+<div class="absolute left-0 top-full mt-2 w-72 bg-surface-container-high border border-secondary/20 shadow-2xl z-50">
+<div class="p-2 border-b border-white/5 bg-surface-container-low">
+<span class="font-label text-[10px] text-secondary uppercase tracking-widest font-bold">Arcane Blocks</span>
+</div>
+<div class="max-h-80 overflow-y-auto custom-scrollbar">
+<!-- Menu Items -->
+<div class="p-3 flex items-center space-x-3 hover:bg-secondary/10 cursor-pointer transition-colors group">
+<div class="w-8 h-8 bg-surface-container flex items-center justify-center border border-white/10 group-hover:border-secondary">
+<span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-secondary">text_snippet</span>
+</div>
+<div>
+<div class="font-label text-sm font-semibold">Text</div>
+<div class="text-[10px] text-on-surface-variant opacity-60">Start writing simple lore</div>
+</div>
+</div>
+<div class="p-3 flex items-center space-x-3 hover:bg-secondary/10 cursor-pointer transition-colors group">
+<div class="w-8 h-8 bg-surface-container flex items-center justify-center border border-white/10 group-hover:border-secondary">
+<span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-secondary">title</span>
+</div>
+<div>
+<div class="font-label text-sm font-semibold">Heading 1</div>
+<div class="text-[10px] text-on-surface-variant opacity-60">Large chapter title</div>
+</div>
+</div>
+<div class="p-3 flex items-center space-x-3 bg-secondary/10 cursor-default">
+<div class="w-8 h-8 bg-surface-container flex items-center justify-center border border-secondary">
+<span class="material-symbols-outlined text-sm text-secondary">format_list_bulleted</span>
+</div>
+<div>
+<div class="font-label text-sm font-semibold text-secondary">Bullet List</div>
+<div class="text-[10px] text-secondary/60">Create a simple bulleted list</div>
+</div>
+</div>
+<div class="p-3 flex items-center space-x-3 hover:bg-secondary/10 cursor-pointer transition-colors group">
+<div class="w-8 h-8 bg-surface-container flex items-center justify-center border border-white/10 group-hover:border-secondary">
+<span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-secondary">format_quote</span>
+</div>
+<div>
+<div class="font-label text-sm font-semibold">Quote</div>
+<div class="text-[10px] text-on-surface-variant opacity-60">Capture an etched inscription</div>
+</div>
+</div>
+<div class="p-3 flex items-center space-x-3 hover:bg-secondary/10 cursor-pointer transition-colors group">
+<div class="w-8 h-8 bg-surface-container flex items-center justify-center border border-white/10 group-hover:border-secondary">
+<span class="material-symbols-outlined text-sm text-tertiary">heart_connect</span>
+</div>
+<div>
+<div class="font-label text-sm font-semibold text-tertiary">AI Lore Infusion</div>
+<div class="text-[10px] text-tertiary/60">Auto-generate based on existing world data</div>
+</div>
+</div>
+<div class="p-3 flex items-center space-x-3 hover:bg-secondary/10 cursor-pointer transition-colors group">
+<div class="w-8 h-8 bg-surface-container flex items-center justify-center border border-white/10 group-hover:border-secondary">
+<span class="material-symbols-outlined text-sm text-on-surface-variant group-hover:text-secondary">image</span>
+</div>
+<div>
+<div class="font-label text-sm font-semibold">Image</div>
+<div class="text-[10px] text-on-surface-variant opacity-60">Upload a visual depiction</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Image Block (Placeholder) -->
+<figure class="my-10 border border-white/5 relative group">
+<img alt="mystical wizard tower" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700 opacity-60 group-hover:opacity-100" data-alt="Cinematic concept art of a floating obsidian tower illuminated by swirling ethereal violet and amber energies under a starlit void sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8WVgP-tmdi9RHHRrdzIUa5H_MVTeSe2j7nQ_JuzrwrruHE4B_2emQVVdw4pKIWbd2ZbewwcPk5uuD9mjgi4iH3IjWSHlv7UtRouEgyzXPDEux_QEHWfG75nxroQSS3TUMUrk_y6vD6DxvZN5CfxoRK5AqgL_7OfeJbkZ0XT4Ykjn7TYFS2FjNxpPQqiP2ls-BCtUfmu7NMOMfaNYD7UqqLqmvkzAMz6KTyMOXZGD0KZaIBkbu6GQLSrLTNYz7bSjuDqFjn7XufoA"/>
+<figcaption class="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm px-3 py-1 font-label text-[10px] text-on-surface uppercase tracking-widest border-l-2 border-primary">
+              Artifact Visualization: The Anchor Stone
+            </figcaption>
+</figure>
+<p class="outline-none" contenteditable="true">
+            Contemporary scholars from the <span class="text-secondary border-b border-secondary/30 pb-0.5 cursor-help">Arcaneum of Vael</span> dispute this. They argue that Aelarion is not a person at all, but a sentient magical phenomenon—a tear in the veil that wears a human face to speak with the living.
+          </p>
+</div>
+</div>
+</section>
+<!-- RIGHT: PROPERTIES PANEL -->
+<aside class="w-[300px] sticky top-16 h-[calc(100vh-4rem)] bg-surface-container-lowest border-l border-white/5 p-6 overflow-y-auto custom-scrollbar">
+<div class="mb-8">
+<h3 class="font-headline text-primary text-sm font-bold uppercase tracking-widest mb-4 border-b border-primary/20 pb-2">Entry Properties</h3>
+<div class="space-y-6">
+<div>
+<label class="block font-label text-[10px] uppercase text-on-surface-variant tracking-widest mb-2 font-bold">Category</label>
+<div class="bg-surface-container-low px-3 py-2 border-b border-outline-variant text-sm flex justify-between items-center group cursor-pointer hover:bg-surface-container">
+<span>Historical Entity</span>
+<span class="material-symbols-outlined text-sm opacity-40 group-hover:text-primary">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block font-label text-[10px] uppercase text-on-surface-variant tracking-widest mb-2 font-bold">Alignment</label>
+<div class="bg-surface-container-low px-3 py-2 border-b border-outline-variant text-sm flex justify-between items-center group cursor-pointer hover:bg-surface-container">
+<div class="flex items-center space-x-2">
+<div class="w-1.5 h-1.5 bg-tertiary"></div>
+<span>Neutral True</span>
+</div>
+<span class="material-symbols-outlined text-sm opacity-40 group-hover:text-primary">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block font-label text-[10px] uppercase text-on-surface-variant tracking-widest mb-2 font-bold">Tags</label>
+<div class="flex flex-wrap gap-2 mt-1">
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter">Immortal</span>
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter">Ley-Anchor</span>
+<button class="bg-white/5 hover:bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter transition-colors">+ Add</button>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12">
+<h3 class="font-headline text-on-surface-variant text-sm font-bold uppercase tracking-widest mb-4 border-b border-white/10 pb-2 opacity-50">Promoted Attributes</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 bg-surface-container-low hover:bg-primary/5 transition-colors border-l-2 border-transparent hover:border-primary cursor-pointer">
+<span class="font-label text-xs font-semibold">Aura Intensity</span>
+<span class="text-primary font-bold text-xs uppercase">Extreme</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-low hover:bg-primary/5 transition-colors border-l-2 border-transparent hover:border-primary cursor-pointer">
+<span class="font-label text-xs font-semibold">Physical Manifest</span>
+<span class="text-primary font-bold text-xs uppercase">98%</span>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-10">
+<div class="p-4 bg-tertiary/5 border border-tertiary/20">
+<div class="flex items-center space-x-2 text-tertiary mb-2">
+<span class="material-symbols-outlined text-sm">auto_fix_high</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest">Oracle Check</span>
+</div>
+<p class="text-[11px] text-on-surface-variant italic leading-relaxed">
+            Current entry consistency: <span class="text-tertiary">94%</span>. Minor conflict detected with "Siege of Oakhaven" entry.
+          </p>
+<button class="mt-3 w-full py-1 text-[10px] font-bold uppercase bg-tertiary/20 text-tertiary hover:bg-tertiary/30 transition-colors">Resolve Conflict</button>
+</div>
+</div>
+</aside>
+</main>
+<!-- BOTTOM BAR: Fixed Formatting -->
+<footer class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center bg-[#2b2834]/80 backdrop-blur-xl z-50 border border-white/5 shadow-[0_0_15px_rgba(220,184,255,0.1)]">
+<div class="flex items-center divide-x divide-white/5">
+<!-- Formatting Group -->
+<div class="flex px-1 py-1">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">format_bold</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">format_italic</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">title</span>
+</button>
+</div>
+<!-- Links/Media Group -->
+<div class="flex px-1 py-1">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">image</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">comment</span>
+</button>
+</div>
+<!-- AI / Action Group -->
+<div class="flex px-1 py-1">
+<button class="h-10 px-4 flex items-center space-x-2 bg-primary/10 text-primary font-label text-[10px] font-bold uppercase tracking-widest hover:bg-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px]">heart_connect</span>
+<span>AI Write</span>
+</button>
+</div>
+</div>
+<!-- Word Count Overlay (Floating right of bar) -->
+<div class="ml-4 pr-4 py-1 flex items-center text-on-surface-variant/40 font-label text-[10px] uppercase tracking-widest select-none">
+      Words: 1,402
+    </div>
+</footer>
+</body></html>

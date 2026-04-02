@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | New Lore Entry</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed": "#2b1700",
+                        "on-secondary": "#480081",
+                        "on-surface": "#e6e0ef",
+                        "on-tertiary": "#00382b",
+                        "on-primary-container": "#643b00",
+                        "primary-fixed": "#ffddbb",
+                        "surface-variant": "#36333f",
+                        "on-surface-variant": "#d8c3af",
+                        "on-tertiary-container": "#004f3e",
+                        "on-secondary-container": "#dcb7ff",
+                        "tertiary": "#37e7bc",
+                        "surface-container-lowest": "#0f0d17",
+                        "on-secondary-fixed": "#2c0051",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#00caa2",
+                        "primary-container": "#f5a032",
+                        "outline": "#a08d7c",
+                        "tertiary-fixed": "#55fcd0",
+                        "error-container": "#93000a",
+                        "surface": "#14121c",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#e6e0ef",
+                        "background": "#0a0812",
+                        "on-primary-fixed-variant": "#673d00",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "surface-container-high": "#2b2834",
+                        "inverse-surface": "#e6e0ef",
+                        "surface-dim": "#14121c",
+                        "tertiary-fixed-dim": "#28dfb5",
+                        "secondary-fixed": "#efdbff",
+                        "surface-tint": "#ffb868",
+                        "surface-container": "#211e29",
+                        "primary-fixed-dim": "#ffb868",
+                        "primary": "#ffc381",
+                        "surface-bright": "#3b3743",
+                        "on-primary": "#482900",
+                        "secondary-container": "#7701d0",
+                        "secondary": "#dcb8ff",
+                        "surface-container-low": "#1c1a25",
+                        "outline-variant": "#534435",
+                        "inverse-on-surface": "#322f3a",
+                        "surface-container-highest": "#36333f",
+                        "on-tertiary-fixed": "#002118",
+                        "on-error": "#690005",
+                        "inverse-primary": "#885200"
+                    },
+                    fontFamily: {
+                        "headline": ["Cinzel"],
+                        "body": ["Newsreader"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+        .glow-amber { text-shadow: 0 0 12px rgba(245, 160, 50, 0.4); }
+        .glow-violet { box-shadow: 0 0 8px rgba(119, 1, 208, 0.3); }
+        .glow-teal { box-shadow: 0 0 8px rgba(0, 202, 162, 0.3); }
+        .glow-rose { box-shadow: 0 0 8px rgba(240, 64, 96, 0.3); }
+        input:focus, select:focus, textarea:focus { outline: none !important; border-bottom-color: #f5a032 !important; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0f0d17; }
+        ::-webkit-scrollbar-thumb { background: #36333f; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body overflow-x-hidden selection:bg-primary-container selection:text-on-primary">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 w-full h-16 bg-[#0a0812] border-b border-white/5 flex justify-between items-center px-8 z-50">
+<div class="font-['Cinzel'] text-2xl font-bold text-amber-500 drop-shadow-[0_0_8px_rgba(245,160,50,0.4)] uppercase">AllCodex</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="font-['Cinzel'] uppercase tracking-widest text-sm text-slate-400 hover:text-amber-300 transition-colors duration-300" href="#">Chronicle</a>
+<a class="font-['Cinzel'] uppercase tracking-widest text-sm text-slate-400 hover:text-amber-300 transition-colors duration-300" href="#">Characters</a>
+<a class="font-['Cinzel'] uppercase tracking-widest text-sm text-amber-400 font-bold" href="#">New</a>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-amber-300">account_circle</span>
+</nav>
+</header>
+<!-- Side Navigation Shell -->
+<aside class="flex flex-col h-screen fixed left-0 top-0 pt-20 pb-8 px-4 bg-[#0f0d17] w-64 z-40">
+<div class="mb-8 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-high flex items-center justify-center border border-secondary/20">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<div>
+<p class="font-label text-xs font-medium uppercase tracking-tighter text-slate-400">The Archivist</p>
+<p class="font-label text-[10px] text-slate-500">Grand Master</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 font-label text-xs font-medium uppercase tracking-tighter text-slate-500 hover:bg-white/5 hover:text-amber-200 transition-all" href="#">
+<span class="material-symbols-outlined">auto_stories</span> Chronicle
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-label text-xs font-medium uppercase tracking-tighter text-violet-400 border-l-2 border-violet-500 bg-violet-500/5" href="#">
+<span class="material-symbols-outlined">edit_note</span> Studio
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-label text-xs font-medium uppercase tracking-tighter text-slate-500 hover:bg-white/5 hover:text-amber-200 transition-all" href="#">
+<span class="material-symbols-outlined">magic_button</span> AI Tools
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-label text-xs font-medium uppercase tracking-tighter text-slate-500 hover:bg-white/5 hover:text-amber-200 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span> System
+            </a>
+</nav>
+<button class="mt-auto mx-4 bg-primary-container text-on-primary font-label text-xs font-bold uppercase tracking-widest py-3 flex items-center justify-center gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-sm">add</span> New Entry
+        </button>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-32 px-12 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-12">
+<nav class="mb-4 flex items-center gap-2 font-label text-[10px] uppercase tracking-widest text-slate-500">
+<span>Chronicle</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span>Characters</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-amber-400">New</span>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-4xl glow-amber" style="font-variation-settings: 'FILL' 1;">history_edu</span>
+<h1 class="font-headline text-5xl font-black text-primary glow-amber uppercase tracking-tight">New Lore Entry</h1>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-12">
+<!-- Left Column: The Manuscript -->
+<div class="col-span-12 lg:col-span-8 space-y-10">
+<!-- Section 1: Basics -->
+<section class="space-y-6">
+<div class="flex flex-col">
+<label class="font-headline text-amber-400/80 text-sm uppercase tracking-widest mb-2">Title</label>
+<input class="bg-transparent border-0 border-b border-outline-variant py-4 font-headline text-3xl text-on-surface placeholder:text-slate-600 transition-all duration-300" placeholder="Entry title..." type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="flex flex-col">
+<label class="font-headline text-amber-400/80 text-sm uppercase tracking-widest mb-2">Lore Type</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border-0 border-b border-outline-variant py-3 px-0 text-on-surface font-label text-sm appearance-none">
+<option>Character</option>
+<option>Location</option>
+<option>Faction</option>
+<option>Creature</option>
+<option>Event</option>
+<option>Item</option>
+</select>
+<span class="material-symbols-outlined absolute right-0 top-3 text-slate-500 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col">
+<label class="font-headline text-amber-400/80 text-sm uppercase tracking-widest mb-2">Parent Note</label>
+<div class="relative">
+<input class="w-full bg-transparent border-0 border-b border-outline-variant py-3 text-on-surface font-label text-sm placeholder:text-slate-600" placeholder="Link to existing lore..." type="text"/>
+<span class="material-symbols-outlined absolute right-0 top-3 text-slate-500 cursor-pointer hover:text-amber-400">inventory_2</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Character Details -->
+<section class="p-8 bg-surface-container-low/50 relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary/30"></div>
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline text-tertiary text-sm uppercase tracking-widest">Character Details</h2>
+<div class="flex items-center gap-2 font-label text-[10px] text-tertiary/70 uppercase">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                            Generating attributes from type: Character
+                        </div>
+</div>
+<div class="grid grid-cols-2 gap-x-12 gap-y-6">
+<div class="space-y-1">
+<label class="font-label text-[10px] text-slate-500 uppercase font-bold">Full Name</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/30 py-2 text-on-surface text-sm" type="text" value="Aethelred the Unspoken"/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] text-slate-500 uppercase font-bold">Aliases</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/30 py-2 text-on-surface text-sm" placeholder="Ghost of the Rift..." type="text"/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] text-slate-500 uppercase font-bold">Age</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/30 py-2 text-on-surface text-sm" type="text" value="Unknown (appears mid-40s)"/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] text-slate-500 uppercase font-bold">Race</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/30 py-2 text-on-surface text-sm" type="text" value="Void-touched Human"/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] text-slate-500 uppercase font-bold">Affiliation</label>
+<input class="w-full bg-transparent border-0 border-b border-outline-variant/30 py-2 text-on-surface text-sm" type="text" value="The Silent Council"/>
+</div>
+<div class="space-y-1">
+<label class="font-label text-[10px] text-slate-500 uppercase font-bold">Status</label>
+<select class="w-full bg-transparent border-0 border-b border-outline-variant/30 py-2 text-on-surface text-sm appearance-none">
+<option>Active</option>
+<option>Deceased</option>
+<option>Missing</option>
+<option>Eternal</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Section 3: Content Editor -->
+<section class="space-y-4">
+<label class="font-headline text-amber-400/80 text-sm uppercase tracking-widest">Content</label>
+<div class="border border-secondary-container bg-surface-container-lowest glow-violet transition-all focus-within:border-secondary">
+<!-- Editor Toolbar -->
+<div class="flex items-center gap-1 p-2 border-b border-white/5 bg-surface-container">
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">format_bold</span></button>
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">format_italic</span></button>
+<div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">title</span></button>
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">format_quote</span></button>
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">link</span></button>
+<div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">alternate_email</span></button>
+<button class="p-2 hover:bg-white/5 text-slate-400 hover:text-on-surface"><span class="material-symbols-outlined text-sm">terminal</span></button>
+</div>
+<!-- Editable Area -->
+<textarea class="w-full bg-transparent border-0 p-6 font-body text-lg leading-relaxed placeholder:text-slate-700 resize-none focus:ring-0" placeholder="Write your lore here... or use Brain Dump to have AI fill this in." rows="12"></textarea>
+</div>
+</section>
+</div>
+<!-- Right Column: Metadata & Tools -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Draft & Visibility -->
+<div class="bg-surface-container-low p-6 border-l border-white/5">
+<h3 class="font-label text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Status &amp; Visibility</h3>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-between p-3 bg-tertiary/5 border border-tertiary/20 glow-teal group">
+<span class="font-label text-xs uppercase text-tertiary font-bold">Draft</span>
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 border border-error/20 hover:bg-error/5 group transition-all">
+<span class="font-label text-xs uppercase text-error/60 group-hover:text-error transition-colors">GM Only</span>
+<span class="material-symbols-outlined text-error/60 group-hover:text-error text-sm">visibility_off</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 border border-primary/20 hover:bg-primary/5 group transition-all">
+<span class="font-label text-xs uppercase text-primary/60 group-hover:text-primary transition-colors">Published</span>
+<span class="material-symbols-outlined text-primary/60 group-hover:text-primary text-sm">public</span>
+</button>
+</div>
+</div>
+<!-- Template Picker -->
+<div class="bg-surface-container-low p-6 border-l border-white/5">
+<h3 class="font-label text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Templates</h3>
+<div class="grid grid-cols-3 gap-2">
+<div class="flex flex-col items-center justify-center p-3 border border-primary glow-amber bg-primary/5 cursor-pointer">
+<span class="material-symbols-outlined text-primary mb-1">person</span>
+<span class="font-label text-[9px] uppercase font-bold text-primary">Character</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 border border-white/5 hover:border-slate-500 cursor-pointer">
+<span class="material-symbols-outlined text-slate-500 mb-1">map</span>
+<span class="font-label text-[9px] uppercase font-bold text-slate-500">Location</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 border border-white/5 hover:border-slate-500 cursor-pointer">
+<span class="material-symbols-outlined text-slate-500 mb-1">groups</span>
+<span class="font-label text-[9px] uppercase font-bold text-slate-500">Faction</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 border border-white/5 hover:border-slate-500 cursor-pointer">
+<span class="material-symbols-outlined text-slate-500 mb-1">pets</span>
+<span class="font-label text-[9px] uppercase font-bold text-slate-500">Creature</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 border border-white/5 hover:border-slate-500 cursor-pointer">
+<span class="material-symbols-outlined text-slate-500 mb-1">event</span>
+<span class="font-label text-[9px] uppercase font-bold text-slate-500">Event</span>
+</div>
+<div class="flex flex-col items-center justify-center p-3 border border-white/5 hover:border-slate-500 cursor-pointer">
+<span class="material-symbols-outlined text-slate-500 mb-1">diamond</span>
+<span class="font-label text-[9px] uppercase font-bold text-slate-500">Item</span>
+</div>
+</div>
+</div>
+<!-- AI Assist -->
+<div class="bg-surface-container-low p-6 border-l-2 border-tertiary">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+<h3 class="font-label text-[10px] font-bold uppercase tracking-widest text-tertiary">AI Assistant</h3>
+</div>
+<div class="space-y-2">
+<button class="w-full bg-tertiary text-on-tertiary py-2 font-label text-[10px] font-black uppercase tracking-widest transition-transform active:scale-95">Auto-fill from Brain Dump</button>
+<button class="w-full border border-tertiary/30 text-tertiary py-2 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-tertiary/5 transition-all">Suggest Relations</button>
+<button class="w-full border border-tertiary/30 text-tertiary py-2 font-label text-[10px] font-bold uppercase tracking-widest hover:bg-tertiary/5 transition-all">Check Consistency</button>
+</div>
+</div>
+<!-- Mini Lore Edit Preview Hint -->
+<div class="opacity-30 pointer-events-none translate-x-12 mt-12">
+<div class="bg-surface-container p-4 border border-white/5">
+<div class="h-4 w-3/4 bg-slate-700 mb-2"></div>
+<div class="h-3 w-1/2 bg-slate-800"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Row -->
+<footer class="fixed bottom-0 left-64 right-0 h-20 bg-[#0f0d17] border-t border-white/5 flex items-center justify-between px-12 z-50">
+<div class="flex items-center gap-6">
+<button class="bg-primary-container text-on-primary font-label text-xs font-black uppercase tracking-widest py-3 px-8 transition-transform active:scale-95">Create Entry</button>
+<button class="border border-tertiary text-tertiary font-label text-xs font-bold uppercase tracking-widest py-3 px-8 hover:bg-tertiary/5 transition-all">Save as Draft</button>
+</div>
+<button class="text-slate-500 hover:text-error font-label text-xs font-bold uppercase tracking-widest transition-colors">Cancel</button>
+</footer>
+</body></html>

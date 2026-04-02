@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | Aldric Stonehaven</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-surface": "#e6e0ef",
+              "on-secondary-container": "#dcb7ff",
+              "on-secondary-fixed": "#2c0051",
+              "on-surface": "#e6e0ef",
+              "error": "#ffb4ab",
+              "on-error": "#690005",
+              "surface-variant": "#36333f",
+              "secondary-fixed-dim": "#dcb8ff",
+              "on-primary-container": "#643b00",
+              "on-primary": "#482900",
+              "surface-container-high": "#2b2834",
+              "on-tertiary-fixed-variant": "#00513f",
+              "on-tertiary": "#00382b",
+              "on-error-container": "#ffdad6",
+              "secondary-container": "#7701d0",
+              "inverse-primary": "#885200",
+              "secondary-fixed": "#efdbff",
+              "error-container": "#93000a",
+              "tertiary": "#37e7bc",
+              "on-secondary-fixed-variant": "#6700b5",
+              "tertiary-container": "#00caa2",
+              "inverse-on-surface": "#322f3a",
+              "primary-container": "#f5a032",
+              "background": "#0a0812",
+              "on-secondary": "#480081",
+              "secondary": "#dcb8ff",
+              "primary-fixed": "#ffddbb",
+              "outline": "#a08d7c",
+              "on-primary-fixed": "#2b1700",
+              "primary": "#ffc381",
+              "surface-container-lowest": "#0f0d17",
+              "on-surface-variant": "#d8c3af",
+              "tertiary-fixed": "#55fcd0",
+              "outline-variant": "#534435",
+              "surface-bright": "#3b3743",
+              "on-tertiary-fixed": "#002118",
+              "on-primary-fixed-variant": "#673d00",
+              "surface-tint": "#ffb868",
+              "surface": "#14121c",
+              "tertiary-fixed-dim": "#28dfb5",
+              "surface-container": "#211e29",
+              "on-tertiary-container": "#004f3e",
+              "primary-fixed-dim": "#ffb868",
+              "surface-container-low": "#1c1a25",
+              "surface-container-highest": "#36333f",
+              "on-background": "#e6e0ef",
+              "surface-dim": "#0a0812"
+            },
+            fontFamily: {
+              "headline": ["Cinzel", "serif"],
+              "body": ["Newsreader", "serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        background-color: #0a0812;
+        color: #e6e0ef;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #0f0d17;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #36333f;
+      }
+      .glass-card {
+        background: rgba(43, 40, 52, 0.6);
+        backdrop-filter: blur(12px);
+      }
+      .neon-glow-amber {
+        text-shadow: 0 0 12px rgba(245, 160, 50, 0.4);
+      }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full w-60 bg-surface-container-lowest flex flex-col py-8 px-4 overflow-y-auto border-r-0 shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-50">
+<div class="mb-10 px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="text-2xl font-black tracking-tighter text-primary-container uppercase font-headline">ALLCODEX</span>
+</div>
+<p class="text-[10px] tracking-[0.2em] text-on-surface-variant font-label mt-1 opacity-60">THE LIVING GRIMOIRE</p>
+</div>
+<nav class="space-y-8 flex-1">
+<!-- CHRONICLE Section -->
+<div>
+<h3 class="font-label text-[10px] font-bold tracking-widest text-secondary mb-4 opacity-50 px-4">CHRONICLE</h3>
+<ul class="space-y-1">
+<li class="flex items-center gap-3 py-2 px-4 transition-all duration-300 text-primary font-bold border-l-2 border-primary-container bg-white/5">
+<span class="material-symbols-outlined text-sm">auto_stories</span>
+<span class="font-label text-xs tracking-wider">LORE BROWSER</span>
+</li>
+<li class="flex items-center gap-3 py-2 px-4 text-on-surface-variant opacity-70 hover:text-primary-container hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">dashboard</span>
+<span class="font-label text-xs tracking-wider">DASHBOARD</span>
+</li>
+<li class="flex items-center gap-3 py-2 px-4 text-on-surface-variant opacity-70 hover:text-primary-container hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">timeline</span>
+<span class="font-label text-xs tracking-wider">TIMELINE</span>
+</li>
+<li class="flex items-center gap-3 py-2 px-4 text-on-surface-variant opacity-70 hover:text-primary-container hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">groups</span>
+<span class="font-label text-xs tracking-wider">SESSIONS</span>
+</li>
+</ul>
+</div>
+<!-- STUDIO Section -->
+<div>
+<h3 class="font-label text-[10px] font-bold tracking-widest text-secondary mb-4 opacity-50 px-4">STUDIO</h3>
+<ul class="space-y-1">
+<li class="flex items-center gap-3 py-2 px-4 text-on-surface-variant opacity-70 hover:text-primary-container hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">brush</span>
+<span class="font-label text-xs tracking-wider">BRAIN DUMP</span>
+</li>
+<li class="flex items-center gap-3 py-2 px-4 text-on-surface-variant opacity-70 hover:text-primary-container hover:bg-white/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">add_box</span>
+<span class="font-label text-xs tracking-wider">NEW ENTRY</span>
+</li>
+</ul>
+</div>
+<!-- AI TOOLS -->
+<div>
+<h3 class="font-label text-[10px] font-bold tracking-widest text-tertiary mb-4 opacity-50 px-4 uppercase">AI TOOLS</h3>
+<ul class="space-y-1">
+<li class="flex items-center gap-3 py-2 px-4 text-on-surface-variant opacity-70 hover:text-tertiary transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm text-tertiary">magic_button</span>
+<span class="font-label text-xs tracking-wider">CONSISTENCY</span>
+</li>
+</ul>
+</div>
+</nav>
+<div class="mt-auto px-4 border-t border-outline-variant pt-6">
+<button class="w-full bg-primary-container hover:bg-surface-tint text-on-primary py-3 font-label text-[11px] font-bold tracking-widest uppercase flex items-center justify-center gap-2 transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg">edit</span>
+                QUICK EDIT
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-60 flex min-h-screen">
+<!-- Center Flexible Content -->
+<section class="flex-1 px-12 py-10 max-w-4xl">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 text-[10px] font-headline tracking-[0.2em] text-tertiary mb-8 uppercase">
+<span>World</span>
+<span class="material-symbols-outlined text-[12px] opacity-40">chevron_right</span>
+<span>Characters</span>
+<span class="material-symbols-outlined text-[12px] opacity-40">chevron_right</span>
+<span class="text-on-surface">Aldric Stonehaven</span>
+</nav>
+<!-- Page Title -->
+<header class="mb-10">
+<div class="flex items-baseline gap-4 mb-2">
+<h1 class="text-6xl font-black font-headline text-primary-container neon-glow-amber leading-none">Aldric Stonehaven</h1>
+<span class="bg-primary-container/10 text-primary text-[10px] font-bold px-3 py-1 font-label tracking-widest uppercase border border-primary-container/20">CHARACTER</span>
+</div>
+<div class="h-1 w-24 bg-gradient-to-r from-primary-container to-transparent"></div>
+</header>
+<!-- Warning Banner -->
+<div class="bg-error-container text-on-error-container p-4 mb-10 flex items-center gap-4 border-l-4 border-error">
+<span class="material-symbols-outlined text-error">visibility_off</span>
+<span class="font-label text-sm font-semibold tracking-wide">This entry contains GM-only content. Spoilers ahead.</span>
+</div>
+<!-- Table of Contents (Mobile/Compact context) -->
+<div class="mb-10 p-6 bg-surface-container-low border border-outline-variant/10">
+<h4 class="font-headline text-on-surface opacity-60 text-xs tracking-widest uppercase mb-4">Contents</h4>
+<ol class="font-label text-sm space-y-2">
+<li class="flex items-center gap-3">
+<span class="text-tertiary font-bold">01.</span>
+<a class="hover:text-primary transition-colors underline decoration-tertiary/30 decoration-1 underline-offset-4" href="#biography">Biography</a>
+</li>
+<li class="flex items-center gap-3">
+<span class="text-tertiary font-bold">02.</span>
+<a class="hover:text-primary transition-colors underline decoration-tertiary/30 decoration-1 underline-offset-4" href="#iron-veil">The Iron Veil Era</a>
+</li>
+<li class="flex items-center gap-3">
+<span class="text-tertiary font-bold">03.</span>
+<a class="hover:text-primary transition-colors underline decoration-tertiary/30 decoration-1 underline-offset-4" href="#current-status">Current Status</a>
+</li>
+</ol>
+</div>
+<!-- Article Body Content -->
+<article class="text-lg leading-relaxed text-on-surface/90 space-y-10">
+<section id="biography">
+<h2 class="font-headline text-3xl text-primary border-b border-primary/20 pb-2 mb-6">Biography</h2>
+<p class="mb-6">
+                        Born into the waning shadows of the <a class="text-on-surface underline decoration-tertiary decoration-2 underline-offset-4 font-semibold" href="#">Stonehaven Clan</a>, Aldric was never meant for the throne. While his brothers practiced the broadsword in the courtyard of Crimson Keep, Aldric found himself navigating the intricate labyrinths of the royal archives. It was here, amidst the dust and parchment, that he discovered his true calling: the weight of secrets.
+                    </p>
+<blockquote class="pl-6 border-l-4 border-secondary-container italic text-on-surface-variant font-headline text-2xl py-2 my-10 bg-secondary-container/5">
+                        "A king rules by the sword, but a Spymaster rules by the silence between words. Aldric knows the silence better than any man alive."
+                        <cite class="block text-xs font-label not-italic mt-4 uppercase tracking-[0.3em] opacity-40">— Chronicler Vaelen, Year 432</cite>
+</blockquote>
+</section>
+<section id="iron-veil">
+<h2 class="font-headline text-3xl text-primary border-b border-primary/20 pb-2 mb-6">The Iron Veil Era</h2>
+<p class="mb-6">
+                        The formation of the <span class="text-tertiary font-semibold">Order of the Iron Veil</span> marked Aldric's ascension to true power. Tasked by Lord Maren to purge the internal rot of the Northern Campaign, Aldric utilized a network of informants stretching from the docks of Oakhaven to the peaks of the Frozen Spine. 
+                    </p>
+<p>
+                        His methods were often described as "spectral"—striking from the shadows with surgical precision and leaving behind only a signature seal of violet wax.
+                    </p>
+</section>
+<section class="bg-surface-container-high/30 p-8 border border-outline-variant/20" id="current-status">
+<h2 class="font-headline text-2xl text-primary mb-4">Current Status</h2>
+<p>
+                        As of the current timeline, Aldric resides in the high towers of the <a class="text-tertiary hover:underline" href="#">Crimson Keep</a>. Though officially retired from active field work, his presence looms over every political negotiation in the kingdom.
+                    </p>
+</section>
+</article>
+<!-- Related Entries Section -->
+<footer class="mt-20 pt-10 border-t border-outline-variant">
+<h3 class="font-headline text-xl text-primary-container mb-8 tracking-widest uppercase">Related Entries</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest border border-secondary/20 p-6 hover:border-secondary transition-all cursor-pointer group">
+<span class="text-[10px] font-label font-bold text-secondary-fixed-dim uppercase tracking-widest mb-2 block">LOCATION</span>
+<h4 class="font-headline text-lg text-primary mb-3 group-hover:text-primary-container">Crimson Keep</h4>
+<div class="h-0.5 w-full bg-secondary-container/20 group-hover:bg-secondary transition-all"></div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest border border-secondary/20 p-6 hover:border-secondary transition-all cursor-pointer group">
+<span class="text-[10px] font-label font-bold text-secondary-fixed-dim uppercase tracking-widest mb-2 block">FACTION</span>
+<h4 class="font-headline text-lg text-primary mb-3 group-hover:text-primary-container">Stonehaven Clan</h4>
+<div class="h-0.5 w-full bg-secondary-container/20 group-hover:bg-secondary transition-all"></div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest border border-secondary/20 p-6 hover:border-secondary transition-all cursor-pointer group">
+<span class="text-[10px] font-label font-bold text-secondary-fixed-dim uppercase tracking-widest mb-2 block">EVENT</span>
+<h4 class="font-headline text-lg text-primary mb-3 group-hover:text-primary-container">Northern Campaign</h4>
+<div class="h-0.5 w-full bg-secondary-container/20 group-hover:bg-secondary transition-all"></div>
+</div>
+</div>
+</footer>
+</section>
+<!-- Right Infobox Sidebar -->
+<aside class="w-[320px] bg-surface-container-low p-8 border-l border-outline-variant/10">
+<div class="sticky top-10 space-y-6">
+<!-- Entity Info Card -->
+<div class="bg-surface-container-lowest border border-secondary/40 shadow-[0_0_15px_rgba(119,1,208,0.1)] overflow-hidden">
+<div class="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-secondary-container/30 to-background flex items-center justify-center border-b border-secondary/20">
+<img alt="Aldric Stonehaven" class="w-full h-full object-cover opacity-60 mix-blend-luminosity" data-alt="dramatic portrait of a middle-aged medieval man in dark ornate leather armor, cinematic lighting, shadowed face, dark castle background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7RMi3HXqg19ZaY2D-4W_daPnHLfaNQJgqfR0hwoEzGwADLlj356adhxELtI4w4bFpj90-_AXJf20gdShpMr3J_TXeCoHPoz7fWspy0flyo7mGpWZvr-yqaWu3HJLfnONcY8RA1sbk6rlY3cuiMK5d-Mltczu5vIZWFJ92XqW3LqqTC7EIRfRl4uDlqXE03OAXy6_GiRUxNKxTEVkbXPPLEqj9hNoIvSSLYk2yKEl4nKRfwWy7MUpjshel8WmEYG6YhLsNx5OPsRs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<span class="font-headline text-xs text-primary-container font-black tracking-widest uppercase bg-background/80 px-2 py-1">ALDRIC S.</span>
+</div>
+</div>
+<div class="p-6">
+<h5 class="font-label text-[10px] font-bold text-tertiary tracking-widest uppercase mb-4 text-center">Character Details</h5>
+<div class="space-y-3 font-label text-xs">
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="text-tertiary-fixed opacity-60">Full Name</span>
+<span class="text-on-surface font-semibold">Aldric Stonehaven</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="text-tertiary-fixed opacity-60">Race</span>
+<span class="text-on-surface">Human</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="text-tertiary-fixed opacity-60">Age</span>
+<span class="text-on-surface">34</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="text-tertiary-fixed opacity-60">Affiliation</span>
+<span class="text-on-surface">Iron Veil</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="text-tertiary-fixed opacity-60">Status</span>
+<span class="text-tertiary font-bold">ALIVE</span>
+</div>
+</div>
+<div class="flex justify-center my-6 text-primary/30">
+<span>✦</span>
+<span class="mx-2 opacity-20">──────────</span>
+<span>✦</span>
+</div>
+<!-- Relations -->
+<div class="space-y-4">
+<div class="flex flex-col gap-2">
+<span class="text-[10px] text-on-surface-variant font-bold tracking-widest flex items-center gap-1">
+                                    ALLIED WITH <span class="material-symbols-outlined text-[12px]">favorite</span>
+</span>
+<span class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-3 py-1 border border-tertiary/20 w-fit">KIRA VAEL</span>
+</div>
+<div class="flex flex-col gap-2">
+<span class="text-[10px] text-on-surface-variant font-bold tracking-widest flex items-center gap-1">
+                                    HATES <span class="material-symbols-outlined text-[12px]">skull</span>
+</span>
+<span class="bg-error/10 text-error text-[10px] font-bold px-3 py-1 border border-error/20 w-fit">THE PALE COURT</span>
+</div>
+<div class="flex flex-col gap-2">
+<span class="text-[10px] text-on-surface-variant font-bold tracking-widest flex items-center gap-1">
+                                    SERVES <span class="material-symbols-outlined text-[12px]">crown</span>
+</span>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 border border-primary/20 w-fit">LORD MAREN</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="space-y-3">
+<button class="w-full bg-primary-container text-on-primary py-4 font-label text-xs font-black tracking-widest uppercase hover:bg-surface-tint shadow-[0_0_15px_rgba(245,160,50,0.2)] transition-all">
+                        EDIT ENTRY
+                    </button>
+<button class="w-full border border-tertiary text-tertiary py-4 font-label text-xs font-black tracking-widest uppercase hover:bg-tertiary/5 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+                        VIEW AI SUGGESTIONS
+                    </button>
+</div>
+<div class="p-4 bg-surface-container-high/50 border-l-2 border-tertiary/40">
+<p class="text-[11px] font-label text-tertiary-fixed leading-relaxed">
+                        AI Insight: 3 connections found in "Northern Campaign" logs. Suggesting relationship update for Aldric's whereabouts during the Siege of Stonehaven.
+                    </p>
+</div>
+</div>
+</aside>
+</main>
+<!-- Global Search Backdrop (Fixed Overlay Logic) -->
+<div class="fixed bottom-8 right-8 z-[100]">
+<button class="w-14 h-14 bg-secondary-container text-on-secondary rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(119,1,208,0.4)] hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">search</span>
+</button>
+</div>
+</body></html>

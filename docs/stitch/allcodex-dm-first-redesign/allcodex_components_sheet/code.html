@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex Component Sheet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#673d00",
+                        "error": "#ffb4ab",
+                        "inverse-primary": "#885200",
+                        "surface-container-highest": "#36333f",
+                        "surface-variant": "#36333f",
+                        "primary": "#ffc381",
+                        "tertiary-fixed": "#55fcd0",
+                        "on-tertiary-fixed": "#002118",
+                        "secondary": "#dcb8ff",
+                        "on-secondary-fixed": "#2c0051",
+                        "surface-container": "#211e29",
+                        "background": "#14121c",
+                        "tertiary-fixed-dim": "#28dfb5",
+                        "secondary-container": "#7701d0",
+                        "on-secondary": "#480081",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "surface-container-high": "#2b2834",
+                        "surface-tint": "#ffb868",
+                        "tertiary-container": "#00caa2",
+                        "on-primary-container": "#643b00",
+                        "on-primary": "#482900",
+                        "on-surface": "#e6e0ef",
+                        "error-container": "#93000a",
+                        "surface": "#14121c",
+                        "on-tertiary-container": "#004f3e",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "surface-dim": "#14121c",
+                        "on-tertiary": "#00382b",
+                        "on-surface-variant": "#d8c3af",
+                        "on-primary-fixed": "#2b1700",
+                        "primary-container": "#f5a032",
+                        "primary-fixed-dim": "#ffb868",
+                        "tertiary": "#37e7bc",
+                        "outline-variant": "#534435",
+                        "outline": "#a08d7c",
+                        "on-secondary-container": "#dcb7ff",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "surface-container-lowest": "#0f0d17",
+                        "primary-fixed": "#ffddbb",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e6e0ef",
+                        "surface-container-low": "#1c1a25",
+                        "secondary-fixed": "#efdbff",
+                        "on-background": "#e6e0ef",
+                        "inverse-on-surface": "#322f3a",
+                        "surface-bright": "#3b3743"
+                    },
+                    fontFamily: {
+                        "headline": ["Cinzel", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0rem", "lg": "0rem", "xl": "0rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .arcane-glow {
+            text-shadow: 0 0 12px rgba(245, 160, 50, 0.4);
+        }
+        body {
+            background-color: #0a0812;
+            color: #e6e0ef;
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-secondary-container selection:text-white overflow-x-hidden">
+<!-- Top Navigation Anchor -->
+<header class="flex justify-between items-center px-8 py-4 w-full bg-[#0a0812] border-b border-[#dcb8ff]/10 fixed top-0 z-50">
+<div class="font-headline text-2xl font-bold tracking-wider text-[#ffc381] drop-shadow-[0_0_8px_rgba(245,160,52,0.4)]">
+            AllCodex
+        </div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="font-label text-sm uppercase tracking-widest text-[#ffc381] border-b-2 border-[#ffc381] pb-1 transition-all" href="#">Grimoire</a>
+<a class="font-label text-sm uppercase tracking-widest text-[#e6e0ef]/70 hover:text-[#ffc381] hover:drop-shadow-[0_0_5px_rgba(220,184,255,0.5)] transition-all" href="#">Bestiary</a>
+<a class="font-label text-sm uppercase tracking-widest text-[#e6e0ef]/70 hover:text-[#ffc381] hover:drop-shadow-[0_0_5px_rgba(220,184,255,0.5)] transition-all" href="#">Spells</a>
+<a class="font-label text-sm uppercase tracking-widest text-[#e6e0ef]/70 hover:text-[#ffc381] hover:drop-shadow-[0_0_5px_rgba(220,184,255,0.5)] transition-all" href="#">Artifacts</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffc381] cursor-pointer hover:scale-110 transition-transform" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<main class="min-h-screen pt-24 px-8 pb-12 relative">
+<!-- Visual Accent Background -->
+<div class="absolute inset-0 pointer-events-none opacity-10">
+<div class="absolute top-0 right-0 w-[800px] h-[800px] bg-secondary-container blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+<div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary-container blur-[100px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+</div>
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 relative z-10">
+<!-- LEFT SECTION: QUICK CREATE MODAL -->
+<div class="md:col-span-5 flex flex-col items-start gap-8">
+<h2 class="font-headline text-primary text-xl tracking-widest uppercase arcane-glow">Creation Hub</h2>
+<!-- Floating Modal Component -->
+<div class="w-full max-w-[380px] bg-[#1c1a25] border border-[#7701d0]/30 shadow-[0_20px_50px_rgba(119,1,208,0.3)] p-6 relative">
+<!-- Header -->
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-primary-container text-sm tracking-widest uppercase">Quick Create</h3>
+<button class="text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+</button>
+</div>
+<!-- Form Content -->
+<div class="space-y-5">
+<!-- Title Field -->
+<div class="space-y-1">
+<input class="w-full bg-[#0a0812] border border-[#7701d0]/20 text-on-surface px-3 py-2 font-body text-lg focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/50 transition-all placeholder:text-on-surface-variant/40" placeholder="NPC name or title..." type="text"/>
+</div>
+<!-- Type Auto-detect Row -->
+<div class="flex items-center justify-between bg-[#0a0812]/50 p-2 border-l-2 border-primary-container">
+<div class="flex items-center gap-2">
+<span class="font-label text-[10px] uppercase text-on-surface-variant tracking-wider">Type</span>
+<span class="font-label text-[10px] font-bold uppercase text-on-primary bg-primary-container px-2 py-0.5">Character</span>
+</div>
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<!-- Notes Area -->
+<div>
+<textarea class="w-full bg-[#0a0812] border-b border-outline-variant/30 text-on-surface px-3 py-2 font-body resize-none focus:outline-none focus:border-primary transition-all placeholder:text-on-surface-variant/30" placeholder="Notes... (optional)" rows="2"></textarea>
+</div>
+<!-- Toggle Row -->
+<div class="flex items-center justify-between py-2">
+<span class="font-label text-xs text-on-surface/80">Pin to session</span>
+<div class="w-10 h-5 bg-[#0a0812] border border-tertiary-container/30 relative cursor-pointer">
+<div class="absolute right-0 top-0 bottom-0 w-5 bg-tertiary shadow-[0_0_8px_rgba(55,231,188,0.5)]"></div>
+</div>
+</div>
+<!-- Action Row -->
+<div class="flex items-center gap-4 pt-2">
+<button class="flex-1 bg-primary-container text-on-primary font-label text-xs font-bold uppercase tracking-widest py-3 hover:brightness-110 transition-all">
+                                Create + Pin
+                            </button>
+<a class="font-label text-xs font-semibold text-tertiary border-b border-tertiary/20 hover:border-tertiary transition-all" href="#">
+                                Just Create
+                            </a>
+</div>
+<!-- Shortcut -->
+<div class="text-center">
+<span class="font-label text-[9px] text-on-surface-variant/40 tracking-tight uppercase">⌘ Enter to create</span>
+</div>
+</div>
+</div>
+<!-- Supporting Text (Context) -->
+<div class="prose prose-invert max-w-sm">
+<p class="text-on-surface-variant font-body leading-relaxed text-sm italic">
+                        The scribe's hand never tires. Use the quick-creation module to instantly weave new souls into your chronicle without breaking your storytelling rhythm.
+                    </p>
+</div>
+</div>
+<!-- RIGHT SECTION: SHARE STATE VARIANTS -->
+<div class="md:col-span-7 space-y-12">
+<div class="flex flex-col gap-8">
+<h2 class="font-headline text-primary text-xl tracking-widest uppercase arcane-glow">Entity Status</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Variant Column -->
+<div class="flex flex-col gap-4 w-[140px]">
+<p class="font-label text-[10px] uppercase text-outline tracking-[0.2em] mb-2">Publish States</p>
+<!-- DRAFT -->
+<div class="flex items-center gap-2 px-3 py-2 bg-secondary-container/20 border-l-2 border-secondary text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+<span class="font-label text-[11px] font-bold tracking-widest uppercase">Draft</span>
+</div>
+<!-- PUBLISHED -->
+<div class="flex items-center gap-2 px-3 py-2 bg-tertiary text-black shadow-[0_0_15px_rgba(55,231,188,0.4)]">
+<span class="material-symbols-outlined text-sm" data-icon="public">public</span>
+<span class="font-label text-[11px] font-bold tracking-widest uppercase">Published</span>
+</div>
+<!-- GM ONLY -->
+<div class="flex items-center gap-2 px-3 py-2 bg-[#ff2e63] text-white">
+<span class="material-symbols-outlined text-sm" data-icon="visibility_off">visibility_off</span>
+<span class="font-label text-[11px] font-bold tracking-widest uppercase">GM Only</span>
+</div>
+<!-- SHARED -->
+<div class="flex items-center gap-2 px-3 py-2 bg-primary-container text-black">
+<span class="material-symbols-outlined text-sm" data-icon="link">link</span>
+<span class="font-label text-[11px] font-bold tracking-widest uppercase">Shared</span>
+</div>
+<!-- PASSWORD -->
+<div class="flex items-center gap-2 px-3 py-2 bg-primary-container/20 border border-primary-container/40 text-primary-container">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+<span class="font-label text-[11px] font-bold tracking-widest uppercase">Protected</span>
+</div>
+</div>
+<!-- Card Preview -->
+<div class="col-span-1 lg:col-span-2">
+<div class="bg-[#0f0d17] p-8 border border-outline-variant/10 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-tertiary text-black shadow-[0_0_10px_rgba(55,231,188,0.3)]">
+<span class="material-symbols-outlined text-xs" data-icon="public">public</span>
+<span class="font-label text-[9px] font-black tracking-widest uppercase">Published</span>
+</div>
+</div>
+<div class="mb-8">
+<span class="font-label text-tertiary text-[10px] tracking-widest uppercase block mb-2">Artifact #042</span>
+<h4 class="font-headline text-3xl text-on-surface">The Obsidian Compass</h4>
+</div>
+<div class="space-y-4 font-body text-on-surface/70 leading-relaxed text-sm">
+<p>A relic pulled from the crushing depths of the Trench of Whispers. Its needle does not point North, but toward the nearest source of raw arcane resonance.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-0.5 bg-tertiary-container/10 text-tertiary font-label text-[9px] uppercase tracking-wider">Cursed</span>
+<span class="px-2 py-0.5 bg-tertiary-container/10 text-tertiary font-label text-[9px] uppercase tracking-wider">Soulbound</span>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/10 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-high border border-outline-variant/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<p class="font-headline text-xs text-on-surface">Archmage Elara</p>
+<p class="font-label text-[9px] text-on-surface-variant uppercase">Creator</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors cursor-pointer" data-icon="share">share</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Style Feature Section -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12">
+<div class="bg-[#1c1a25] p-6 border-l-4 border-secondary">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4" data-icon="storage">storage</span>
+<h5 class="font-headline text-lg text-secondary mb-2">Secured Archives</h5>
+<p class="font-body text-on-surface/60 text-sm">Every entry is cryptographically sealed within the vault, accessible only via sigil or approved password protected links.</p>
+</div>
+<div class="bg-[#1c1a25] p-6 border-l-4 border-tertiary">
+<span class="material-symbols-outlined text-tertiary text-3xl mb-4" data-icon="history_edu">history_edu</span>
+<h5 class="font-headline text-lg text-tertiary mb-2">Lore Auto-Scribe</h5>
+<p class="font-body text-on-surface/60 text-sm">AI-driven entity detection intelligently categorizes your notes, identifying NPCs, Spells, and Locations as you write.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Side Navigation Anchor (Recessed) -->
+<aside class="hidden xl:flex flex-col fixed left-0 top-0 bottom-0 w-16 bg-[#0f0d17] border-r border-[#dcb8ff]/10 z-40 py-24 items-center gap-8">
+<div class="group relative">
+<span class="material-symbols-outlined text-[#e6e0ef]/40 group-hover:text-[#ffc381] cursor-pointer transition-all" data-icon="menu_book">menu_book</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-[10px] font-label uppercase hidden group-hover:block whitespace-nowrap z-50">Chronicles</span>
+</div>
+<div class="group relative">
+<span class="material-symbols-outlined text-[#e6e0ef]/40 group-hover:text-[#ffc381] cursor-pointer transition-all" data-icon="auto_awesome">auto_awesome</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-[10px] font-label uppercase hidden group-hover:block whitespace-nowrap z-50">Arcana</span>
+</div>
+<div class="group relative bg-[#1c1a25] w-full flex justify-center py-4 border-l-4 border-[#f5a032]">
+<span class="material-symbols-outlined text-[#ffc381]" data-icon="pest_control">pest_control</span>
+</div>
+<div class="group relative">
+<span class="material-symbols-outlined text-[#e6e0ef]/40 group-hover:text-[#ffc381] cursor-pointer transition-all" data-icon="storage">storage</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-[10px] font-label uppercase hidden group-hover:block whitespace-nowrap z-50">Vault</span>
+</div>
+<div class="mt-auto group relative">
+<span class="material-symbols-outlined text-[#e6e0ef]/40 group-hover:text-[#ffc381] cursor-pointer transition-all" data-icon="settings">settings</span>
+<span class="absolute left-full ml-4 px-2 py-1 bg-surface-container text-primary text-[10px] font-label uppercase hidden group-hover:block whitespace-nowrap z-50">Settings</span>
+</div>
+</aside>
+<!-- Mobile Navigation -->
+<footer class="md:hidden fixed bottom-0 left-0 right-0 bg-[#0a0812] border-t border-[#dcb8ff]/10 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
+<span class="material-symbols-outlined text-[#ffc381]" data-icon="menu_book">menu_book</span>
+<span class="material-symbols-outlined text-[#e6e0ef]/40" data-icon="pest_control">pest_control</span>
+<div class="w-12 h-12 bg-primary-container flex items-center justify-center -mt-10 border-4 border-[#0a0812]">
+<span class="material-symbols-outlined text-on-primary font-bold" data-icon="add">add</span>
+</div>
+<span class="material-symbols-outlined text-[#e6e0ef]/40" data-icon="storage">storage</span>
+<span class="material-symbols-outlined text-[#e6e0ef]/40" data-icon="account_circle">account_circle</span>
+</footer>
+</body></html>

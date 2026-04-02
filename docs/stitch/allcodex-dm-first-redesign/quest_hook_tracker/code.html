@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | Quest &amp; Hook Tracker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Inter:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary": "#00382b",
+                        "inverse-primary": "#885200",
+                        "on-primary": "#482900",
+                        "error-container": "#93000a",
+                        "secondary": "#dcb8ff",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "on-tertiary-container": "#004f3e",
+                        "on-surface": "#e6e0ef",
+                        "tertiary-fixed": "#55fcd0",
+                        "on-primary-fixed-variant": "#673d00",
+                        "primary-container": "#f5a032",
+                        "tertiary-container": "#00caa2",
+                        "outline-variant": "#534435",
+                        "outline": "#a08d7c",
+                        "surface-container": "#211e29",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1c1a25",
+                        "surface-container-lowest": "#0f0d17",
+                        "surface": "#14121c",
+                        "primary": "#ffc381",
+                        "inverse-surface": "#e6e0ef",
+                        "surface-variant": "#36333f",
+                        "primary-fixed": "#ffddbb",
+                        "surface-dim": "#14121c",
+                        "on-secondary": "#480081",
+                        "on-background": "#e6e0ef",
+                        "background": "#14121c",
+                        "surface-container-high": "#2b2834",
+                        "tertiary-fixed-dim": "#28dfb5",
+                        "on-tertiary-fixed": "#002118",
+                        "secondary-fixed": "#efdbff",
+                        "surface-tint": "#ffb868",
+                        "on-primary-fixed": "#2b1700",
+                        "on-primary-container": "#643b00",
+                        "surface-container-highest": "#36333f",
+                        "inverse-on-surface": "#322f3a",
+                        "tertiary": "#37e7bc",
+                        "surface-bright": "#3b3743",
+                        "on-surface-variant": "#d8c3af",
+                        "secondary-container": "#7701d0",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "on-secondary-container": "#dcb7ff",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-error": "#690005",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "primary-fixed-dim": "#ffb868"
+                    },
+                    fontFamily: {
+                        "headline": ["Cinzel"],
+                        "body": ["Newsreader"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0rem", "lg": "0rem", "xl": "0rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #0a0812;
+            color: #e6e0ef;
+            font-family: 'Newsreader', serif;
+        }
+        .arcane-glow-amber {
+            text-shadow: 0 0 12px rgba(245, 160, 50, 0.4);
+        }
+        .arcane-glow-violet {
+            box-shadow: 0 0 15px rgba(119, 1, 208, 0.15);
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0f0d17; }
+        ::-webkit-scrollbar-thumb { background: #36333f; }
+    </style>
+</head>
+<body class="flex min-h-screen overflow-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#0a0812]">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-black tracking-tighter font-['Cinzel'] text-[#ffc381] drop-shadow-[0_0_8px_rgba(245,160,50,0.4)]">AllCodex</span>
+<div class="hidden md:flex items-center space-x-6 font-['Inter'] text-sm tracking-wide">
+<a class="text-[#e6e0ef]/70 hover:text-[#ffc381] transition-colors duration-300" href="#">Grimoire</a>
+<a class="text-[#e6e0ef]/70 hover:text-[#ffc381] transition-colors duration-300" href="#">Bestiary</a>
+<a class="text-[#e6e0ef]/70 hover:text-[#ffc381] transition-colors duration-300" href="#">Timeline</a>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-[#ffc381] cursor-pointer hover:scale-110 transition-transform">auto_awesome</span>
+<span class="material-symbols-outlined text-[#ffc381] cursor-pointer hover:scale-110 transition-transform">settings</span>
+<div class="w-8 h-8 bg-surface-container-highest border border-outline-variant">
+<img alt="DM Avatar" class="w-full h-full object-cover" data-alt="close-up portrait of a mysterious cloaked dungeon master with glowing eyes in a dark library" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjKdNhA0URYFE7gPp2Pdt9IvLc2OroiRcSalH3A-WwvObSfv8yamJ_jEJQFEgtS5FQtvLF18ppHOpSXn-F8ko754bIar9DBbBVTwdmOzbd41dqzTxnpFedtCHL7aa6vlXbc7ZaPj-Uo2IRFKXKCwsnbfA-kYBP2OaYFHhJQOjYI6XHUdVgQB157j3HH5mL2F-TV8I_O9N5yNUbgwcaKWTNeJwUpRgH_yBTIGgGz9sGQdiy4tgr13q9rDdE4WVw7VEBGbNQUV7Q030"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 z-40 flex flex-col bg-[#0f0d17]">
+<div class="p-6 border-b border-surface-container">
+<h2 class="font-['Cinzel'] text-[#ffc381] text-sm tracking-widest">Shadows of Aetheria</h2>
+<p class="font-['Inter'] text-[10px] uppercase tracking-[0.2em] text-[#e6e0ef]/50 mt-1">Level 12 • Act III</p>
+</div>
+<nav class="flex-1 py-4 overflow-y-auto">
+<div class="px-3 mb-2 font-['Inter'] text-[10px] uppercase tracking-widest text-[#e6e0ef]/30">Navigation</div>
+<a class="flex items-center space-x-3 text-[#e6e0ef]/50 py-3 px-6 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+<span class="font-['Inter'] text-xs uppercase tracking-widest">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 text-[#ffc381] border-l-4 border-[#f5a032] bg-[#1c1a25] py-3 px-6 translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="menu_book">menu_book</span>
+<span class="font-['Inter'] text-xs uppercase tracking-widest">Quest Tracker</span>
+</a>
+<a class="flex items-center space-x-3 text-[#e6e0ef]/50 py-3 px-6 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="anchor">anchor</span>
+<span class="font-['Inter'] text-xs uppercase tracking-widest">Hook Registry</span>
+</a>
+<a class="flex items-center space-x-3 text-[#e6e0ef]/50 py-3 px-6 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="group">group</span>
+<span class="font-['Inter'] text-xs uppercase tracking-widest">Npc Codex</span>
+</a>
+<a class="flex items-center space-x-3 text-[#e6e0ef]/50 py-3 px-6 hover:bg-[#1c1a25] hover:text-[#ffc381] transition-all" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="map">map</span>
+<span class="font-['Inter'] text-xs uppercase tracking-widest">Map Vault</span>
+</a>
+</nav>
+<div class="p-4 bg-[#1c1a25]/50">
+<button class="w-full bg-primary-container text-on-primary py-2 font-['Inter'] text-[10px] uppercase tracking-widest font-bold active:scale-95 duration-150">
+                New Encounter
+            </button>
+</div>
+<div class="p-4 border-t border-surface-container">
+<a class="flex items-center space-x-3 text-[#e6e0ef]/50 py-2 hover:text-[#ffc381] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="library_books">library_books</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest">Lore Wiki</span>
+</a>
+<a class="flex items-center space-x-3 text-[#e6e0ef]/50 py-2 hover:text-[#ffc381] transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest">System Logs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 mt-16 flex-1 p-8 overflow-y-auto bg-background h-[calc(100vh-64px)]">
+<!-- Header -->
+<header class="flex justify-between items-end mb-12">
+<div>
+<h1 class="text-5xl font-['Cinzel'] text-primary arcane-glow-amber mb-3">Quests &amp; Hooks</h1>
+<span class="inline-block px-3 py-1 bg-tertiary-container/10 text-tertiary border border-tertiary/20 font-['Inter'] text-[10px] uppercase tracking-widest">
+                    Session 7 — Night at Blackrock
+                </span>
+</div>
+<button class="bg-primary-container text-on-primary px-6 py-3 font-['Inter'] text-xs uppercase tracking-widest font-bold flex items-center gap-2 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-lg">add</span>
+                Add Hook
+            </button>
+</header>
+<!-- Kanban Board -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+<!-- COLUMN 1: ACTIVE -->
+<div class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-primary/20 pb-2">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined" data-icon="local_fire_department">local_fire_department</span>
+<h3 class="font-['Cinzel'] text-sm tracking-widest uppercase">Active</h3>
+</div>
+<span class="text-primary/40 font-['Inter'] text-[10px]">2 QUETS</span>
+</div>
+<!-- Card 1 -->
+<div class="bg-surface-container-low border-l-2 border-primary p-5 space-y-4 relative overflow-hidden group">
+<div class="flex justify-between items-start">
+<h4 class="font-['Cinzel'] text-on-surface text-base group-hover:text-primary transition-colors">Find the Pale Court Contact</h4>
+<span class="bg-[#690005] text-[#ffdad6] px-2 py-0.5 font-['Inter'] text-[9px] uppercase tracking-tighter">🔥 Urgent</span>
+</div>
+<p class="font-['Newsreader'] text-on-surface/70 text-sm leading-relaxed">
+                        Mira the fence may know — introduce at the tavern.
+                    </p>
+<div class="grid grid-cols-1 gap-2 pt-2">
+<div class="flex items-center gap-2 font-['Inter'] text-[10px] text-on-surface/50">
+<span class="material-symbols-outlined text-sm">location_on</span> Duskhaven Tavern
+                        </div>
+<div class="flex items-center gap-2 font-['Inter'] text-[10px] text-on-surface/50">
+<span class="material-symbols-outlined text-sm">person</span> Mira
+                        </div>
+<div class="flex items-center gap-2 font-['Inter'] text-[10px] text-on-surface/50">
+<span class="material-symbols-outlined text-sm">schedule</span> Tonight
+                        </div>
+</div>
+<div class="pt-4 space-y-2 border-t border-outline-variant/30">
+<div class="flex items-center gap-3 text-[10px] text-on-surface/80">
+<span class="material-symbols-outlined text-sm text-primary" data-weight="fill">check_box</span>
+<span class="line-through opacity-50">Steal the ledger</span>
+</div>
+<div class="flex items-center gap-3 text-[10px] text-on-surface/80">
+<span class="material-symbols-outlined text-sm text-primary" data-weight="fill">check_box</span>
+<span class="line-through opacity-50">Identify the sigil</span>
+</div>
+<div class="flex items-center gap-3 text-[10px] text-on-surface/80">
+<span class="material-symbols-outlined text-sm text-outline">check_box_outline_blank</span>
+<span>Bribe the guard</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low border-l-2 border-primary p-5 space-y-4">
+<div class="flex justify-between items-start">
+<h4 class="font-['Cinzel'] text-on-surface text-base">Decrypt the Pale Cipher</h4>
+<span class="bg-tertiary-container/10 text-tertiary px-2 py-0.5 border border-tertiary/20 font-['Inter'] text-[9px] uppercase tracking-tighter">2 clues found</span>
+</div>
+<p class="font-['Newsreader'] text-on-surface/70 text-sm leading-relaxed">
+                        The scroll from Vayne's study holds the coordinates.
+                    </p>
+<div class="flex flex-wrap gap-4 pt-2">
+<div class="flex items-center gap-2 font-['Inter'] text-[10px] text-on-surface/50">
+<span class="material-symbols-outlined text-sm">auto_stories</span> Keep Library
+                        </div>
+<div class="flex items-center gap-2 font-['Inter'] text-[10px] text-on-surface/50">
+<span class="material-symbols-outlined text-sm">link</span> Elder Vayne
+                        </div>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: IN PROGRESS -->
+<div class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-tertiary/20 pb-2">
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined" data-icon="trending_flat">trending_flat</span>
+<h3 class="font-['Cinzel'] text-sm tracking-widest uppercase">In Progress</h3>
+</div>
+</div>
+<!-- Card 1 -->
+<div class="bg-surface-container-low border-l-2 border-tertiary p-5 space-y-4">
+<h4 class="font-['Cinzel'] text-on-surface text-base">Secure the Northern Pass</h4>
+<div class="flex items-center gap-2 text-[10px] font-['Inter'] bg-surface-container-highest px-2 py-1 w-fit">
+<span class="material-symbols-outlined text-xs">location_on</span> Camp Ironveil
+                    </div>
+<div class="flex items-center gap-3 text-[10px] text-on-surface/80">
+<span class="material-symbols-outlined text-sm text-tertiary">hourglass_bottom</span>
+<span>1 sub-task remaining</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low border-l-2 border-tertiary p-5 space-y-4">
+<h4 class="font-['Cinzel'] text-on-surface text-base">Recruit Lord Maren's Agent</h4>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="bg-secondary-container/10 text-secondary border border-secondary/20 px-2 py-1 font-['Inter'] text-[9px] uppercase">Lord Maren</span>
+<span class="bg-secondary-container/10 text-secondary border border-secondary/20 px-2 py-1 font-['Inter'] text-[9px] uppercase">Aldric Stonehaven</span>
+</div>
+</div>
+</div>
+<!-- COLUMN 3: DONE -->
+<div class="flex flex-col gap-6 opacity-60 grayscale-[0.5]">
+<div class="flex items-center justify-between border-b border-outline/20 pb-2">
+<div class="flex items-center gap-2 text-on-surface/40">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+<h3 class="font-['Cinzel'] text-sm tracking-widest uppercase">Done</h3>
+</div>
+</div>
+<!-- Muted Cards -->
+<div class="bg-surface-container-lowest border border-outline-variant/20 p-5 space-y-3">
+<h4 class="font-['Cinzel'] text-on-surface/50 text-base line-through">Infiltrate Blackrock Outpost</h4>
+<span class="inline-block text-[9px] font-['Inter'] uppercase tracking-widest text-tertiary/60">Completed Session 6</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/20 p-5 space-y-3">
+<h4 class="font-['Cinzel'] text-on-surface/50 text-base line-through">Return the Stolen Relic</h4>
+<span class="inline-block text-[9px] font-['Inter'] uppercase tracking-widest text-tertiary/60">Completed Session 6</span>
+</div>
+</div>
+</section>
+<!-- Bottom Section: Active Hooks -->
+<section>
+<div class="flex items-center gap-4 mb-6">
+<h3 class="font-['Cinzel'] text-primary text-xl tracking-widest">Active Hooks</h3>
+<div class="h-[1px] flex-1 bg-primary/20"></div>
+</div>
+<div class="space-y-4">
+<!-- Hook Row 1 -->
+<div class="group flex items-center justify-between p-4 bg-surface-container-low border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 bg-primary-container rotate-45 shadow-[0_0_8px_rgba(245,160,50,0.6)]"></div>
+<p class="font-['Newsreader'] text-on-surface group-hover:text-primary transition-colors">Introduce Mira at tavern if party visits Duskhaven</p>
+</div>
+<span class="font-['Inter'] text-[10px] uppercase tracking-[0.2em] text-primary/80 bg-primary/5 px-3 py-1 border border-primary/20">Trigger: Proximity</span>
+</div>
+<!-- Hook Row 2 -->
+<div class="group flex items-center justify-between p-4 bg-surface-container-low border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 bg-[#f04060] rotate-45 shadow-[0_0_8px_rgba(240,64,96,0.6)]"></div>
+<p class="font-['Newsreader'] text-on-surface">Pale Court reinforcements arrive in 2 sessions</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-[#690005] text-[#ffdad6] px-3 py-1 font-['Inter'] text-[10px] uppercase tracking-widest font-bold">T-Minus 2 Sessions</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Background Glows (Decorative) -->
+<div class="fixed top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-secondary/5 blur-[100px] rounded-full pointer-events-none"></div>
+</body></html>

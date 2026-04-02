@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex | The Living Grimoire Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72@200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary-fixed": "#ffddbb",
+                "tertiary-fixed-dim": "#28dfb5",
+                "on-tertiary-container": "#004f3e",
+                "surface-container": "#211e29",
+                "on-secondary": "#480081",
+                "inverse-surface": "#e6e0ef",
+                "secondary-fixed-dim": "#dcb8ff",
+                "on-background": "#e6e0ef",
+                "surface-container-low": "#1c1a25",
+                "on-surface": "#e6e0ef",
+                "inverse-primary": "#885200",
+                "background": "#14121c",
+                "surface-container-highest": "#36333f",
+                "secondary-container": "#7701d0",
+                "outline": "#a08d7c",
+                "on-secondary-fixed-variant": "#6700b5",
+                "surface-bright": "#3b3743",
+                "secondary-fixed": "#efdbff",
+                "on-tertiary-fixed-variant": "#00513f",
+                "outline-variant": "#534435",
+                "tertiary": "#37e7bc",
+                "surface-dim": "#14121c",
+                "primary-container": "#f5a032",
+                "on-primary-container": "#643b00",
+                "on-primary-fixed": "#2b1700",
+                "on-primary": "#482900",
+                "on-primary-fixed-variant": "#673d00",
+                "error": "#ffb4ab",
+                "tertiary-fixed": "#55fcd0",
+                "surface": "#14121c",
+                "on-tertiary-fixed": "#002118",
+                "surface-variant": "#36333f",
+                "primary-fixed-dim": "#ffb868",
+                "on-secondary-container": "#dcb7ff",
+                "on-secondary-fixed": "#2c0051",
+                "on-error": "#690005",
+                "on-surface-variant": "#d8c3af",
+                "inverse-on-surface": "#322f3a",
+                "primary": "#ffc381",
+                "tertiary-container": "#00caa2",
+                "surface-tint": "#ffb868",
+                "on-error-container": "#ffdad6",
+                "error-container": "#93000a",
+                "on-tertiary": "#00382b",
+                "surface-container-lowest": "#0f0d17",
+                "surface-container-high": "#2b2834",
+                "secondary": "#dcb8ff"
+              },
+              fontFamily: {
+                "headline": ["Cinzel"],
+                "body": ["Newsreader"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0a0812;
+            color: #e6e0ef;
+            font-family: 'Newsreader', serif;
+        }
+        .arcane-glow-amber { text-shadow: 0 0 12px rgba(245, 160, 50, 0.4); }
+        .arcane-glow-violet { text-shadow: 0 0 12px rgba(119, 1, 208, 0.4); }
+        .glass-panel {
+            background: rgba(43, 40, 52, 0.6);
+            backdrop-filter: blur(12px);
+        }
+        input:focus { outline: none; border-bottom-color: #ffc381 !important; }
+        select:focus { outline: none; border-bottom-color: #ffc381 !important; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar (Persistent Left) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#0f0d17] flex flex-col shadow-[10px_0_30px_rgba(119,1,208,0.05)] z-50">
+<div class="p-8 flex flex-col gap-2">
+<span class="text-xl font-black text-[#dcb8ff] font-['Inter'] uppercase tracking-widest">AllCodex</span>
+<div class="flex items-center gap-3 mt-4">
+<div class="w-10 h-10 bg-surface-container-highest flex items-center justify-center border border-secondary/20">
+<span class="material-symbols-outlined text-secondary">auto_stories</span>
+</div>
+<div>
+<h3 class="font-['Inter'] text-xs font-bold uppercase tracking-widest text-on-surface">The Living Grimoire</h3>
+<p class="font-['Inter'] text-[10px] text-on-surface/50 uppercase">Archivist Access</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 mt-4">
+<a class="text-[#e6e0ef] opacity-50 py-4 px-6 flex items-center gap-3 font-['Inter'] text-xs font-medium uppercase tracking-widest hover:bg-[#1c1a25] hover:text-[#dcb8ff] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">auto_stories</span> Chronicle
+            </a>
+<a class="text-[#e6e0ef] opacity-50 py-4 px-6 flex items-center gap-3 font-['Inter'] text-xs font-medium uppercase tracking-widest hover:bg-[#1c1a25] hover:text-[#dcb8ff] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">auto_fix_high</span> Studio
+            </a>
+<a class="text-[#e6e0ef] opacity-50 py-4 px-6 flex items-center gap-3 font-['Inter'] text-xs font-medium uppercase tracking-widest hover:bg-[#1c1a25] hover:text-[#dcb8ff] transition-all duration-200" href="#">
+<span class="material-symbols-outlined">psychology</span> AI Tools
+            </a>
+<a class="text-[#ffc381] border-l-4 border-[#ffc381] bg-[#1c1a25] py-4 px-6 flex items-center gap-3 font-['Inter'] text-xs font-medium uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">settings</span> System
+            </a>
+</nav>
+<div class="p-6">
+<button class="w-full py-3 bg-secondary-container text-on-secondary font-['Inter'] text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all active:scale-95">
+                New Entry
+            </button>
+</div>
+<footer class="mt-auto border-t border-outline-variant/10">
+<a class="text-[#e6e0ef] opacity-50 py-4 px-6 flex items-center gap-3 font-['Inter'] text-xs font-medium uppercase tracking-widest hover:text-[#dcb8ff]" href="#">
+<span class="material-symbols-outlined">help_outline</span> Help
+            </a>
+<a class="text-[#e6e0ef] opacity-50 py-4 px-6 flex items-center gap-3 font-['Inter'] text-xs font-medium uppercase tracking-widest hover:text-error" href="#">
+<span class="material-symbols-outlined">logout</span> Log Out
+            </a>
+</footer>
+</aside>
+<!-- Main Wrapper -->
+<div class="flex-1 ml-64 flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-[#0a0812] sticky top-0 z-40 flex justify-between items-center w-full px-8 py-4">
+<div class="flex items-center gap-6">
+<span class="text-2xl font-bold text-[#ffc381] drop-shadow-[0_0_8px_rgba(245,160,50,0.4)] font-['Cinzel'] tracking-wider uppercase">AllCodex</span>
+</div>
+<div class="flex items-center gap-8">
+<div class="hidden md:flex items-center gap-6">
+<a class="text-[#ffc381] font-bold border-b-2 border-[#ffc381] pb-1 font-['Cinzel'] tracking-wider uppercase text-sm" href="#">Settings</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] transition-colors"><span class="material-symbols-outlined">history</span></button>
+<button class="text-[#e6e0ef] opacity-70 hover:text-[#ffc381] transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<div class="flex gap-3">
+<button class="px-4 py-1.5 border border-outline-variant/30 text-[#e6e0ef] font-['Inter'] text-[10px] uppercase tracking-widest hover:bg-surface-container transition-all">Reset</button>
+<button class="px-4 py-1.5 bg-primary-container text-on-primary font-['Inter'] text-[10px] font-bold uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all">Save Changes</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-12 max-w-5xl mx-auto w-full">
+<!-- Page Header -->
+<header class="mb-12">
+<h1 class="text-5xl font-['Cinzel'] text-primary arcane-glow-amber mb-2 uppercase font-black tracking-tight">Settings</h1>
+<p class="text-on-surface-variant font-body text-lg italic">Configure your AllCodex workspace</p>
+</header>
+<section class="flex flex-col gap-8">
+<!-- Card 1: AllCodex Connection -->
+<div class="bg-surface-container-high border-l-2 border-primary p-8 shadow-2xl">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-['Cinzel'] text-xl text-primary font-bold uppercase tracking-widest mb-1">AllCodex Connection</h2>
+<p class="font-['Inter'] text-[10px] text-on-surface/40 uppercase tracking-[0.2em]">Core System Synchronizer</p>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1 border border-primary/10">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#37e7bc]"></span>
+<span class="text-[10px] font-['Inter'] font-bold text-tertiary uppercase tracking-tighter">Connected to AllCodex v0.90.0</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+<div class="flex flex-col gap-2">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">Server URL</label>
+<input class="bg-surface-container-lowest border-0 border-b border-outline-variant text-on-surface font-['Inter'] text-sm py-2 px-0 focus:ring-0 transition-all" type="text" value="http://localhost:8080"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">API Token</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant text-on-surface font-['Inter'] text-sm py-2 px-0 focus:ring-0 transition-all" type="password" value="••••••••••••••••"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-primary tracking-widest hover:underline">Reveal</button>
+</div>
+</div>
+</div>
+<div class="flex justify-end gap-4">
+<button class="px-6 py-2 border border-primary text-primary font-['Inter'] text-[10px] font-bold uppercase tracking-widest hover:bg-primary/5 transition-all">Test Connection</button>
+<button class="px-8 py-2 bg-primary text-on-primary font-['Inter'] text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all">Save</button>
+</div>
+</div>
+<!-- Card 2: AllKnower Connection -->
+<div class="bg-surface-container-high border-l-2 border-tertiary p-8 shadow-2xl">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-['Cinzel'] text-xl text-tertiary font-bold uppercase tracking-widest mb-1">AllKnower Connection</h2>
+<p class="font-['Inter'] text-[10px] text-on-surface/40 uppercase tracking-[0.2em]">AI Lore Engine Integration</p>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1 border border-tertiary/10">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#37e7bc]"></span>
+<span class="text-[10px] font-['Inter'] font-bold text-tertiary uppercase tracking-tighter">AllKnower online · Model: claude-3-sonnet</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+<div class="flex flex-col gap-2">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">Server URL</label>
+<input class="bg-surface-container-lowest border-0 border-b border-outline-variant text-on-surface font-['Inter'] text-sm py-2 px-0 focus:ring-0 transition-all" type="text" value="http://localhost:3001"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">API Token</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant text-on-surface font-['Inter'] text-sm py-2 px-0 focus:ring-0 transition-all" type="password" value="••••••••••••••••"/>
+</div>
+</div>
+<div class="flex justify-end gap-4">
+<button class="px-6 py-2 border border-tertiary text-tertiary font-['Inter'] text-[10px] font-bold uppercase tracking-widest hover:bg-tertiary/5 transition-all">Test Connection</button>
+<button class="px-8 py-2 bg-tertiary text-on-tertiary font-['Inter'] text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all">Save</button>
+</div>
+</div>
+<!-- Card 3: Portal Configuration -->
+<div class="bg-surface-container-high border-l-2 border-secondary p-8 shadow-2xl">
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-4">
+<h2 class="font-['Cinzel'] text-xl text-secondary font-bold uppercase tracking-widest arcane-glow-violet">Portal Configuration</h2>
+<span class="bg-secondary/10 text-secondary text-[10px] font-bold px-2 py-0.5 font-['Inter'] uppercase tracking-widest">New</span>
+</div>
+</div>
+<div class="flex flex-col gap-8 mb-8">
+<div class="flex flex-col gap-2">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">Lore Root Note ID</label>
+<input class="bg-surface-container-lowest border-0 border-b border-outline-variant text-on-surface font-['Inter'] text-sm py-2 px-0 focus:ring-0 transition-all" placeholder="root" type="text"/>
+<span class="text-[10px] font-['Newsreader'] italic text-on-surface/40">The unique identifier for the starting node of your knowledge graph.</span>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">Default Lore Type</label>
+<select class="bg-surface-container-lowest border-0 border-b border-outline-variant text-on-surface font-['Inter'] text-sm py-2 px-0 focus:ring-0 appearance-none cursor-pointer">
+<option>Encyclopedic Entry</option>
+<option>Narrative Fragment</option>
+<option>Technical Schema</option>
+<option>Arcane Manuscript</option>
+</select>
+</div>
+<div class="flex flex-col gap-4">
+<label class="font-['Inter'] text-[10px] font-bold uppercase tracking-widest text-on-surface/60">Session Workspace Layout</label>
+<div class="flex gap-4">
+<button class="flex-1 py-4 border border-secondary bg-secondary/5 flex flex-col items-center gap-2 group hover:bg-secondary/10 transition-all">
+<span class="material-symbols-outlined text-secondary">view_agenda</span>
+<span class="text-[10px] font-bold font-['Inter'] uppercase tracking-widest text-secondary">Classic</span>
+</button>
+<button class="flex-1 py-4 border border-outline-variant/30 flex flex-col items-center gap-2 group hover:border-secondary/50 transition-all">
+<span class="material-symbols-outlined text-on-surface/50 group-hover:text-secondary">center_focus_strong</span>
+<span class="text-[10px] font-bold font-['Inter'] uppercase tracking-widest text-on-surface/50 group-hover:text-secondary">Focus</span>
+</button>
+<button class="flex-1 py-4 border border-outline-variant/30 flex flex-col items-center gap-2 group hover:border-secondary/50 transition-all">
+<span class="material-symbols-outlined text-on-surface/50 group-hover:text-secondary">view_column</span>
+<span class="text-[10px] font-bold font-['Inter'] uppercase tracking-widest text-on-surface/50 group-hover:text-secondary">Split</span>
+</button>
+</div>
+</div>
+</div>
+<button class="w-full py-3 bg-secondary text-on-secondary font-['Inter'] text-[10px] font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.99] transition-all">
+                        Save Configuration
+                    </button>
+</div>
+<!-- Card 4: About & System -->
+<div class="bg-surface-container-low p-8 flex flex-col md:flex-row justify-between items-center gap-8 border-t border-outline-variant/10">
+<div class="flex flex-col gap-2">
+<h3 class="font-['Cinzel'] text-sm text-on-surface/70 font-bold uppercase tracking-widest">AllCodex Portal v0.4.0</h3>
+<div class="flex gap-3 text-[10px] font-['Inter'] font-medium uppercase tracking-widest text-tertiary">
+<a class="hover:underline" href="#">View Changelog</a>
+<span class="text-outline-variant">·</span>
+<a class="hover:underline" href="#">Documentation</a>
+<span class="text-outline-variant">·</span>
+<a class="hover:underline" href="#">Report Bug</a>
+</div>
+</div>
+<div class="w-full md:w-64 flex flex-col gap-2">
+<div class="flex justify-between text-[9px] font-bold font-['Inter'] uppercase tracking-tighter text-on-surface/40">
+<span>Storage Usage</span>
+<span>42.8 GB / 100 GB</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full overflow-hidden">
+<div class="h-full bg-secondary-container" style="width: 42.8%;"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Subtle Backdrop Decoration -->
+<div class="fixed bottom-0 right-0 w-96 h-96 opacity-10 pointer-events-none z-0">
+<div class="absolute inset-0 bg-gradient-to-tl from-secondary to-transparent blur-[120px]"></div>
+</div>
+</div>
+</body></html>

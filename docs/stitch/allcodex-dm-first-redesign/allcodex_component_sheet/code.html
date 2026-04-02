@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AllCodex - The Digital Grimoire UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&amp;family=Inter:wght@400;500;700&amp;family=Newsreader:ital,wght@0,400;0,600;1,400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-highest": "#36333f",
+                        "inverse-primary": "#885200",
+                        "primary": "#ffc381",
+                        "surface-variant": "#36333f",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#673d00",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "surface-container": "#201e29",
+                        "background": "#14121c",
+                        "tertiary-fixed": "#e8deff",
+                        "on-tertiary-fixed": "#20005f",
+                        "on-secondary-fixed": "#002118",
+                        "secondary": "#41eec2",
+                        "tertiary-container": "#baa6ff",
+                        "surface-tint": "#ffb868",
+                        "on-primary": "#482900",
+                        "on-primary-container": "#643b00",
+                        "on-secondary": "#00382b",
+                        "secondary-container": "#00d1a7",
+                        "surface-container-high": "#2b2833",
+                        "on-secondary-fixed-variant": "#00513f",
+                        "surface": "#14121c",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-container": "#4d00cc",
+                        "on-surface": "#e6e0ef",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#d8c3af",
+                        "on-primary-fixed": "#2b1700",
+                        "surface-dim": "#14121c",
+                        "on-tertiary": "#370096",
+                        "primary-fixed-dim": "#ffb868",
+                        "primary-container": "#f5a032",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "secondary-fixed-dim": "#28dfb5",
+                        "surface-container-lowest": "#0f0d17",
+                        "on-secondary-container": "#005441",
+                        "outline-variant": "#534435",
+                        "outline": "#a08d7c",
+                        "tertiary": "#d4c6ff",
+                        "primary-fixed": "#ffddbb",
+                        "surface-bright": "#3a3843",
+                        "inverse-surface": "#e6e0ef",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#312f3a",
+                        "secondary-fixed": "#55fcd0",
+                        "on-background": "#e6e0ef",
+                        "surface-container-low": "#1c1a25"
+                    },
+                    fontFamily: {
+                        "headline": ["Cinzel"],
+                        "lore": ["Newsreader"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0f0d17;
+            color: #e6e0ef;
+            font-family: 'Inter', sans-serif;
+        }
+        .cinzel { font-family: 'Cinzel', serif; }
+        .newsreader { font-family: 'Newsreader', serif; }
+        .glass-violet {
+            background: rgba(43, 40, 51, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 198, 255, 0.2);
+            box-shadow: 0 0 20px rgba(212, 198, 255, 0.05);
+        }
+        .amber-glow-border {
+            box-shadow: inset 0 0 8px rgba(245, 160, 50, 0.3), 0 0 12px rgba(245, 160, 50, 0.2);
+        }
+        .violet-glow {
+            box-shadow: 0 0 24px rgba(212, 198, 255, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8 space-y-16">
+<!-- BREADCRUMB NAV -->
+<section class="max-w-7xl mx-auto">
+<div class="flex items-center space-x-2 py-3 px-6 bg-surface-container-low border-b border-tertiary/10">
+<a class="cinzel text-sm text-secondary hover:text-secondary-fixed-dim transition-colors uppercase tracking-wider" href="#">World</a>
+<span class="material-symbols-outlined text-xs text-tertiary/40">chevron_right</span>
+<a class="cinzel text-sm text-secondary hover:text-secondary-fixed-dim transition-colors uppercase tracking-wider" href="#">Characters</a>
+<span class="material-symbols-outlined text-xs text-tertiary/40">chevron_right</span>
+<span class="cinzel text-sm text-primary font-bold uppercase tracking-widest">Aldric Stonehaven</span>
+</div>
+<div class="mt-2 text-[10px] text-on-surface-variant/40 uppercase tracking-[0.2em] ml-6">Breadcrumb Navigation Cluster</div>
+</section>
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+<!-- MAP PIN POPUP -->
+<div class="relative min-h-[400px] bg-surface-container-lowest border border-outline-variant/20 overflow-hidden" data-alt="Stylized dark fantasy map with obsidian textures and faint violet ley lines glowing in the background">
+<!-- Simulated Map Background -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" data-alt="Abstract dark topographical texture with deep purple and charcoal tones" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC_Kc-mvrl6ytTAew_01BVZDAmmpcTZFa0LxDFqOtSuxxcJLn31DdzrUete8CN1iNJ4pYDPtjStWKWO2RV63zDqLWtG6Fv_7FqWYJcD3aczu21H3Pmdr_NjVc73fS8t1l-7jkwE-MDOp5YrS_wa3FWqq46GfikZ3Ss-KbSvhUbfaXyD7S74YYLsof2L9tIu4sd5D7NowIDtLuv5hn5VN5fcou3d9mpmE75sA3l0yYaiiPqDR1TDzfC_Cb_Z4rE6rP3NjVRVlL-kiTc'); background-size: cover;"></div>
+<div class="absolute top-20 left-20">
+<!-- Glowing Pin -->
+<div class="absolute -top-2 -left-2 w-4 h-4 bg-primary rounded-full animate-pulse amber-glow-border"></div>
+<!-- Popup Card -->
+<div class="glass-violet w-[240px] p-5 relative z-10">
+<h3 class="cinzel text-lg font-bold text-on-surface tracking-tight leading-tight">Blackrock Keep</h3>
+<p class="text-[10px] text-secondary font-bold uppercase tracking-wider mt-1 mb-3">Location · Fortress</p>
+<p class="newsreader text-sm text-on-surface-variant leading-relaxed italic border-l-2 border-primary/30 pl-3 py-1 mb-4">
+                        "The obsidian spires of the Keep pierce the eternal smog of the Iron Wastes..."
+                    </p>
+<a class="group flex items-center text-xs text-primary font-bold uppercase tracking-widest transition-all hover:gap-2" href="#">
+                        Open Entry 
+                        <span class="material-symbols-outlined text-sm ml-1 transition-transform group-hover:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+<div class="absolute bottom-4 left-4 text-[10px] text-on-surface-variant/40 uppercase tracking-[0.2em]">Map Pin Popup Context</div>
+</div>
+<!-- STATBLOCK CARD -->
+<div class="flex flex-col">
+<div class="bg-surface-container-high violet-glow border-t-[3px] border-primary p-0">
+<!-- Statblock Header -->
+<div class="p-6 pb-4">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="cinzel text-3xl font-black text-primary tracking-tighter uppercase">Elder Vayne</h2>
+<p class="newsreader italic text-on-surface-variant text-lg mt-1">Medium Humanoid (Human), Lawful Evil</p>
+</div>
+<div class="bg-primary/10 border border-primary/30 px-3 py-1">
+<span class="cinzel text-primary font-bold">CR 11</span>
+</div>
+</div>
+<div class="h-px w-full bg-gradient-to-r from-primary/50 via-primary/10 to-transparent mt-4"></div>
+</div>
+<!-- Defense Row -->
+<div class="grid grid-cols-3 gap-4 px-6 py-2 bg-surface-container">
+<div>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant block">Armor Class</span>
+<span class="cinzel text-xl text-primary font-bold">14</span>
+</div>
+<div>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant block">Hit Points</span>
+<span class="cinzel text-xl text-primary font-bold">104 <span class="text-xs font-normal text-on-surface-variant">(16d8+32)</span></span>
+</div>
+<div>
+<span class="text-[10px] uppercase tracking-widest text-on-surface-variant block">Speed</span>
+<span class="cinzel text-xl text-primary font-bold">30 ft.</span>
+</div>
+</div>
+<!-- Ability Scores -->
+<div class="grid grid-cols-6 gap-2 px-6 py-6 border-y border-outline-variant/10">
+<div class="text-center">
+<span class="text-[10px] font-bold text-on-surface-variant block">STR</span>
+<span class="cinzel text-lg text-primary block">10</span>
+<span class="text-xs text-on-surface-variant/60">(+0)</span>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-on-surface-variant block">DEX</span>
+<span class="cinzel text-lg text-primary block">18</span>
+<span class="text-xs text-on-surface-variant/60">(+4)</span>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-on-surface-variant block">CON</span>
+<span class="cinzel text-lg text-primary block">14</span>
+<span class="text-xs text-on-surface-variant/60">(+2)</span>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-on-surface-variant block">INT</span>
+<span class="cinzel text-lg text-primary block">20</span>
+<span class="text-xs text-on-surface-variant/60">(+5)</span>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-on-surface-variant block">WIS</span>
+<span class="cinzel text-lg text-primary block">16</span>
+<span class="text-xs text-on-surface-variant/60">(+3)</span>
+</div>
+<div class="text-center">
+<span class="text-[10px] font-bold text-on-surface-variant block">CHA</span>
+<span class="cinzel text-lg text-primary block">14</span>
+<span class="text-xs text-on-surface-variant/60">(+2)</span>
+</div>
+</div>
+<!-- Traits -->
+<div class="px-6 py-4 space-y-2 text-sm">
+<p><strong class="text-primary tracking-wide">Saving Throws</strong> <span class="text-on-surface-variant">Int +9, Wis +7</span></p>
+<p><strong class="text-primary tracking-wide">Skills</strong> <span class="text-on-surface-variant">Arcana +13, Deception +6, History +9</span></p>
+<p><strong class="text-primary tracking-wide">Senses</strong> <span class="text-on-surface-variant">Darkvision 60 ft., Passive Perception 13</span></p>
+</div>
+<!-- Actions Header -->
+<div class="px-6 pt-4 pb-2">
+<h4 class="cinzel text-sm text-primary font-bold uppercase tracking-[0.2em] border-b border-primary/20 pb-1">Actions</h4>
+</div>
+<!-- Action Entries -->
+<div class="px-6 py-4 space-y-4">
+<div>
+<p class="text-on-surface font-bold italic newsreader">Arcane Dagger. <span class="not-italic text-sm font-normal text-on-surface-variant">Melee Weapon Attack: +8 to hit, reach 5 ft., one target. Hit: 6 (<span class="text-primary">1d4+4</span>) piercing damage plus 14 (<span class="text-primary">4d6</span>) force damage.</span></p>
+</div>
+<div>
+<p class="text-on-surface font-bold italic newsreader">Spectral Surge. <span class="not-italic text-sm font-normal text-on-surface-variant">Vayne unleashes a wave of spectral energy. Each creature in a 20-foot cone must make a DC 17 Int save, taking 36 (<span class="text-primary">8d8</span>) psychic damage on a failure.</span></p>
+</div>
+</div>
+<!-- Footer -->
+<div class="p-6 flex justify-between items-center bg-surface-container-low/50 border-t border-outline-variant/10">
+<a class="text-xs font-bold text-secondary uppercase tracking-widest hover:text-secondary-fixed-dim transition-colors" href="#">Open Full Note →</a>
+<button class="bg-gradient-to-br from-primary to-primary-container px-6 py-2 cinzel text-sm font-black text-on-primary uppercase tracking-widest transition-transform hover:scale-105 active:scale-95">
+                        Add to Session
+                    </button>
+</div>
+</div>
+<div class="mt-4 text-[10px] text-on-surface-variant/40 uppercase tracking-[0.2em]">Statblock Display Pattern</div>
+</div>
+</div>
+</body></html>
