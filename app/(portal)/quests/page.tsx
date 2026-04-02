@@ -1,11 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, ExternalLink, Loader2, AlertCircle } from "lucide-react";
+import { MapPin, ExternalLink, Loader2, AlertCircle, Plus } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -91,11 +96,28 @@ function QuestCard({ note }: { note: QuestNote }) {
 }
 
 export default function QuestsPage() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<QuestStatus>("all");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [createError, setCreateError] = useState<string | null>(null);
+  const trimmedTitle = title.trim();
 
   const { data: quests, isLoading, isError } = useQuery<QuestNote[]>({
     queryKey: ["quests"],
-    queryFn: () => fetch("/api/quests").then((r) => r.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/quests");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(typeof data?.error === "string" ? data.error : "Failed to load quests.");
+      }
+      if (!Array.isArray(data)) {
+        throw new Error("Failed to load quests.");
+      }
+      return data;
+    },
     staleTime: 30_000,
   });
 
@@ -116,6 +138,48 @@ export default function QuestsPage() {
     { active: 0, complete: 0, failed: 0 }
   );
 
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setLocation("");
+    setCreateError(null);
+  };
+
+  const { mutate: createQuest, isPending: isCreating } = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/quests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: trimmedTitle,
+          description,
+          location,
+          status: "active",
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Failed to create quest.";
+        try {
+          const data = await res.json();
+          if (typeof data?.error === "string") message = data.error;
+        } catch {
+          const text = await res.text().catch(() => "");
+          if (text) message = text;
+        }
+        throw new Error(message);
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      resetForm();
+      setIsCreateOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ["quests"] });
+    },
+    onError: (error: Error) => setCreateError(error.message),
+  });
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
@@ -124,11 +188,22 @@ export default function QuestsPage() {
         <h1 className="font-bold text-lg" style={{ fontFamily: "var(--font-cinzel)" }}>
           Quests &amp; Hooks
         </h1>
-        {quests && (
-          <Badge variant="outline" className="ml-auto text-xs">
-            {quests.length} total
-          </Badge>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setIsCreateOpen(true)}
+            disabled={isCreating}
+          >
+            <Plus className="h-4 w-4" />
+            New Quest
+          </Button>
+          {quests && (
+            <Badge variant="outline" className="text-xs">
+              {quests.length} total
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -185,6 +260,73 @@ export default function QuestsPage() {
           )}
         </div>
       </ScrollArea>
+
+      <Dialog
+        open={isCreateOpen}
+        onOpenChange={(open) => {
+          setIsCreateOpen(open);
+          if (!open && !isCreating) resetForm();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>New Quest</DialogTitle>
+            <DialogDescription>
+              Create a quest note tagged for the quest board. You can refine it later from the lore editor.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="quest-title">Title</Label>
+              <Input
+                id="quest-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Recover the Moon Sigil"
+                disabled={isCreating}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="quest-location">Location</Label>
+              <Input
+                id="quest-location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Optional"
+                disabled={isCreating}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="quest-description">Description</Label>
+              <Textarea
+                id="quest-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional quest summary"
+                disabled={isCreating}
+              />
+            </div>
+
+            {createError && (
+              <div className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                {createError}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>
+              Cancel
+            </Button>
+            <Button onClick={() => createQuest()} disabled={!trimmedTitle || isCreating}>
+              {isCreating ? "Creating..." : "Create Quest"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
