@@ -3,13 +3,6 @@ import { createAttribute, createNote, searchNotes } from "@/lib/etapi-server";
 import { getEtapiCreds, getLoreRootNoteId } from "@/lib/get-creds";
 import { handleRouteError, notConfigured } from "@/lib/route-error";
 
-type QuestCreateResult = {
-  noteId?: string;
-  note?: {
-    noteId?: string;
-  };
-};
-
 export async function GET(_req: NextRequest) {
   try {
     const creds = await getEtapiCreds();
@@ -25,6 +18,11 @@ function parseOptionalString(value: unknown) {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   return trimmed || undefined;
+}
+
+function extractCreatedNoteId(result: unknown) {
+  const created = result as { noteId?: string; note?: { noteId?: string } };
+  return created.noteId ?? created.note?.noteId;
 }
 
 export async function POST(req: NextRequest) {
@@ -46,10 +44,9 @@ export async function POST(req: NextRequest) {
       content: parseOptionalString(body?.content),
     });
 
-    const created = result as QuestCreateResult;
-    const noteId = created.noteId ?? created.note?.noteId;
+    const noteId = extractCreatedNoteId(result);
     if (!noteId) {
-      return NextResponse.json({ error: "Quest note was created without a noteId." }, { status: 502 });
+      return NextResponse.json({ error: "Quest note was created without a noteId." }, { status: 500 });
     }
 
     await createAttribute(creds, { noteId, type: "label", name: "quest", value: "" });

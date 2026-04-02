@@ -103,6 +103,7 @@ export default function QuestsPage() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
+  const trimmedTitle = title.trim();
 
   const { data: quests, isLoading, isError } = useQuery<QuestNote[]>({
     queryKey: ["quests"],
@@ -150,7 +151,7 @@ export default function QuestsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title,
+          title: trimmedTitle,
           description,
           location,
           status: "active",
@@ -320,7 +321,7 @@ export default function QuestsPage() {
             <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>
               Cancel
             </Button>
-            <Button onClick={() => createQuest()} disabled={!title.trim() || isCreating}>
+            <Button onClick={() => createQuest()} disabled={!trimmedTitle || isCreating}>
               {isCreating ? "Creating..." : "Create Quest"}
             </Button>
           </DialogFooter>
