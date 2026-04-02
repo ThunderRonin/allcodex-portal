@@ -1,5 +1,8 @@
 # Mermaid Relationship Diagrams for Lore Entries
 
+> **Status: ✅ COMPLETED** — Shipped in Phase B. See `components/portal/RelationshipGraph.tsx`.
+> This document is retained as a historical design spec.
+
 Render interactive visual diagrams showing how lore entries relate to each other using the `beautiful-mermaid` package.
 
 ## Context
