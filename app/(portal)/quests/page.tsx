@@ -106,7 +106,17 @@ export default function QuestsPage() {
 
   const { data: quests, isLoading, isError } = useQuery<QuestNote[]>({
     queryKey: ["quests"],
-    queryFn: () => fetch("/api/quests").then((r) => r.json()),
+    queryFn: async () => {
+      const res = await fetch("/api/quests");
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(typeof data?.error === "string" ? data.error : "Failed to load quests.");
+      }
+      if (!Array.isArray(data)) {
+        throw new Error("Failed to load quests.");
+      }
+      return data;
+    },
     staleTime: 30_000,
   });
 
