@@ -144,20 +144,58 @@
   font-family: var(--font-crimson), Georgia, serif;
   font-size: 1.075rem;
 }
-.lore-content h1, .lore-content h2, .lore-content h3 {
+.lore-content h1, .lore-content h2, .lore-content h3,
+.lore-content h4, .lore-content h5, .lore-content h6 {
   font-family: var(--font-cinzel), "Palatino Linotype", serif;
   @apply text-primary mt-6 mb-2 border-b border-border pb-1;
 }
+.lore-content h4 { @apply text-base border-b-0; }
+.lore-content h5, .lore-content h6 { @apply text-sm border-b-0 text-muted-foreground; }
 .lore-content p { @apply mb-3; }
 .lore-content a { @apply text-primary underline underline-offset-2 hover:text-primary/80; }
-.lore-content ul, .lore-content ol { @apply pl-5 mb-3; }
+.lore-content ul { @apply list-disc pl-5 mb-3; }
+.lore-content ol { @apply list-decimal pl-5 mb-3; }
 .lore-content li { @apply mb-1; }
+.lore-content li > ul, .lore-content li > ol { @apply mt-1 mb-0; }
 .lore-content blockquote {
   @apply border-l-2 border-primary/50 pl-4 italic text-muted-foreground my-3;
 }
+.lore-content hr {
+  @apply my-6 border-0 relative;
+}
+.lore-content hr::after {
+  content: "✦";
+  @apply absolute left-1/2 -translate-x-1/2 -top-2 text-primary/50 text-xs tracking-[0.5em];
+}
+.lore-content pre {
+  @apply bg-muted rounded-md p-4 overflow-x-auto text-sm font-mono mb-4;
+}
+.lore-content code {
+  @apply bg-muted rounded px-1 py-0.5 text-sm font-mono;
+}
+.lore-content pre code { @apply bg-transparent p-0; }
 .lore-content table { @apply w-full text-sm border-collapse mb-4; }
-.lore-content th { @apply border border-border bg-secondary px-3 py-1 text-left; }
-.lore-content td { @apply border border-border px-3 py-1; }
+.lore-content th {
+  @apply border border-border bg-secondary/60 px-3 py-1.5 text-left font-semibold text-xs uppercase tracking-wider;
+  font-family: var(--font-cinzel), serif;
+}
+.lore-content td { @apply border border-border/60 px-3 py-1.5 align-top; }
+.lore-content tr:nth-child(even) td { @apply bg-muted/20; }
+.lore-content img {
+  @apply max-w-full h-auto rounded-md my-3;
+}
+.lore-content figure {
+  @apply my-4;
+}
+.lore-content figcaption {
+  @apply text-xs text-muted-foreground text-center mt-1 italic;
+}
+/* CKEditor compat — inline images */
+.lore-content .image { @apply my-4 text-center; }
+.lore-content .image img { @apply mx-auto; }
+.lore-content .image-style-align-left { @apply float-left mr-4 mb-2 clear-none; }
+.lore-content .image-style-align-right { @apply float-right ml-4 mb-2 clear-none; }
+.lore-content::after { content: ""; @apply block clear-both; }
 
 /* ── Ornamental divider ─────────────────────────────────────────────────────── */
 .grimoire-divider {

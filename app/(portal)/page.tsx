@@ -77,8 +77,11 @@ function StatCard({
 export default function DashboardPage() {
   const { data: notes, isLoading } = useQuery<Note[]>({
     queryKey: ["lore", "#lore"],
-    queryFn: () =>
-      fetch("/api/lore?q=%23lore").then((r) => r.json()),
+    queryFn: async () => {
+      const r = await fetch("/api/lore?q=%23lore");
+      const data = await r.json();
+      return Array.isArray(data) ? data : [];
+    },
   });
 
   const { data: ragStatus } = useQuery({

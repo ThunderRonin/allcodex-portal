@@ -17,12 +17,18 @@ import {
   Brain,
   Search,
   LayoutDashboard,
-  Sparkles,
   ShieldAlert,
   Network,
   Microscope,
-  Scroll,
   Settings,
+  Swords,
+  MapPin,
+  CalendarDays,
+  BookMarked,
+  Upload,
+  Scroll,
+  Sparkles,
+  Globe,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,6 +49,15 @@ const navItems = [
     ],
   },
   {
+    label: "Session",
+    items: [
+      { href: "/session", icon: Swords, label: "Session Workspace" },
+      { href: "/quests", icon: MapPin, label: "Quests & Hooks" },
+      { href: "/timeline", icon: CalendarDays, label: "Timeline" },
+      { href: "/statblocks", icon: BookMarked, label: "Statblock Library" },
+    ],
+  },
+  {
     label: "AI Tools",
     items: [
       { href: "/ai/consistency", icon: ShieldAlert, label: "Consistency" },
@@ -53,6 +68,8 @@ const navItems = [
   {
     label: "System",
     items: [
+      { href: "/import", icon: Upload, label: "Import" },
+      { href: "/shared", icon: Globe, label: "Shared Content" },
       { href: "/settings", icon: Settings, label: "Settings" },
     ],
   },
@@ -82,7 +99,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {group.items.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href}>
+                  <SidebarMenuButton asChild isActive={pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))}>
                     <Link href={item.href}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,15 @@ function NewLoreContent() {
   const [template, setTemplate] = useState<TemplateDef | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [parentId, setParentId] = useState(searchParams.get("parentId") || "");
+
+  useEffect(() => {
+    if (searchParams.get("parentId")) return; // explicit param wins
+    fetch("/api/config/portal")
+      .then((r) => r.json())
+      .then((d) => { if (d.loreRootNoteId) setParentId(d.loreRootNoteId); })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [content, setContent] = useState("");
   const [attributeValues, setAttributeValues] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);

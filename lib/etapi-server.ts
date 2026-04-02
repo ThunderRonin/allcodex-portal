@@ -218,6 +218,54 @@ export async function refreshNoteOrdering(creds: EtapiCreds, parentNoteId: strin
   await etapiFetch(creds, `/refresh-note-ordering/${parentNoteId}`, { method: "POST" });
 }
 
+/** Walk parentNoteIds to build breadcrumb ancestry (root → immediate parent). */
+export async function getNoteAncestors(
+  creds: EtapiCreds,
+  noteId: string,
+  maxDepth = 8,
+): Promise<Array<{ noteId: string; title: string }>> {
+  const ancestors: Array<{ noteId: string; title: string }> = [];
+  const visited = new Set<string>([noteId]);
+  let currentId = noteId;
+
+  for (let i = 0; i < maxDepth; i++) {
+    const note = await getNote(creds, currentId).catch(() => null);
+    if (!note) break;
+    const parentId = note.parentNoteIds?.[0];
+    if (!parentId || parentId === "root" || visited.has(parentId)) break;
+    visited.add(parentId);
+    const parent = await getNote(creds, parentId).catch(() => null);
+    if (!parent) break;
+    ancestors.unshift({ noteId: parentId, title: parent.title });
+    currentId = parentId;
+  }
+  return ancestors;
+}
+
+/** Search for notes that have any relation pointing TO the given noteId. */
+export async function searchBacklinks(
+  creds: EtapiCreds,
+  noteId: string,
+): Promise<Array<{ noteId: string; title: string; loreType: string | null }>> {
+  try {
+    // Trilium search: ~*=X finds notes with any relation whose target matches X.
+    // AllCodex may match by noteId or title depending on build version.
+    const res = await etapiFetch(
+      creds,
+      `/notes?search=${encodeURIComponent(`~* ="${noteId}"`)}&limit=50`,
+    );
+    const data = await res.json();
+    const notes: EtapiNote[] = data.results ?? [];
+    return notes.map((n) => ({
+      noteId: n.noteId,
+      title: n.title,
+      loreType: n.attributes?.find((a) => a.name === "loreType")?.value ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 /** Get app info */
 export async function getAppInfo(creds: EtapiCreds): Promise<EtapiAppInfo> {
   const res = await etapiFetch(creds, "/app-info");
