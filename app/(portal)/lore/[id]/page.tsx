@@ -23,12 +23,20 @@ import {
   Calendar,
   Clock,
   Network,
+  ArrowLeftRight,
 } from "lucide-react";
 import { RelationshipGraph } from "@/components/portal/RelationshipGraph";
+import { Breadcrumbs } from "@/components/portal/Breadcrumbs";
+import { TableOfContents } from "@/components/portal/TableOfContents";
+import { NotePreviewLink } from "@/components/portal/NotePreview";
+import { ShareSettings } from "@/components/portal/ShareSettings";
+import { PreviewToggle, type PreviewMode } from "@/components/portal/PreviewToggle";
 import Link from "next/link";
-import { use } from "react";
+import { use, useRef, useState } from "react";
+import { sanitizeLoreHtml } from "@/lib/sanitize";
 
 interface Attribute {
+  attributeId: string;
   name: string;
   type: "label" | "relation";
   value: string;
@@ -52,13 +60,12 @@ function AttributeRow({ attr }: { attr: Attribute }) {
       </span>
       <div className="flex-1 min-w-0">
         {isRelation ? (
-          <Link
-            href={`/lore/${attr.value}`}
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-          >
-            <Link2 className="h-3 w-3" />
-            {attr.value}
-          </Link>
+          <NotePreviewLink noteId={attr.value}>
+            <span className="inline-flex items-center gap-1 text-xs text-primary hover:underline cursor-pointer">
+              <Link2 className="h-3 w-3" />
+              {attr.value}
+            </span>
+          </NotePreviewLink>
         ) : (
           <span className="text-xs font-medium break-words">{attr.value}</span>
         )}
@@ -85,6 +92,8 @@ export default function LoreDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("gm");
 
   const { data: note, isLoading: noteLoading } = useQuery<Note>({
     queryKey: ["note", id],
@@ -92,13 +101,19 @@ export default function LoreDetailPage({
   });
 
   const { data: content, isLoading: contentLoading } = useQuery<string>({
-    queryKey: ["note-content", id],
+    queryKey: ["note-content", id, previewMode],
     queryFn: () =>
-      fetch(`/api/lore/${id}/content`).then((r) => r.text()),
+      previewMode === "player"
+        ? fetch(`/api/lore/${id}/preview?mode=player`).then((r) => r.text())
+        : fetch(`/api/lore/${id}/content`).then((r) => r.text()),
     enabled: !!note,
   });
 
-  const hiddenLabels = ["template", "iconClass", "cssClass", "loreType", "lore", "pageTemplate", "bookTheme"];
+  const hiddenLabels = [
+    "template", "iconClass", "cssClass", "loreType", "lore", "pageTemplate", "bookTheme",
+    // Share / visibility labels — managed via ShareSettings panel
+    "draft", "gmOnly", "shareAlias", "shareCredentials", "shareRoot",
+  ];
   const allLabels = note?.attributes?.filter(
     (a) => 
       a.type === "label" && 
@@ -114,8 +129,23 @@ export default function LoreDetailPage({
   const relations = note?.attributes?.filter((a) => a.type === "relation" && a.name !== "template") ?? [];
   const loreType = note?.attributes?.find((a) => a.name === "loreType")?.value ?? "lore";
 
+  const { data: backlinks = [] } = useQuery<
+    Array<{ noteId: string; title: string; loreType: string | null }>
+  >({
+    queryKey: ["backlinks", id],
+    queryFn: async () => {
+      const r = await fetch(`/api/lore/${id}/backlinks`);
+      if (!r.ok) return [];
+      return r.json();
+    },
+    staleTime: 60_000,
+  });
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {/* Breadcrumbs */}
+      <Breadcrumbs noteId={id} />
+
       {/* Top bar */}
       <div className="flex items-center gap-3">
         <Button asChild variant="ghost" size="sm" className="gap-2 text-muted-foreground">
@@ -131,6 +161,7 @@ export default function LoreDetailPage({
           <span className="text-sm truncate">{note?.title}</span>
         )}
         <div className="ml-auto flex items-center gap-2">
+          <PreviewToggle mode={previewMode} onChange={setPreviewMode} />
           <Button asChild variant="outline" size="sm" className="gap-2">
             <Link href={`/lore/${id}/edit`}>
               <Edit2 className="h-4 w-4" />
@@ -183,9 +214,14 @@ export default function LoreDetailPage({
             </div>
           ) : content ? (
             <div
+              ref={contentRef}
               className="lore-content"
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeLoreHtml(content) }}
             />
+          ) : previewMode === "player" && !content ? (
+            <p className="text-sm text-muted-foreground italic">
+              This note has no player-visible content (it may be hidden from the share tree).
+            </p>
           ) : (
             <p className="text-sm text-muted-foreground italic">
               This entry has no body text yet.
@@ -195,6 +231,9 @@ export default function LoreDetailPage({
 
         {/* Info box sidebar — World Anvil style */}
         <div className="space-y-4">
+          {/* ToC */}
+          <TableOfContents contentRef={contentRef} />
+
           {/* Labels / Promoted Attributes */}
           {details.length > 0 && (
             <Card className="border-primary/20 bg-card/60">
@@ -257,8 +296,42 @@ export default function LoreDetailPage({
           )}
 
           {/* Relationship Map */}
+          {backlinks.length > 0 && (
+            <Card className="border-border/50">
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                  Referenced By
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 space-y-0">
+                {backlinks.map((bl) => (
+                  <NotePreviewLink key={bl.noteId} noteId={bl.noteId}>
+                    <div className="flex items-center justify-between gap-2 py-1.5 border-b border-border/20 last:border-0 cursor-pointer hover:bg-muted/20 rounded px-1 -mx-1 transition-colors">
+                      <span className="text-xs truncate text-foreground/80">{bl.title}</span>
+                      {bl.loreType && (
+                        <Badge variant="outline" className="text-[10px] capitalize shrink-0">
+                          {bl.loreType}
+                        </Badge>
+                      )}
+                    </div>
+                  </NotePreviewLink>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Relationship graph */}
           {note && (
             <RelationshipGraph noteId={id} noteTitle={note.title} />
+          )}
+
+          {/* Share Settings */}
+          {note && (
+            <ShareSettings
+              noteId={id}
+              attributes={note.attributes.filter((a) => a.type === "label")}
+            />
           )}
 
           {/* Find Related */}

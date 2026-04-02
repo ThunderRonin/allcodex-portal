@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchNotes, createNote, createAttribute } from "@/lib/etapi-server";
-import { getEtapiCreds } from "@/lib/get-creds";
+import { getEtapiCreds, getLoreRootNoteId } from "@/lib/get-creds";
 import { handleRouteError, notConfigured } from "@/lib/route-error";
 
 export async function GET(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const creds = await getEtapiCreds();
     if (!creds.url || !creds.token) return notConfigured("AllCodex");
     const { loreType, templateId, attributes, ...noteParams } = await req.json();
-    if (!noteParams.parentNoteId) noteParams.parentNoteId = "root";
+    if (!noteParams.parentNoteId) noteParams.parentNoteId = await getLoreRootNoteId();
     const result = await createNote(creds, noteParams);
     const noteId = (result as any)?.note?.noteId ?? (result as any).noteId;
     if (noteId) {
