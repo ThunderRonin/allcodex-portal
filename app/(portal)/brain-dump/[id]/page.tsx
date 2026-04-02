@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft,
@@ -96,7 +95,7 @@ export default function BrainDumpDetailPage() {
       </div>
 
       {error && (
-        <p className="text-sm text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-3">
+        <p className="text-sm text-destructive rounded-none bg-destructive/10 border border-destructive/20 p-3">
           Failed to load entry.
         </p>
       )}
@@ -130,13 +129,11 @@ export default function BrainDumpDetailPage() {
       )}
 
       {/* Raw text */}
-      <Card className="border-border/60">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">
-            Raw Text
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="rounded-none border border-border/30 bg-card/40 overflow-hidden">
+        <div className="px-4 py-3 border-b border-border/20">
+          <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium">Raw Text</p>
+        </div>
+        <div className="p-4">
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -144,26 +141,26 @@ export default function BrainDumpDetailPage() {
               ))}
             </div>
           ) : (
-            <blockquote className="border-l-2 border-border/50 pl-4 text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">
+            <blockquote className="border-l-2 border-border/40 pl-4 text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">
               {entry?.rawText}
             </blockquote>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* AI Summary */}
       {(isLoading || summary) && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader className="pb-2">
-            <CardTitle
-              className="text-sm text-primary flex items-center gap-2"
+        <div className="rounded-none border border-primary/20 bg-primary/5 border-l-2 border-l-primary/40 overflow-hidden">
+          <div className="px-4 py-3 border-b border-primary/15">
+            <h3
+              className="text-sm text-primary flex items-center gap-2 font-semibold"
               style={{ fontFamily: "var(--font-cinzel)" }}
             >
               <Brain className="h-4 w-4" />
               AllKnower Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="p-4">
             {isLoading ? (
               <Skeleton className="h-4 w-3/4" />
             ) : (
@@ -171,8 +168,8 @@ export default function BrainDumpDetailPage() {
                 {summary}
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Entity cards */}
@@ -191,15 +188,19 @@ export default function BrainDumpDetailPage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {entities.map((e) => (
                 <Link
                   key={e.noteId}
                   href={`/lore/${e.noteId}`}
-                  className="flex items-center gap-3 rounded-lg border border-border/40 bg-card/40 p-3 hover:border-primary/40 hover:bg-card/70 transition-colors"
+                  className={`flex items-center gap-3 border-l-2 p-3 hover:bg-card/70 transition-colors ${
+                    e.action === "created"
+                      ? "border-l-[var(--accent)] bg-[var(--accent)]/5"
+                      : "border-l-primary/60 bg-primary/5"
+                  }`}
                 >
-                  <div className="p-2 rounded-md bg-primary/10 shrink-0">
-                    <BookOpen className="h-4 w-4 text-primary" />
+                  <div className={`p-2 shrink-0 ${e.action === "created" ? "text-[var(--accent)]" : "text-primary"}`}>
+                    <BookOpen className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{e.title}</p>
@@ -207,10 +208,10 @@ export default function BrainDumpDetailPage() {
                   </div>
                   <Badge
                     variant="outline"
-                    className={`shrink-0 text-[10px] ${
+                    className={`shrink-0 text-[10px] rounded-none ${
                       e.action === "created"
-                        ? "text-green-400 border-green-500/40"
-                        : "text-yellow-400 border-yellow-500/40"
+                        ? "text-[var(--accent)] border-[var(--accent)]/40"
+                        : "text-primary border-primary/40"
                     }`}
                   >
                     {e.action}
