@@ -191,7 +191,7 @@ export default function QuestsPage() {
           size="sm"
           className="ml-auto gap-1.5"
           onClick={() => setIsCreateOpen(true)}
-          disabled={isCreating}
+          disabled={isCreating || isCreateOpen}
         >
           <Plus className="h-4 w-4" />
           New Quest

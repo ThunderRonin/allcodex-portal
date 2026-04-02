@@ -41,24 +41,26 @@ export async function POST(req: NextRequest) {
 
     const created = result as { noteId?: string; note?: { noteId?: string } };
     const noteId = created.noteId ?? created.note?.noteId;
-    if (noteId) {
-      await createAttribute(creds, { noteId, type: "label", name: "quest", value: "" });
-      await createAttribute(creds, {
-        noteId,
-        type: "label",
-        name: "questStatus",
-        value: asOptionalString(body?.status) ?? "active",
-      });
+    if (!noteId) {
+      return NextResponse.json({ error: "Quest note was created without a noteId." }, { status: 502 });
+    }
 
-      const description = asOptionalString(body?.description);
-      if (description) {
-        await createAttribute(creds, { noteId, type: "label", name: "description", value: description });
-      }
+    await createAttribute(creds, { noteId, type: "label", name: "quest", value: "" });
+    await createAttribute(creds, {
+      noteId,
+      type: "label",
+      name: "questStatus",
+      value: asOptionalString(body?.status) ?? "active",
+    });
 
-      const location = asOptionalString(body?.location);
-      if (location) {
-        await createAttribute(creds, { noteId, type: "label", name: "location", value: location });
-      }
+    const description = asOptionalString(body?.description);
+    if (description) {
+      await createAttribute(creds, { noteId, type: "label", name: "description", value: description });
+    }
+
+    const location = asOptionalString(body?.location);
+    if (location) {
+      await createAttribute(creds, { noteId, type: "label", name: "location", value: location });
     }
 
     return NextResponse.json(result, { status: 201 });
