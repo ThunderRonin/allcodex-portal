@@ -38,24 +38,57 @@ async function akFetch(creds: AkCreds, path: string, init: RequestInit = {}): Pr
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+export interface BrainDumpEntity {
+  noteId: string;
+  title: string;
+  type: string;
+}
+
+export interface ProposedEntity {
+  title: string;
+  type: string;
+  action: "create" | "update";
+  content?: string;
+  existingNoteId?: string;
+}
+
 export interface BrainDumpResult {
-  notesCreated: number;
-  notesUpdated: number;
+  mode?: "auto";
   summary: string;
-  entities: Array<{
-    action: "created" | "updated";
-    noteId: string;
-    title: string;
-    type: string;
+  created: BrainDumpEntity[];
+  updated: BrainDumpEntity[];
+  skipped: Array<{ title: string; reason: string }>;
+  duplicates?: Array<{
+    proposedTitle: string;
+    proposedType: string;
+    matches: Array<{ noteId: string; title: string; score: number }>;
   }>;
 }
+
+export interface BrainDumpReviewResult {
+  mode: "review";
+  summary: string;
+  proposedEntities: ProposedEntity[];
+  duplicates?: Array<{
+    proposedTitle: string;
+    proposedType: string;
+    matches: Array<{ noteId: string; title: string; score: number }>;
+  }>;
+}
+
+export interface BrainDumpInboxResult {
+  mode: "inbox";
+  queued: true;
+}
+
+export type BrainDumpAnyResult = BrainDumpResult | BrainDumpReviewResult | BrainDumpInboxResult;
 
 export interface BrainDumpHistoryEntry {
   id: string;
   rawText: string;
   summary: string | null;
-  notesCreated: number;
-  notesUpdated: number;
+  notesCreated: string[];
+  notesUpdated: string[];
   model: string;
   tokensUsed: number | null;
   createdAt: string;
@@ -65,6 +98,18 @@ export interface BrainDumpHistoryEntry {
     title: string;
     type: string;
   }> | null;
+}
+
+export interface BrainDumpDetailEntry extends BrainDumpHistoryEntry {
+  parsedJson: {
+    entities?: Array<{
+      noteId: string;
+      title: string;
+      type: string;
+      action: "created" | "updated";
+    }>;
+    summary?: string;
+  } | null;
 }
 
 export interface RagChunk {
@@ -107,16 +152,37 @@ export interface GapResult {
 
 // ── Brain Dump ────────────────────────────────────────────────────────────────
 
-export async function runBrainDump(creds: AkCreds, rawText: string): Promise<BrainDumpResult> {
+export async function runBrainDump(
+  creds: AkCreds,
+  rawText: string,
+  mode: "auto" | "review" | "inbox" = "auto"
+): Promise<BrainDumpAnyResult> {
   const res = await akFetch(creds, "/brain-dump", {
     method: "POST",
-    body: JSON.stringify({ rawText }),
+    body: JSON.stringify({ rawText, mode }),
+  });
+  return res.json();
+}
+
+export async function commitBrainDump(
+  creds: AkCreds,
+  rawText: string,
+  approvedEntities: ProposedEntity[]
+): Promise<BrainDumpResult> {
+  const res = await akFetch(creds, "/brain-dump/commit", {
+    method: "POST",
+    body: JSON.stringify({ rawText, approvedEntities }),
   });
   return res.json();
 }
 
 export async function getBrainDumpHistory(creds: AkCreds): Promise<BrainDumpHistoryEntry[]> {
   const res = await akFetch(creds, "/brain-dump/history");
+  return res.json();
+}
+
+export async function getBrainDumpEntry(creds: AkCreds, id: string): Promise<BrainDumpDetailEntry> {
+  const res = await akFetch(creds, `/brain-dump/history/${encodeURIComponent(id)}`);
   return res.json();
 }
 
@@ -166,7 +232,7 @@ export async function suggestRelationships(creds: AkCreds, text: string, noteId?
 export async function akFetchAutocomplete(creds: AkCreds, q: string): Promise<any[]> {
   const res = await akFetch(creds, `/suggest/autocomplete?q=${encodeURIComponent(q)}`);
   const data = await res.json();
-  return data.results ?? [];
+  return data.suggestions ?? [];
 }
 
 export interface ApplyRelationsResult {
