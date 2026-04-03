@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const { loreType, templateId, attributes, ...noteParams } = await req.json();
     if (!noteParams.parentNoteId) noteParams.parentNoteId = await getLoreRootNoteId();
     const result = await createNote(creds, noteParams);
-    const noteId = (result as any)?.note?.noteId ?? (result as any).noteId;
+    const noteId = result.note?.noteId;
     if (noteId) {
       await createAttribute(creds, { noteId, type: "label", name: "lore", value: "" });
       if (loreType) {

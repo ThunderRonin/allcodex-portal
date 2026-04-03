@@ -78,6 +78,11 @@ export interface CreateNoteParams {
   noteId?: string;
 }
 
+export interface CreateNoteResponse {
+  note: EtapiNote;
+  branch: unknown;
+}
+
 export interface EtapiAppInfo {
   appVersion: string;
   dbVersion: number;
@@ -126,7 +131,7 @@ export async function getNoteContent(creds: EtapiCreds, noteId: string): Promise
 }
 
 /** Create a new note */
-export async function createNote(creds: EtapiCreds, params: CreateNoteParams): Promise<EtapiNote & { branch: unknown }> {
+export async function createNote(creds: EtapiCreds, params: CreateNoteParams): Promise<CreateNoteResponse> {
   const res = await etapiFetch(creds, "/create-note", {
     method: "POST",
     body: JSON.stringify({ type: "text", ...params }),
