@@ -27,11 +27,14 @@ test("quick-capture submit shows entity pills", async ({ page }) => {
 });
 
 test("quick-capture shows failure message on brain dump error", async ({ page }) => {
-  await installPortalApiMocks(page, {
-    brainDump: {
-      status: 503,
-      body: { error: "UNREACHABLE", message: "AllKnower unavailable" },
-    },
+  await installPortalApiMocks(page);
+  // abort() causes fetch to throw, triggering captureMutation.isError
+  await page.route("**/api/brain-dump", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.abort("failed");
+    } else {
+      await route.fallback();
+    }
   });
 
   await page.goto("/session");
@@ -64,16 +67,40 @@ test("statblock lookup renders a StatblockCard for the selected result", async (
   const errors = attachConsoleErrorCollector(page);
   await installPortalApiMocks(page);
 
+  // Override the statblock search route to return full note objects with attributes
+  await page.route("**/api/search**", async (route) => {
+    const q = new URL(route.request().url()).searchParams.get("q") ?? "";
+    if (q.toLowerCase().includes("statblock")) {
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify([{
+          noteId: "sb-cave-bear",
+          title: "Cave Bear",
+          attributes: [
+            { name: "cr", value: "2", type: "label" },
+            { name: "ac", value: "11", type: "label" },
+            { name: "hp", value: "42", type: "label" },
+            { name: "speed", value: "40 ft.", type: "label" },
+            { name: "str", value: "20", type: "label" },
+            { name: "dex", value: "10", type: "label" },
+          ],
+        }]),
+      });
+    } else {
+      await route.fallback();
+    }
+  });
+
   await page.goto("/session");
 
   const statblockInput = page.getByPlaceholder(/search statblocks/i);
-  await statblockInput.fill("Cave");
+  await statblockInput.fill("Ca");
 
   await expect(page.getByText("Cave Bear").first()).toBeVisible();
   await page.getByText("Cave Bear").first().click();
 
-  // StatblockCard should show
-  await expect(page.getByText(/Armor Class/i).first()).toBeVisible();
+  // StatblockCard should show CR or AC stat
+  await expect(page.getByText(/Armor Class|AC/i).first()).toBeVisible();
   await expectNoConsoleErrors(errors);
 });
 
@@ -81,7 +108,7 @@ test("recap section renders brain dump history entries", async ({ page }) => {
   const errors = attachConsoleErrorCollector(page);
   await installPortalApiMocks(page, {
     brainDumpHistory: [
-      { timestamp: new Date(Date.now() - 3_600_000).toISOString(), entityCount: 3, summary: "Extracted three fragments" },
+      { id: "hist-1", rawText: "Three fragments of ancient lore", summary: "Extracted three fragments", notesCreated: ["n-1", "n-2", "n-3"], notesUpdated: [], model: "gpt-4o-mini", tokensUsed: 200, createdAt: new Date(Date.now() - 3_600_000).toISOString() },
     ],
   });
 

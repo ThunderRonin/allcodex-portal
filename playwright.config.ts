@@ -2,11 +2,19 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests",
+  snapshotDir: "./tests/snapshots",
   timeout: 30_000,
   fullyParallel: true,
   retries: 0,
   outputDir: "tests/test-results/artifacts",
   reporter: [["list"], ["html", { outputFolder: "tests/test-results/html-report", open: "never" }]],
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.02,
+      // Snapshot name pattern: <test-title>-<platform>/<browser>/<test-title>.png
+      // e.g. tests/snapshots/chromium/visual-lore-list.png
+    },
+  },
   use: {
     baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",

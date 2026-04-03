@@ -53,9 +53,14 @@ type SearchResult = {
 };
 
 type HistoryEntry = {
-  timestamp: string;
-  entityCount: number;
-  summary?: string;
+  id: string;
+  rawText: string;
+  summary: string | null;
+  notesCreated: string[];
+  notesUpdated: string[];
+  model: string;
+  tokensUsed: number | null;
+  createdAt: string;
 };
 
 type MentionSuggestion = {
@@ -71,6 +76,29 @@ function normalizePortalImageHtml(html: string) {
     .replace(/src=["'][^"']*\/api\/images\//gi, 'src="/api/images/');
 }
 
+type AutolinkMatch = {
+  term: string;
+  noteId: string;
+  title: string;
+};
+
+type TimelineNote = {
+  noteId: string;
+  title: string;
+  attributes: Array<{ name: string; value: string; type: string }>;
+};
+
+type ShareItem = {
+  noteId: string;
+  title: string;
+  loreType: string | null;
+  isDraft: boolean;
+  isGmOnly: boolean;
+  shareAlias: string | null;
+  isProtected: boolean;
+  dateModified: string;
+};
+
 export type PortalMockOptions = {
   notes?: NoteRecord[];
   ragStatus?: { indexedNotes: number; model: string };
@@ -79,10 +107,14 @@ export type PortalMockOptions = {
   gaps?: GapsResponse;
   consistency?: ConsistencyResponse;
   mentionSuggestions?: MentionSuggestion[];
+  autolinkMatches?: AutolinkMatch[];
+  breadcrumbs?: Record<string, Array<{ noteId: string; title: string }>>;
   searchResults?: SearchResult[];
   quests?: NoteRecord[];
   statblocks?: NoteRecord[];
   brainDumpHistory?: HistoryEntry[];
+  timeline?: TimelineNote[];
+  shareTree?: ShareItem[];
   configStatus?: {
     allcodex: { ok?: boolean; connected?: boolean; configured?: boolean; url: string; version?: string; error?: string };
     allknower: { ok?: boolean; connected?: boolean; configured?: boolean; url: string; error?: string };
@@ -269,8 +301,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     }),
   ];
   const brainDumpHistory: HistoryEntry[] = options.brainDumpHistory ?? [
-    { timestamp: new Date(Date.now() - 3_600_000).toISOString(), entityCount: 3, summary: "Extracted three lore fragments" },
-    { timestamp: new Date(Date.now() - 7_200_000).toISOString(), entityCount: 1, summary: "Extracted one lore fragment" },
+    { id: "hist-default-1", rawText: "Default captured fragments", summary: "Captured two fragments", notesCreated: ["note-1"], notesUpdated: [], model: "gpt-4o-mini", tokensUsed: 120, createdAt: new Date(Date.now() - 3_600_000).toISOString() },
   ];
   const configStatus = options.configStatus ?? {
     allcodex: { ok: true, configured: true, url: "http://localhost:8080", version: "0.92.0" },
@@ -279,6 +310,32 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
   const mentionSuggestions = options.mentionSuggestions ?? [
     { noteId: "mention-1", title: "Aether Keep", loreType: "location" },
     { noteId: "mention-2", title: "Aria Vale", loreType: "character" },
+  ];
+
+  const autolinkMatches = options.autolinkMatches ?? [
+    { term: "Aria Vale", noteId: "note-1", title: "Aria Vale" },
+    { term: "Aether Keep", noteId: "note-2", title: "Aether Keep" },
+  ];
+
+  const timelineNotes: TimelineNote[] = options.timeline ?? [
+    { noteId: "tl-1", title: "Founding of Aether Keep", attributes: [
+      { name: "lore", value: "", type: "label" },
+      { name: "loreType", value: "event", type: "label" },
+      { name: "inWorldDate", value: "Year 12, Age of Embers", type: "label" },
+      { name: "era", value: "Age of Embers", type: "label" },
+      { name: "description", value: "The fortress was raised on the ley breach.", type: "label" },
+    ]},
+    { noteId: "tl-2", title: "Aria Vale Appointed Warden", attributes: [
+      { name: "lore", value: "", type: "label" },
+      { name: "loreType", value: "timeline", type: "label" },
+      { name: "inWorldDate", value: "Year 45, Age of Embers", type: "label" },
+      { name: "era", value: "Age of Embers", type: "label" },
+    ]},
+  ];
+
+  const shareTree: ShareItem[] = options.shareTree ?? [
+    { noteId: "note-1", title: "Aria Vale", loreType: "character", isDraft: false, isGmOnly: false, shareAlias: "aria-vale", isProtected: false, dateModified: new Date().toISOString() },
+    { noteId: "note-2", title: "Aether Keep", loreType: "location", isDraft: true, isGmOnly: false, shareAlias: null, isProtected: false, dateModified: new Date().toISOString() },
   ];
 
   const seedNotes = options.notes ?? [
@@ -309,6 +366,28 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
 
   await page.route("**/api/config/portal", async (route) => {
     await fulfillJson(route, { loreRootNoteId: "root" });
+  });
+
+  await page.route("**/api/share**", async (route) => {
+    const method = route.request().method();
+    if (method === "GET") {
+      await fulfillJson(route, { enabled: false, shareId: null, shareUrl: null });
+    } else if (method === "POST" || method === "PUT") {
+      await fulfillJson(route, { enabled: true, shareId: "share-123", shareUrl: "http://localhost:8080/share/share-123" });
+    } else if (method === "DELETE") {
+      await fulfillJson(route, { enabled: false, shareId: null, shareUrl: null });
+    } else {
+      await route.fallback();
+    }
+  });
+
+  // Must be registered AFTER **/api/share** so LIFO routing matches /api/share/tree first
+  await page.route("**/api/share/tree**", async (route) => {
+    await fulfillJson(route, shareTree);
+  });
+
+  await page.route("**/api/timeline**", async (route) => {
+    await fulfillJson(route, timelineNotes);
   });
 
   await page.route("**/api/rag", async (route) => {
@@ -388,11 +467,21 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
   });
 
   await page.route("**/api/lore/*/breadcrumbs", async (route) => {
-    await fulfillJson(route, []);
+    const noteId = findNoteFromUrl(route.request().url(), notes)?.noteId;
+    const crumbs = noteId && options.breadcrumbs?.[noteId] ? options.breadcrumbs[noteId] : [];
+    await fulfillJson(route, crumbs);
   });
 
   await page.route("**/api/lore/*/relationships", async (route) => {
     await fulfillJson(route, { existing: [], suggestions: relationships.suggestions });
+  });
+
+  await page.route("**/api/lore/autolink", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
+    }
+    await fulfillJson(route, { matches: autolinkMatches });
   });
 
   await page.route("**/api/lore/*/preview**", async (route) => {
@@ -632,37 +721,40 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
       return;
     }
     await fulfillJson(route, {
-      created: 22,
-      skipped: 0,
-      errors: 0,
-      buckets: {
-        states: [{ title: "Ironmark" }, { title: "Valdris" }, { title: "Caelmont" }],
-        burgs: [{ title: "Ashgate" }],
-        religions: [{ title: "The Ember Creed" }],
-        cultures: [{ title: "Velthari" }],
-        notes: [{ title: "GM Note 1" }],
-      },
+      mapName: "Test Realm",
+      totals: { created: 22, skipped: 0, errors: 0 },
+      states: { created: [{ noteId: "s-1", name: "Ironmark" }], skipped: [], errors: [] },
+      burgs: { created: [{ noteId: "b-1", name: "Ashgate" }], skipped: [], errors: [] },
+      religions: { created: [{ noteId: "r-1", name: "The Ember Creed" }], skipped: [], errors: [] },
+      cultures: { created: [{ noteId: "c-1", name: "Velthari" }], skipped: [], errors: [] },
+      notes: { created: [], skipped: [], errors: [] },
     });
   });
 
   await page.route("**/api/import/system-pack", async (route) => {
     await fulfillJson(route, {
-      created: [{ noteId: "sp-1", title: "Goblin" }, { noteId: "sp-2", title: "Orc" }],
-      skipped: [],
-      errors: [],
+      created: 2,
+      skipped: 0,
+      errors: 0,
+      detail: {
+        created: [{ noteId: "sp-1", name: "Goblin" }, { noteId: "sp-2", name: "Orc" }],
+        skipped: [],
+        errors: [],
+      },
     });
   });
 
-  await page.route("**/api/brain-dump/history**", async (route) => {
-    await fulfillJson(route, brainDumpHistory);
-  });
-
+  // Register history AFTER the general brain-dump handler so it wins in LIFO order
   await page.route("**/api/brain-dump**", async (route) => {
     if (brainDump.delayMs) {
       await new Promise((resolve) => setTimeout(resolve, brainDump.delayMs));
     }
 
     await fulfillJson(route, brainDump.body, brainDump.status ?? 200);
+  });
+
+  await page.route("**/api/brain-dump/history**", async (route) => {
+    await fulfillJson(route, brainDumpHistory);
   });
 
   await page.route("**/api/ai/relationships", async (route) => {

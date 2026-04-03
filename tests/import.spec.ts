@@ -104,7 +104,7 @@ test("Azgaar tab: uploading a map file shows the preview with map name", async (
     buffer: Buffer.from(mapData),
   });
 
-  await expect(page.getByText("Test Realm")).toBeVisible();
+  await expect(page.getByText("Test Realm").first()).toBeVisible();
   await expectNoConsoleErrors(errors);
 });
 
@@ -125,7 +125,7 @@ test("Azgaar tab: clicking Import shows result totals", async ({ page }) => {
     buffer: Buffer.from(mapData),
   });
 
-  await expect(page.getByText("Test Realm")).toBeVisible();
+  await expect(page.getByText("Test Realm").first()).toBeVisible();
   await page.getByRole("button", { name: /import.*Test Realm|import from/i }).click();
 
   await expect(page.getByText(/import complete/i)).toBeVisible();

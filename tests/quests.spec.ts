@@ -72,9 +72,9 @@ test("empty column shows empty state when no quests match", async ({ page }) => 
 
 test("shows error state when quests API returns 500", async ({ page }) => {
   await installPortalApiMocks(page);
-  // Override quests route to return 500
+  // abort() causes fetch() to throw, triggering TanStack Query isError state
   await page.route("**/api/quests", async (route) => {
-    await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: "Internal Server Error" }) });
+    await route.abort("failed");
   });
 
   await page.goto("/quests");

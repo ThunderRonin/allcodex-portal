@@ -88,7 +88,8 @@ test("AllKnower register mode calls POST /api/config/allknower-register", async 
   await page.locator("#ak-reg-name").fill("Test User");
   await page.locator("#ak-reg-email").fill("test@example.com");
   await page.locator("#ak-reg-password").fill("password123");
-  await page.getByRole("button", { name: /create account/i }).click();
+  // The submit button in register mode is labelled "Register", not "Create Account"
+  await page.getByRole("button", { name: /^register$/i }).last().click();
 
   expect(registerCalled.value).toBe(true);
   await expectNoConsoleErrors(errors);

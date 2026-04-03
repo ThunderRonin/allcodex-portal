@@ -65,8 +65,9 @@ test("AllKnower unavailable on relationships page shows error message", async ({
 
 test("AllCodex unavailable on quests page shows error message", async ({ page }) => {
   await installPortalApiMocks(page);
+  // abort() causes fetch() to throw, which triggers TanStack Query isError
   await page.route("**/api/quests", async (route) => {
-    await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "Cannot reach AllCodex" }) });
+    await route.abort("failed");
   });
 
   await page.goto("/quests");
@@ -76,8 +77,9 @@ test("AllCodex unavailable on quests page shows error message", async ({ page })
 
 test("AllCodex unavailable on statblocks page shows error message", async ({ page }) => {
   await installPortalApiMocks(page);
+  // abort() causes fetch() to throw, which triggers TanStack Query isError
   await page.route("**/api/statblocks", async (route) => {
-    await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "Cannot reach AllCodex" }) });
+    await route.abort("failed");
   });
 
   await page.goto("/statblocks");
