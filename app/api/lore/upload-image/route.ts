@@ -51,12 +51,10 @@ export async function POST(req: NextRequest) {
       throw new Error(`Failed to put image content: ${await res.text()}`);
     }
 
-    // Return the URL that the portal can use to load this image.
-    // Our portal proxy doesn't currently proxy static images cleanly unless we add a route,
-    // but we can use an absolute URL from the AllCodex instance (requires auth though),
-    // Or we provide a /api/lore/[id]/image route.
-    // For now we'll return a new local proxy route.
-    const url = `/api/lore/${noteId}/image`;
+    // Return the canonical image-note route shape used by AllCodex note content.
+    // The portal exposes a matching proxy route under /api/images/* so rendered lore HTML
+    // can keep using image-note URLs without leaking backend credentials to the browser.
+    const url = `/api/images/${noteId}/${encodeURIComponent(filename)}`;
 
     return NextResponse.json({ url, noteId }, { status: 201 });
   } catch (err: any) {

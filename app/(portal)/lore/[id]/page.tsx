@@ -7,23 +7,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   ArrowLeft,
   Edit2,
+  Eye,
   Tag,
   Link2,
   Calendar,
   Clock,
   Network,
   ArrowLeftRight,
+  AlertTriangle,
+  Sparkles,
+  ScrollText,
+  Shield,
+  BookOpen,
 } from "lucide-react";
 import { RelationshipGraph } from "@/components/portal/RelationshipGraph";
 import { Breadcrumbs } from "@/components/portal/Breadcrumbs";
@@ -32,14 +31,23 @@ import { NotePreviewLink } from "@/components/portal/NotePreview";
 import { ShareSettings } from "@/components/portal/ShareSettings";
 import { PreviewToggle, type PreviewMode } from "@/components/portal/PreviewToggle";
 import Link from "next/link";
+import Image from "next/image";
 import { use, useRef, useState } from "react";
 import { sanitizeLoreHtml } from "@/lib/sanitize";
+import { cn } from "@/lib/utils";
 
 interface Attribute {
   attributeId: string;
   name: string;
   type: "label" | "relation";
   value: string;
+}
+
+interface ResolvedRelation {
+  name: string;
+  targetNoteId: string;
+  targetTitle: string;
+  loreType: string | null;
 }
 
 interface Note {
@@ -49,40 +57,140 @@ interface Note {
   dateCreated: string;
   dateModified: string;
   attributes: Attribute[];
+  portraitImageNoteId: string | null;
+  resolvedRelations: ResolvedRelation[];
 }
 
-function AttributeRow({ attr }: { attr: Attribute }) {
-  const isRelation = attr.type === "relation";
+const HIDDEN_LABELS = [
+  "template", "iconClass", "cssClass", "loreType", "lore", "pageTemplate", "bookTheme",
+  "draft", "gmOnly", "shareAlias", "shareCredentials", "shareRoot",
+];
+
+const RELATION_LABELS: Record<string, string> = {
+  ally: "Allied With",
+  relAlly: "Allied With",
+  enemy: "Opposes",
+  relEnemy: "Opposes",
+  family: "Family",
+  relFamily: "Family",
+  location: "Linked Places",
+  relLocation: "Linked Places",
+  event: "Linked Events",
+  relEvent: "Linked Events",
+  faction: "Serves",
+  relFaction: "Serves",
+  other: "Related Entries",
+  relOther: "Related Entries",
+  serves: "Serves",
+  worships: "Reveres",
+  member_of: "Member Of",
+  leader_of: "Leads",
+  located_in: "Located In",
+  originates_from: "Originates From",
+  participated_in: "Involved In",
+};
+
+function toDisplayName(value: string): string {
+  return value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^rel/, "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .trim();
+}
+
+function relationLabel(name: string): string {
+  return RELATION_LABELS[name] ?? toDisplayName(name);
+}
+
+function relationTone(name: string): string {
+  const normalized = name.toLowerCase();
+  if (normalized.includes("enemy") || normalized.includes("hate")) return "rose";
+  if (normalized.includes("ally") || normalized.includes("family")) return "emerald";
+  if (normalized.includes("serv") || normalized.includes("lead")) return "amber";
+  if (normalized.includes("location") || normalized.includes("origin")) return "cyan";
+  return "violet";
+}
+
+function PortraitCard({ note }: { note: Note }) {
+  if (note.portraitImageNoteId) {
+    return (
+      <Card className="wiki-rail-card overflow-hidden">
+        <div className="wiki-portrait-frame">
+          <Image
+            src={`/api/lore/${note.portraitImageNoteId}/image`}
+            alt={`${note.title} portrait`}
+            fill
+            sizes="320px"
+            unoptimized
+            className="object-cover"
+          />
+        </div>
+        <CardContent className="p-4">
+          <p className="wiki-rail-kicker">Portrait</p>
+          <p className="font-semibold text-sm text-foreground/90">{note.title}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const initials = note.title
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+
   return (
-    <div className="flex items-start gap-2 py-1.5 border-b border-border/30 last:border-0">
-      <span className="text-xs text-muted-foreground/70 w-28 shrink-0 capitalize pt-0.5">
-        {attr.name.replace(/_/g, " ")}
-      </span>
-      <div className="flex-1 min-w-0">
-        {isRelation ? (
-          <NotePreviewLink noteId={attr.value}>
-            <span className="inline-flex items-center gap-1 text-xs text-primary hover:underline cursor-pointer">
-              <Link2 className="h-3 w-3" />
-              {attr.value}
+    <Card className="wiki-rail-card overflow-hidden">
+      <div className="wiki-portrait-frame wiki-portrait-placeholder">
+        <div className="wiki-portrait-rune">{initials || "AC"}</div>
+      </div>
+      <CardContent className="p-4 space-y-1">
+        <p className="wiki-rail-kicker">Portrait Slot</p>
+        <p className="text-sm text-muted-foreground">
+          Add a `portraitImage` relation to an image note to populate this panel.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DetailField({ label, value, emphasize = false }: { label: string; value: string; emphasize?: boolean }) {
+  return (
+    <div className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 border-b border-border/25 py-2 last:border-0">
+      <span className="wiki-detail-label">{label}</span>
+      <span className={cn("text-sm break-words", emphasize && "text-accent font-semibold uppercase tracking-wide")}>{value}</span>
+    </div>
+  );
+}
+
+function RelationGroup({ label, items }: { label: string; items: ResolvedRelation[] }) {
+  return (
+    <div className="space-y-2">
+      <p className="wiki-rail-kicker">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {items.map((relation) => (
+          <NotePreviewLink key={`${relation.name}-${relation.targetNoteId}`} noteId={relation.targetNoteId}>
+            <span className={cn("wiki-relation-chip", `wiki-relation-chip--${relationTone(relation.name)}`)}>
+              {relation.targetTitle}
             </span>
           </NotePreviewLink>
-        ) : (
-          <span className="text-xs font-medium break-words">{attr.value}</span>
-        )}
+        ))}
       </div>
-      <Tooltip>
-        <TooltipTrigger>
-          {isRelation ? (
-            <Link2 className="h-3 w-3 text-muted-foreground/40 shrink-0" />
-          ) : (
-            <Tag className="h-3 w-3 text-muted-foreground/40 shrink-0" />
-          )}
-        </TooltipTrigger>
-        <TooltipContent>
-          {isRelation ? "Relation" : "Label"}
-        </TooltipContent>
-      </Tooltip>
     </div>
+  );
+}
+
+function RelatedEntryCard({ entry }: { entry: { noteId: string; title: string; loreType: string | null } }) {
+  return (
+    <NotePreviewLink noteId={entry.noteId}>
+      <div className="wiki-related-card">
+        <span className="wiki-related-kicker">{entry.loreType ?? "entry"}</span>
+        <p className="wiki-related-title">{entry.title}</p>
+        <div className="wiki-related-underline" />
+      </div>
+    </NotePreviewLink>
   );
 }
 
@@ -115,15 +223,10 @@ export default function LoreDetailPage({
     enabled: !!note,
   });
 
-  const hiddenLabels = [
-    "template", "iconClass", "cssClass", "loreType", "lore", "pageTemplate", "bookTheme",
-    // Share / visibility labels — managed via ShareSettings panel
-    "draft", "gmOnly", "shareAlias", "shareCredentials", "shareRoot",
-  ];
   const allLabels = note?.attributes?.filter(
     (a) => 
       a.type === "label" && 
-      !hiddenLabels.includes(a.name) && 
+      !HIDDEN_LABELS.includes(a.name) && 
       !a.name.startsWith("Label:") && 
       !a.name.startsWith("Relation:") &&
       !(a.value && (a.value.includes("promoted") || a.value.includes("alias=")))
@@ -132,8 +235,15 @@ export default function LoreDetailPage({
   const details = allLabels.filter(a => a.value && a.value.trim() !== "");
   const tags = allLabels.filter(a => !a.value || a.value.trim() === "");
 
-  const relations = note?.attributes?.filter((a) => a.type === "relation" && a.name !== "template") ?? [];
   const loreType = note?.attributes?.find((a) => a.name === "loreType")?.value ?? "lore";
+  const isGmOnly = note?.attributes?.some((a) => a.type === "label" && a.name === "gmOnly") ?? false;
+  const isDraft = note?.attributes?.some((a) => a.type === "label" && a.name === "draft") ?? false;
+  const groupedRelations = (note?.resolvedRelations ?? []).reduce<Record<string, ResolvedRelation[]>>((groups, relation) => {
+    const label = relationLabel(relation.name);
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(relation);
+    return groups;
+  }, {});
 
   const { data: backlinks = [] } = useQuery<
     Array<{ noteId: string; title: string; loreType: string | null }>
@@ -147,25 +257,27 @@ export default function LoreDetailPage({
     staleTime: 60_000,
   });
 
+  const relatedEntries = [
+    ...(note?.resolvedRelations ?? []).map((relation) => ({
+      noteId: relation.targetNoteId,
+      title: relation.targetTitle,
+      loreType: relation.loreType,
+    })),
+    ...backlinks,
+  ].filter((entry, index, array) => array.findIndex((candidate) => candidate.noteId === entry.noteId) === index).slice(0, 6);
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {/* Breadcrumbs */}
+    <div className="mx-auto max-w-7xl space-y-8 px-4 pb-10 pt-4 sm:px-6 lg:px-8">
       <Breadcrumbs noteId={id} />
 
-      {/* Top bar */}
-      <div className="flex items-center gap-3">
-        <Button asChild variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-3">
+        <Button asChild variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
           <Link href="/lore">
             <ArrowLeft className="h-4 w-4" />
             Lore
           </Link>
         </Button>
         <span className="text-muted-foreground/30">/</span>
-        {noteLoading ? (
-          <Skeleton className="h-5 w-40" />
-        ) : (
-          <span className="text-sm truncate">{note?.title}</span>
-        )}
         <div className="ml-auto flex items-center gap-2">
           <PreviewToggle mode={previewMode} onChange={setPreviewMode} />
           <Button asChild variant="outline" size="sm" className="gap-2">
@@ -177,177 +289,196 @@ export default function LoreDetailPage({
         </div>
       </div>
 
-      {/* Title */}
       {noteLoading ? (
-        <Skeleton className="h-10 w-72" />
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-20 w-80" />
+        </div>
       ) : (
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <h1
-              className="text-3xl font-bold text-primary"
-              style={{ fontFamily: "var(--font-cinzel)" }}
-            >
-              {note?.title}
-            </h1>
-            <Badge variant="outline" className="capitalize">
-              {loreType}
-            </Badge>
+        <header className="wiki-hero">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant="outline" className="wiki-lore-badge capitalize">
+                <BookOpen className="h-3 w-3" />
+                {loreType}
+              </Badge>
+              {isDraft && (
+                <Badge variant="outline" className="wiki-state-badge wiki-state-badge--draft">
+                  Draft
+                </Badge>
+              )}
+            </div>
+            <h1 className="wiki-page-title">{note?.title}</h1>
+            <div className="wiki-title-rule" />
           </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground/90">
+            <span className="inline-flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
               Created {new Date(note?.dateCreated ?? "").toLocaleDateString()}
             </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
               Modified {new Date(note?.dateModified ?? "").toLocaleDateString()}
             </span>
+            {previewMode === "player" && (
+              <span className="inline-flex items-center gap-1.5 text-accent">
+                <Eye className="h-3.5 w-3.5" />
+                Player-safe preview
+              </span>
+            )}
           </div>
+        </header>
+      )}
+
+      {isGmOnly && previewMode === "gm" && (
+        <div className="wiki-warning-banner">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span>This entry contains GM-only content. Spoilers ahead.</span>
         </div>
       )}
 
-      <div className="grimoire-divider" />
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-8">
+          <Card className="wiki-panel">
+            <CardContent className="p-6 sm:p-8 space-y-8">
+              <TableOfContents contentRef={contentRef} />
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content */}
-        <div className="lg:col-span-2">
-          {contentLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className={`h-4 ${i % 3 === 2 ? "w-2/3" : "w-full"}`} />
-              ))}
+              {contentLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 7 }).map((_, index) => (
+                    <Skeleton key={index} className={cn("h-4", index % 3 === 0 ? "w-4/5" : "w-full")} />
+                  ))}
+                </div>
+              ) : content ? (
+                <div
+                  ref={contentRef}
+                  className="lore-content wiki-article"
+                  dangerouslySetInnerHTML={{ __html: sanitizeLoreHtml(content) }}
+                />
+              ) : previewMode === "player" ? (
+                <p className="text-sm text-muted-foreground italic">
+                  This note has no player-visible content.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  This entry has no body text yet.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {relatedEntries.length > 0 && (
+            <section className="space-y-5">
+              <div className="wiki-section-header">
+                <ScrollText className="h-4 w-4" />
+                <h2 className="wiki-section-title">Related Entries</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {relatedEntries.map((entry) => (
+                  <RelatedEntryCard key={entry.noteId} entry={entry} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        <aside className="space-y-4 xl:sticky xl:top-6 xl:self-start">
+          {noteLoading || !note ? (
+            <div className="space-y-4">
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-40 w-full" />
             </div>
-          ) : content ? (
-            <div
-              ref={contentRef}
-              className="lore-content"
-              dangerouslySetInnerHTML={{ __html: sanitizeLoreHtml(content) }}
-            />
-          ) : previewMode === "player" && !content ? (
-            <p className="text-sm text-muted-foreground italic">
-              This note has no player-visible content (it may be hidden from the share tree).
-            </p>
           ) : (
-            <p className="text-sm text-muted-foreground italic">
-              This entry has no body text yet.
-            </p>
-          )}
-        </div>
+            <>
+              <PortraitCard note={note} />
 
-        {/* Info box sidebar — World Anvil style */}
-        <div className="space-y-4">
-          {/* ToC */}
-          <TableOfContents contentRef={contentRef} />
-
-          {/* Labels / Promoted Attributes */}
-          {details.length > 0 && (
-            <Card className="border-primary/20 bg-card/60">
-              <CardHeader className="pb-2 border-b border-border/30">
-                <CardTitle
-                  className="text-xs font-semibold uppercase tracking-wider text-primary"
-                  style={{ fontFamily: "var(--font-cinzel)" }}
-                >
-                  Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                {details.map((attr) => (
-                  <AttributeRow key={`${attr.name}-${attr.value}`} attr={attr} />
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Tags */}
-          {tags.length > 0 && (
-            <Card className="border-border/50 bg-card/40">
-              <CardHeader className="pb-2 border-b border-border/30">
-                <CardTitle
-                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
-                  style={{ fontFamily: "var(--font-cinzel)" }}
-                >
-                  <Tag className="h-3.5 w-3.5" />
-                  Tags
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-3 flex flex-wrap gap-2">
-                {tags.map((attr) => (
-                  <Badge key={attr.name} variant="secondary" className="text-xs font-normal border-border/50 text-muted-foreground">
-                    {attr.name.replace(/_/g, " ")}
-                  </Badge>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Relations */}
-          {relations.length > 0 && (
-            <Card className="border-accent/30 bg-card/60">
-              <CardHeader className="pb-2 border-b border-border/30">
-                <CardTitle
-                  className="text-xs font-semibold uppercase tracking-wider text-primary flex items-center gap-1.5"
-                  style={{ fontFamily: "var(--font-cinzel)" }}
-                >
-                  <Network className="h-3.5 w-3.5" />
-                  Connections
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-2">
-                {relations.map((attr) => (
-                  <AttributeRow key={`${attr.name}-${attr.value}`} attr={attr} />
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Relationship Map */}
-          {backlinks.length > 0 && (
-            <Card className="border-border/50">
-              <CardHeader className="pb-2 pt-4 px-4">
-                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <ArrowLeftRight className="h-3.5 w-3.5" />
-                  Referenced By
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4 space-y-0">
-                {backlinks.map((bl) => (
-                  <NotePreviewLink key={bl.noteId} noteId={bl.noteId}>
-                    <div className="flex items-center justify-between gap-2 py-1.5 border-b border-border/20 last:border-0 cursor-pointer hover:bg-muted/20 rounded px-1 -mx-1 transition-colors">
-                      <span className="text-xs truncate text-foreground/80">{bl.title}</span>
-                      {bl.loreType && (
-                        <Badge variant="outline" className="text-[10px] capitalize shrink-0">
-                          {bl.loreType}
-                        </Badge>
-                      )}
+              <Card className="wiki-rail-card">
+                <CardContent className="p-5 space-y-4">
+                  <div className="space-y-1">
+                    <p className="wiki-rail-kicker">{toDisplayName(loreType)} Details</p>
+                    <div className="space-y-0.5">
+                      <DetailField label="Title" value={note.title} />
+                      <DetailField label="Type" value={toDisplayName(loreType)} />
+                      {details.slice(0, 6).map((attr) => (
+                        <DetailField
+                          key={`${attr.name}-${attr.value}`}
+                          label={toDisplayName(attr.name)}
+                          value={attr.value}
+                          emphasize={attr.name === "status"}
+                        />
+                      ))}
                     </div>
-                  </NotePreviewLink>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+                  </div>
 
-          {/* Relationship graph */}
-          {note && (
-            <RelationshipGraph noteId={id} noteTitle={note.title} />
-          )}
+                  {tags.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="wiki-rail-kicker">Tags</p>
+                      <div className="flex flex-wrap gap-2">
+                        {tags.map((attr) => (
+                          <span key={attr.name} className="wiki-relation-chip wiki-relation-chip--violet">
+                            {toDisplayName(attr.name)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* Share Settings */}
-          {note && (
-            <ShareSettings
-              noteId={id}
-              attributes={(note.attributes ?? []).filter((a) => a.type === "label")}
-            />
-          )}
+              {Object.entries(groupedRelations).length > 0 && (
+                <Card className="wiki-rail-card">
+                  <CardContent className="p-5 space-y-4">
+                    {Object.entries(groupedRelations).map(([label, items]) => (
+                      <RelationGroup key={label} label={label} items={items} />
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-          {/* Find Related */}
-          <Button asChild variant="outline" size="sm" className="w-full gap-2">
-            <Link href={`/ai/relationships?noteId=${id}`}>
-              <Network className="h-4 w-4" />
-              AI: Suggest Connections
-            </Link>
-          </Button>
-        </div>
+              <div className="grid gap-3">
+                <Button asChild className="w-full gap-2">
+                  <Link href={`/lore/${id}/edit`}>
+                    <Edit2 className="h-4 w-4" />
+                    Edit Entry
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full gap-2 border-accent/40 text-accent hover:bg-accent/10">
+                  <Link href={`/ai/relationships?noteId=${id}`}>
+                    <Sparkles className="h-4 w-4" />
+                    View AI Suggestions
+                  </Link>
+                </Button>
+              </div>
+
+              {backlinks.length > 0 && (
+                <Card className="wiki-rail-card">
+                  <CardContent className="p-5 space-y-3">
+                    <p className="wiki-rail-kicker">Referenced By</p>
+                    <div className="space-y-2">
+                      {backlinks.slice(0, 5).map((entry) => (
+                        <RelatedEntryCard key={entry.noteId} entry={entry} />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <RelationshipGraph noteId={id} noteTitle={note.title} />
+
+              <ShareSettings
+                noteId={id}
+                attributes={(note.attributes ?? []).filter((a) => a.type === "label")}
+              />
+
+              <div className="wiki-side-note">
+                <Shield className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                <p>
+                  The redesigned lore rail is driven by existing ETAPI labels and relations. Use a `portraitImage` relation to attach a dedicated portrait.
+                </p>
+              </div>
+            </>
+          )}
+        </aside>
       </div>
     </div>
   );

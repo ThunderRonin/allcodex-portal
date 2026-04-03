@@ -7,6 +7,7 @@
  */
 
 import { ServiceError } from "./route-error";
+import { isPortraitRelationName } from "./lore-presentation";
 
 export interface EtapiCreds {
   url: string;
@@ -66,6 +67,13 @@ export interface EtapiNote {
   parentBranchIds: string[];
   childBranchIds: string[];
   attributes: EtapiAttribute[];
+}
+
+export interface ResolvedRelation {
+  name: string;
+  targetNoteId: string;
+  targetTitle: string;
+  loreType: string | null;
 }
 
 export interface CreateNoteParams {
@@ -269,6 +277,48 @@ export async function searchBacklinks(
   } catch {
     return [];
   }
+}
+
+export function getPortraitImageNoteId(note: EtapiNote): string | null {
+  const portraitRelation = note.attributes?.find(
+    (attr) => attr.type === "relation" && isPortraitRelationName(attr.name),
+  );
+  return portraitRelation?.value ?? null;
+}
+
+export async function resolveNoteRelations(
+  creds: EtapiCreds,
+  note: EtapiNote,
+): Promise<ResolvedRelation[]> {
+  const relations = (note.attributes ?? []).filter(
+    (attr) =>
+      attr.type === "relation" &&
+      attr.name !== "template" &&
+      !isPortraitRelationName(attr.name),
+  );
+
+  const resolved = await Promise.all(
+    relations.map(async (relation) => {
+      try {
+        const target = await getNote(creds, relation.value);
+        return {
+          name: relation.name,
+          targetNoteId: relation.value,
+          targetTitle: target.title,
+          loreType: target.attributes?.find((attr) => attr.name === "loreType")?.value ?? null,
+        } satisfies ResolvedRelation;
+      } catch {
+        return {
+          name: relation.name,
+          targetNoteId: relation.value,
+          targetTitle: relation.value,
+          loreType: null,
+        } satisfies ResolvedRelation;
+      }
+    }),
+  );
+
+  return resolved;
 }
 
 /** Get app info */

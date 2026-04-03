@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNote, patchNote, deleteNote } from "@/lib/etapi-server";
+import { getNote, getPortraitImageNoteId, patchNote, deleteNote, resolveNoteRelations } from "@/lib/etapi-server";
 import { getEtapiCreds } from "@/lib/get-creds";
 import { handleRouteError, notConfigured } from "@/lib/route-error";
 
@@ -9,7 +9,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!creds.url || !creds.token) return notConfigured("AllCodex");
     const { id } = await params;
     const note = await getNote(creds, id);
-    return NextResponse.json(note);
+    const [resolvedRelations, portraitImageNoteId] = await Promise.all([
+      resolveNoteRelations(creds, note),
+      Promise.resolve(getPortraitImageNoteId(note)),
+    ]);
+    return NextResponse.json({
+      ...note,
+      resolvedRelations,
+      portraitImageNoteId,
+    });
   } catch (err) {
     return handleRouteError(err);
   }

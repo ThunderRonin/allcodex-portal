@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getEtapiCreds } from "@/lib/get-creds";
 import { handleRouteError, notConfigured } from "@/lib/route-error";
 import { getNoteContent } from "@/lib/etapi-server";
-import { sanitizePlayerView, sanitizeLoreHtml } from "@/lib/sanitize";
+import { normalizeLoreHtmlForPortal, sanitizePlayerView, sanitizeLoreHtml } from "@/lib/sanitize";
 
 /**
  * GET /api/lore/[id]/preview?mode=player|gm
@@ -22,11 +22,12 @@ export async function GET(
     const mode = req.nextUrl.searchParams.get("mode") ?? "gm";
 
     const rawContent = await getNoteContent(creds, id);
+    const normalizedContent = normalizeLoreHtmlForPortal(rawContent);
 
     const processed =
       mode === "player"
-        ? sanitizePlayerView(rawContent)
-        : sanitizeLoreHtml(rawContent);
+        ? sanitizePlayerView(normalizedContent)
+        : sanitizeLoreHtml(normalizedContent);
 
     return new NextResponse(processed, {
       headers: { "Content-Type": "text/html; charset=utf-8" },

@@ -206,6 +206,98 @@
   @apply text-primary/50 text-xs tracking-[0.5em] block;
 }
 
+/* ── Wiki-style lore detail treatment ──────────────────────────────────────── */
+.wiki-hero {
+  @apply rounded-3xl border border-border/45 bg-[radial-gradient(circle_at_top_left,oklch(0.18_0.07_286/.6),transparent_45%),linear-gradient(180deg,oklch(0.11_0.03_280),oklch(0.08_0.025_276))] px-6 py-8 shadow-[0_24px_80px_rgba(0,0,0,0.28)];
+}
+.wiki-page-title {
+  font-family: var(--font-cinzel), "Palatino Linotype", serif;
+  @apply text-4xl font-black uppercase tracking-[0.04em] text-primary sm:text-5xl lg:text-6xl;
+  text-wrap: balance;
+}
+.wiki-title-rule {
+  @apply h-px w-28 bg-gradient-to-r from-primary via-primary/40 to-transparent;
+}
+.wiki-lore-badge {
+  @apply gap-1.5 border-primary/35 bg-primary/10 text-primary;
+}
+.wiki-state-badge {
+  @apply uppercase tracking-[0.22em] text-[10px];
+}
+.wiki-state-badge--draft {
+  @apply border-amber-400/30 bg-amber-400/10 text-amber-300;
+}
+.wiki-warning-banner {
+  @apply flex items-center gap-3 rounded-2xl border border-red-500/35 bg-red-950/70 px-5 py-4 text-sm font-medium text-red-100 shadow-[0_0_0_1px_rgba(127,29,29,0.15)_inset];
+}
+.wiki-panel {
+  @apply border-border/45 bg-card/70 shadow-[0_20px_60px_rgba(0,0,0,0.22)];
+}
+.wiki-article {
+  @apply min-h-[18rem];
+}
+.wiki-section-header {
+  @apply flex items-center gap-2 text-primary/90;
+}
+.wiki-section-title {
+  font-family: var(--font-cinzel), serif;
+  @apply text-2xl uppercase tracking-[0.14em];
+}
+.wiki-rail-card {
+  @apply border-border/45 bg-card/72 shadow-[0_16px_50px_rgba(0,0,0,0.22)];
+}
+.wiki-rail-kicker {
+  font-family: var(--font-cinzel), serif;
+  @apply text-[11px] uppercase tracking-[0.24em] text-accent/85;
+}
+.wiki-detail-label {
+  @apply text-[11px] uppercase tracking-[0.16em] text-muted-foreground/75;
+}
+.wiki-portrait-frame {
+  @apply relative aspect-[4/5] overflow-hidden border-b border-border/45 bg-[radial-gradient(circle_at_top,oklch(0.18_0.085_295),oklch(0.07_0.02_275)_68%)];
+}
+.wiki-portrait-placeholder {
+  @apply flex items-center justify-center;
+}
+.wiki-portrait-rune {
+  font-family: var(--font-cinzel), serif;
+  @apply rounded-full border border-primary/35 bg-primary/10 px-8 py-7 text-5xl font-bold tracking-[0.08em] text-primary shadow-[0_0_30px_rgba(255,190,98,0.15)];
+}
+.wiki-relation-chip {
+  @apply inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:brightness-110;
+}
+.wiki-relation-chip--violet {
+  @apply border-violet-400/25 bg-violet-500/12 text-violet-100;
+}
+.wiki-relation-chip--emerald {
+  @apply border-emerald-400/25 bg-emerald-500/12 text-emerald-100;
+}
+.wiki-relation-chip--rose {
+  @apply border-rose-400/25 bg-rose-500/12 text-rose-100;
+}
+.wiki-relation-chip--amber {
+  @apply border-amber-400/25 bg-amber-500/12 text-amber-100;
+}
+.wiki-relation-chip--cyan {
+  @apply border-cyan-400/25 bg-cyan-500/12 text-cyan-100;
+}
+.wiki-related-card {
+  @apply h-full rounded-2xl border border-border/45 bg-[linear-gradient(180deg,oklch(0.11_0.03_280),oklch(0.08_0.02_276))] p-5 transition-transform duration-150 hover:-translate-y-0.5 hover:border-primary/35;
+}
+.wiki-related-kicker {
+  @apply mb-3 block text-[10px] uppercase tracking-[0.22em] text-accent/80;
+}
+.wiki-related-title {
+  font-family: var(--font-cinzel), serif;
+  @apply text-lg leading-snug text-primary;
+}
+.wiki-related-underline {
+  @apply mt-4 h-px w-20 bg-gradient-to-r from-violet-400/60 to-transparent;
+}
+.wiki-side-note {
+  @apply flex items-start gap-3 rounded-2xl border border-accent/25 bg-accent/10 px-4 py-3 text-xs leading-relaxed text-muted-foreground;
+}
+
 /* ── Scrollbar styling ───────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--background); }

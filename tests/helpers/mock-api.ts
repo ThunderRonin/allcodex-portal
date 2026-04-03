@@ -38,11 +38,38 @@ type GapsResponse = {
   body: unknown;
 };
 
+type ConsistencyResponse = {
+  status?: number;
+  body: unknown;
+};
+
+type SearchResult = {
+  noteId: string;
+  title: string;
+  type: string;
+  loreType?: string | null;
+  snippet?: string;
+  score?: number;
+};
+
+type HistoryEntry = {
+  timestamp: string;
+  entityCount: number;
+  summary?: string;
+};
+
 type MentionSuggestion = {
   noteId: string;
   title: string;
   loreType: string;
 };
+
+function normalizePortalImageHtml(html: string) {
+  return html
+    .replace(/src=["'][^"']*\/api\/lore\/([a-zA-Z0-9_]+)\/image["']/gi, 'src="/api/images/$1/image"')
+    .replace(/src=["']api\/images\//gi, 'src="/api/images/')
+    .replace(/src=["'][^"']*\/api\/images\//gi, 'src="/api/images/');
+}
 
 export type PortalMockOptions = {
   notes?: NoteRecord[];
@@ -50,7 +77,16 @@ export type PortalMockOptions = {
   brainDump?: BrainDumpResponse;
   relationships?: RelationshipsResponse;
   gaps?: GapsResponse;
+  consistency?: ConsistencyResponse;
   mentionSuggestions?: MentionSuggestion[];
+  searchResults?: SearchResult[];
+  quests?: NoteRecord[];
+  statblocks?: NoteRecord[];
+  brainDumpHistory?: HistoryEntry[];
+  configStatus?: {
+    allcodex: { ok?: boolean; connected?: boolean; configured?: boolean; url: string; version?: string; error?: string };
+    allknower: { ok?: boolean; connected?: boolean; configured?: boolean; url: string; error?: string };
+  };
 };
 
 export function buildNote(overrides: Partial<NoteRecord> & Pick<NoteRecord, "noteId" | "title">): NoteRecord {
@@ -67,6 +103,55 @@ export function buildNote(overrides: Partial<NoteRecord> & Pick<NoteRecord, "not
       { attributeId: `attr-type-${overrides.noteId}`, name: "loreType", value: "character", type: "label" },
     ],
     content: overrides.content ?? `<h1>${escapeHtml(overrides.title)}</h1><p>Chronicle entry body.</p>`,
+  };
+}
+
+export function buildQuest(overrides: Partial<NoteRecord> & Pick<NoteRecord, "noteId" | "title">): NoteRecord {
+  const now = new Date().toISOString();
+  const status = (overrides.attributes?.find((a) => a.name === "questStatus")?.value) ?? "active";
+  return {
+    noteId: overrides.noteId,
+    title: overrides.title,
+    type: overrides.type ?? "text",
+    dateCreated: overrides.dateCreated ?? now,
+    dateModified: overrides.dateModified ?? now,
+    parentNoteIds: overrides.parentNoteIds ?? ["root"],
+    attributes: overrides.attributes ?? [
+      { attributeId: `attr-lore-${overrides.noteId}`, name: "lore", value: "", type: "label" },
+      { attributeId: `attr-type-${overrides.noteId}`, name: "loreType", value: "quest", type: "label" },
+      { attributeId: `attr-status-${overrides.noteId}`, name: "questStatus", value: status, type: "label" },
+      { attributeId: `attr-loc-${overrides.noteId}`, name: "location", value: overrides.title + " Vicinity", type: "label" },
+    ],
+    content: overrides.content ?? `<h1>${escapeHtml(overrides.title)}</h1><p>Quest entry body.</p>`,
+  };
+}
+
+export function buildStatblock(overrides: Partial<NoteRecord> & Pick<NoteRecord, "noteId" | "title">): NoteRecord {
+  const now = new Date().toISOString();
+  return {
+    noteId: overrides.noteId,
+    title: overrides.title,
+    type: overrides.type ?? "text",
+    dateCreated: overrides.dateCreated ?? now,
+    dateModified: overrides.dateModified ?? now,
+    parentNoteIds: overrides.parentNoteIds ?? ["root"],
+    attributes: overrides.attributes ?? [
+      { attributeId: `attr-lore-${overrides.noteId}`, name: "lore", value: "", type: "label" },
+      { attributeId: `attr-type-${overrides.noteId}`, name: "loreType", value: "creature", type: "label" },
+      { attributeId: `attr-statblock-${overrides.noteId}`, name: "statblock", value: "", type: "label" },
+      { attributeId: `attr-cr-${overrides.noteId}`, name: "challengeRating", value: "2", type: "label" },
+      { attributeId: `attr-type2-${overrides.noteId}`, name: "creatureType", value: "beast", type: "label" },
+      { attributeId: `attr-ac-${overrides.noteId}`, name: "ac", value: "13", type: "label" },
+      { attributeId: `attr-hp-${overrides.noteId}`, name: "hp", value: "45", type: "label" },
+      { attributeId: `attr-spd-${overrides.noteId}`, name: "speed", value: "30 ft.", type: "label" },
+      { attributeId: `attr-str-${overrides.noteId}`, name: "str", value: "16", type: "label" },
+      { attributeId: `attr-dex-${overrides.noteId}`, name: "dex", value: "12", type: "label" },
+      { attributeId: `attr-con-${overrides.noteId}`, name: "con", value: "14", type: "label" },
+      { attributeId: `attr-int-${overrides.noteId}`, name: "int", value: "6", type: "label" },
+      { attributeId: `attr-wis-${overrides.noteId}`, name: "wis", value: "8", type: "label" },
+      { attributeId: `attr-cha-${overrides.noteId}`, name: "cha", value: "5", type: "label" },
+    ],
+    content: overrides.content ?? `<h1>${escapeHtml(overrides.title)}</h1>`,
   };
 }
 
@@ -105,6 +190,91 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
         },
       ],
     },
+  };
+  const consistency = options.consistency ?? {
+    body: { issues: [], summary: "Lore is consistent." },
+  };
+  const searchResultsDefault: SearchResult[] = [
+    { noteId: "note-1", title: "Aria Vale", type: "text", loreType: "character", snippet: "Warden of the northern archive.", score: 0.92 },
+    { noteId: "note-2", title: "Aether Keep", type: "text", loreType: "location", snippet: "Fortress built above the ley breach.", score: 0.85 },
+  ];
+  const searchResults = options.searchResults ?? searchResultsDefault;
+  const questsNotes = options.quests ?? [
+    buildQuest({ noteId: "quest-1", title: "The Lost Seal",
+      attributes: [
+        { attributeId: "attr-lore-quest-1", name: "lore", value: "", type: "label" },
+        { attributeId: "attr-type-quest-1", name: "loreType", value: "quest", type: "label" },
+        { attributeId: "attr-status-quest-1", name: "questStatus", value: "active", type: "label" },
+        { attributeId: "attr-loc-quest-1", name: "location", value: "Vault Depths", type: "label" },
+      ],
+    }),
+    buildQuest({ noteId: "quest-2", title: "Reclaim the Archive",
+      attributes: [
+        { attributeId: "attr-lore-quest-2", name: "lore", value: "", type: "label" },
+        { attributeId: "attr-type-quest-2", name: "loreType", value: "quest", type: "label" },
+        { attributeId: "attr-status-quest-2", name: "questStatus", value: "active", type: "label" },
+      ],
+    }),
+    buildQuest({ noteId: "quest-3", title: "The Ember Treaty",
+      attributes: [
+        { attributeId: "attr-lore-quest-3", name: "lore", value: "", type: "label" },
+        { attributeId: "attr-type-quest-3", name: "loreType", value: "quest", type: "label" },
+        { attributeId: "attr-status-quest-3", name: "questStatus", value: "complete", type: "label" },
+      ],
+    }),
+    buildQuest({ noteId: "quest-4", title: "The Fallen Gate",
+      attributes: [
+        { attributeId: "attr-lore-quest-4", name: "lore", value: "", type: "label" },
+        { attributeId: "attr-type-quest-4", name: "loreType", value: "quest", type: "label" },
+        { attributeId: "attr-status-quest-4", name: "questStatus", value: "failed", type: "label" },
+      ],
+    }),
+  ];
+  const statblocksNotes = options.statblocks ?? [
+    buildStatblock({ noteId: "sb-1", title: "Cave Bear",
+      attributes: [
+        { attributeId: "attr-lore-sb-1", name: "lore", value: "", type: "label" },
+        { attributeId: "attr-type-sb-1", name: "loreType", value: "creature", type: "label" },
+        { attributeId: "attr-statblock-sb-1", name: "statblock", value: "", type: "label" },
+        { attributeId: "attr-cr-sb-1", name: "challengeRating", value: "2", type: "label" },
+        { attributeId: "attr-ctype-sb-1", name: "creatureType", value: "beast", type: "label" },
+        { attributeId: "attr-ac-sb-1", name: "ac", value: "11", type: "label" },
+        { attributeId: "attr-hp-sb-1", name: "hp", value: "42", type: "label" },
+        { attributeId: "attr-spd-sb-1", name: "speed", value: "40 ft.", type: "label" },
+        { attributeId: "attr-str-sb-1", name: "str", value: "20", type: "label" },
+        { attributeId: "attr-dex-sb-1", name: "dex", value: "10", type: "label" },
+        { attributeId: "attr-con-sb-1", name: "con", value: "16", type: "label" },
+        { attributeId: "attr-int-sb-1", name: "int", value: "2", type: "label" },
+        { attributeId: "attr-wis-sb-1", name: "wis", value: "13", type: "label" },
+        { attributeId: "attr-cha-sb-1", name: "cha", value: "7", type: "label" },
+      ],
+    }),
+    buildStatblock({ noteId: "sb-2", title: "Shadow Wraith",
+      attributes: [
+        { attributeId: "attr-lore-sb-2", name: "lore", value: "", type: "label" },
+        { attributeId: "attr-type-sb-2", name: "loreType", value: "creature", type: "label" },
+        { attributeId: "attr-statblock-sb-2", name: "statblock", value: "", type: "label" },
+        { attributeId: "attr-cr-sb-2", name: "challengeRating", value: "5", type: "label" },
+        { attributeId: "attr-ctype-sb-2", name: "creatureType", value: "undead", type: "label" },
+        { attributeId: "attr-ac-sb-2", name: "ac", value: "13", type: "label" },
+        { attributeId: "attr-hp-sb-2", name: "hp", value: "67", type: "label" },
+        { attributeId: "attr-spd-sb-2", name: "speed", value: "40 ft. (fly)", type: "label" },
+        { attributeId: "attr-str-sb-2", name: "str", value: "6", type: "label" },
+        { attributeId: "attr-dex-sb-2", name: "dex", value: "14", type: "label" },
+        { attributeId: "attr-con-sb-2", name: "con", value: "13", type: "label" },
+        { attributeId: "attr-int-sb-2", name: "int", value: "11", type: "label" },
+        { attributeId: "attr-wis-sb-2", name: "wis", value: "12", type: "label" },
+        { attributeId: "attr-cha-sb-2", name: "cha", value: "14", type: "label" },
+      ],
+    }),
+  ];
+  const brainDumpHistory: HistoryEntry[] = options.brainDumpHistory ?? [
+    { timestamp: new Date(Date.now() - 3_600_000).toISOString(), entityCount: 3, summary: "Extracted three lore fragments" },
+    { timestamp: new Date(Date.now() - 7_200_000).toISOString(), entityCount: 1, summary: "Extracted one lore fragment" },
+  ];
+  const configStatus = options.configStatus ?? {
+    allcodex: { ok: true, configured: true, url: "http://localhost:8080", version: "0.92.0" },
+    allknower: { ok: true, configured: true, url: "http://localhost:3001" },
   };
   const mentionSuggestions = options.mentionSuggestions ?? [
     { noteId: "mention-1", title: "Aether Keep", loreType: "location" },
@@ -157,8 +327,64 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     await fulfillJson(route, filtered);
   });
 
+  await page.route("**/api/lore/note-search**", async (route) => {
+    const url = new URL(route.request().url());
+    const query = (url.searchParams.get("q") ?? "").toLowerCase();
+    const type = url.searchParams.get("type");
+
+    const results = orderedNoteIds
+      .map((id) => notes.get(id))
+      .filter((note): note is NoteRecord => Boolean(note))
+      .filter((note) => note.title.toLowerCase().includes(query))
+      .filter((note) => !type || note.type === type)
+      .map((note) => ({
+        noteId: note.noteId,
+        title: note.title,
+        type: note.type,
+        loreType: note.attributes.find((attribute) => attribute.name === "loreType")?.value ?? null,
+      }))
+      .slice(0, 12);
+
+    await fulfillJson(route, results);
+  });
+
   await page.route("**/api/lore/*/backlinks", async (route) => {
     await fulfillJson(route, []);
+  });
+
+  await page.route("**/api/lore/*/attributes**", async (route) => {
+    const note = findNoteFromUrl(route.request().url(), notes);
+
+    if (!note) {
+      await fulfillJson(route, { error: "Not found" }, 404);
+      return;
+    }
+
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON() as { type: Attribute["type"]; name: string; value: string };
+      const attribute: Attribute = {
+        attributeId: `attr-${body.name}-${note.noteId}-${note.attributes.length + 1}`,
+        name: body.name,
+        value: body.value,
+        type: body.type,
+      };
+      note.attributes.push(attribute);
+      note.dateModified = new Date().toISOString();
+      await fulfillJson(route, attribute, 200);
+      return;
+    }
+
+    if (route.request().method() === "DELETE") {
+      const attrId = new URL(route.request().url()).searchParams.get("attrId");
+      if (attrId) {
+        note.attributes = note.attributes.filter((attribute) => attribute.attributeId !== attrId);
+        note.dateModified = new Date().toISOString();
+      }
+      await route.fulfill({ status: 204, body: "" });
+      return;
+    }
+
+    await route.fallback();
   });
 
   await page.route("**/api/lore/*/breadcrumbs", async (route) => {
@@ -174,7 +400,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     await route.fulfill({
       status: 200,
       contentType: "text/html; charset=utf-8",
-      body: note?.content ?? "",
+      body: normalizePortalImageHtml(note?.content ?? ""),
     });
   });
 
@@ -193,7 +419,52 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     await route.fulfill({
       status: note ? 200 : 404,
       contentType: "text/html; charset=utf-8",
-      body: note?.content ?? "",
+      body: normalizePortalImageHtml(note?.content ?? ""),
+    });
+  });
+
+  await page.route("**/api/lore/upload-image", async (route) => {
+    const now = new Date().toISOString();
+    const noteId = `image-${orderedNoteIds.length + 1}`;
+    const filename = route.request().headers()["x-vercel-filename"] ?? "portrait.png";
+
+    notes.set(noteId, {
+      noteId,
+      title: filename,
+      type: "image",
+      dateCreated: now,
+      dateModified: now,
+      parentNoteIds: ["root"],
+      attributes: [],
+      content: "",
+    });
+    orderedNoteIds.unshift(noteId);
+
+    await fulfillJson(route, { noteId, url: `/api/images/${noteId}/${encodeURIComponent(filename)}` }, 201);
+  });
+
+  await page.route("**/api/images/*/*", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+    const segments = pathname.split("/");
+    const noteId = segments.at(-2);
+    const note = noteId ? notes.get(noteId) : undefined;
+    const title = note?.title ?? "Portrait";
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 480 600"><rect width="480" height="600" fill="#161124"/><rect x="22" y="22" width="436" height="556" rx="24" fill="#241936" stroke="#ffbf69" stroke-width="3"/><text x="240" y="305" fill="#ffbf69" font-size="42" font-family="serif" text-anchor="middle">${escapeHtml(title)}</text></svg>`;
+    await route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      body: svg,
+    });
+  });
+
+  await page.route("**/api/lore/*/image", async (route) => {
+    const note = findNoteFromUrl(route.request().url(), notes);
+    const title = note?.title ?? "Portrait";
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 480 600"><rect width="480" height="600" fill="#161124"/><rect x="22" y="22" width="436" height="556" rx="24" fill="#241936" stroke="#ffbf69" stroke-width="3"/><text x="240" y="305" fill="#ffbf69" font-size="42" font-family="serif" text-anchor="middle">${escapeHtml(title)}</text></svg>`;
+    await route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      body: svg,
     });
   });
 
@@ -206,14 +477,15 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
 
     if (
       pathname.endsWith("/api/lore") ||
-      pathname.endsWith("/api/lore/mention-search")
+      pathname.endsWith("/api/lore/mention-search") ||
+      pathname.endsWith("/api/lore/note-search")
     ) {
       await route.fallback();
       return;
     }
 
     if (method === "GET") {
-      await fulfillJson(route, note ? serializeNote(note) : { error: "Not found" }, note ? 200 : 404);
+      await fulfillJson(route, note ? serializeNote(note, notes) : { error: "Not found" }, note ? 200 : 404);
       return;
     }
 
@@ -223,7 +495,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
         note.title = body.title;
         note.dateModified = new Date().toISOString();
       }
-      await fulfillJson(route, note ? serializeNote(note) : { error: "Not found" }, note ? 200 : 404);
+      await fulfillJson(route, note ? serializeNote(note, notes) : { error: "Not found" }, note ? 200 : 404);
       return;
     }
 
@@ -254,7 +526,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
       const url = new URL(request.url());
       const q = url.searchParams.get("q") ?? "#lore";
       const result = filterNotes(q, orderedNoteIds.map((id) => notes.get(id)!).filter(Boolean));
-      await fulfillJson(route, result.map(serializeNote));
+      await fulfillJson(route, result.map((note) => serializeNote(note, notes)));
       return;
     }
 
@@ -305,8 +577,84 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     await route.fallback();
   });
 
+  await page.route("**/api/search**", async (route) => {
+    const url = new URL(route.request().url());
+    const query = (url.searchParams.get("q") ?? "").toLowerCase();
+    const filtered = query
+      ? searchResults.filter((r) => r.title.toLowerCase().includes(query) || (r.snippet ?? "").toLowerCase().includes(query))
+      : searchResults;
+    await fulfillJson(route, filtered);
+  });
+
+  await page.route("**/api/quests", async (route) => {
+    await fulfillJson(route, questsNotes.map((note) => serializeNote(note, notes)));
+  });
+
+  await page.route("**/api/statblocks", async (route) => {
+    await fulfillJson(route, statblocksNotes.map((note) => serializeNote(note, notes)));
+  });
+
+  await page.route("**/api/config/status**", async (route) => {
+    await fulfillJson(route, configStatus);
+  });
+
+  await page.route("**/api/config/connect", async (route) => {
+    await fulfillJson(route, { success: true });
+  });
+
+  await page.route("**/api/config/allcodex-login", async (route) => {
+    await fulfillJson(route, { success: true });
+  });
+
+  await page.route("**/api/config/allknower-login", async (route) => {
+    await fulfillJson(route, { success: true });
+  });
+
+  await page.route("**/api/config/allknower-register", async (route) => {
+    await fulfillJson(route, { success: true });
+  });
+
+  await page.route("**/api/config/disconnect**", async (route) => {
+    await fulfillJson(route, { success: true });
+  });
+
+  await page.route("**/api/import/azgaar**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.searchParams.get("action") === "preview") {
+      await fulfillJson(route, {
+        mapName: "Test Realm",
+        stateCount: 3,
+        burgCount: 12,
+        religionCount: 2,
+        cultureCount: 4,
+        noteCount: 1,
+      });
+      return;
+    }
+    await fulfillJson(route, {
+      created: 22,
+      skipped: 0,
+      errors: 0,
+      buckets: {
+        states: [{ title: "Ironmark" }, { title: "Valdris" }, { title: "Caelmont" }],
+        burgs: [{ title: "Ashgate" }],
+        religions: [{ title: "The Ember Creed" }],
+        cultures: [{ title: "Velthari" }],
+        notes: [{ title: "GM Note 1" }],
+      },
+    });
+  });
+
+  await page.route("**/api/import/system-pack", async (route) => {
+    await fulfillJson(route, {
+      created: [{ noteId: "sp-1", title: "Goblin" }, { noteId: "sp-2", title: "Orc" }],
+      skipped: [],
+      errors: [],
+    });
+  });
+
   await page.route("**/api/brain-dump/history**", async (route) => {
-    await fulfillJson(route, []);
+    await fulfillJson(route, brainDumpHistory);
   });
 
   await page.route("**/api/brain-dump**", async (route) => {
@@ -332,7 +680,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
   });
 
   await page.route("**/api/ai/consistency", async (route) => {
-    await fulfillJson(route, { issues: [], summary: "" });
+    await fulfillJson(route, consistency.body, consistency.status ?? 200);
   });
 
   return {
@@ -364,7 +712,28 @@ function filterNotes(query: string, notes: NoteRecord[]) {
   });
 }
 
-function serializeNote(note: NoteRecord) {
+function serializeNote(note: NoteRecord, notes: Map<string, NoteRecord>) {
+  const portraitImageNoteId = note.attributes.find(
+    (attribute) => attribute.type === "relation" && ["portraitImage", "coverImage", "portrait", "heroImage"].includes(attribute.name),
+  )?.value ?? null;
+
+  const resolvedRelations = note.attributes
+    .filter(
+      (attribute) =>
+        attribute.type === "relation" &&
+        attribute.name !== "template" &&
+        !["portraitImage", "coverImage", "portrait", "heroImage"].includes(attribute.name),
+    )
+    .map((attribute) => {
+      const target = notes.get(attribute.value);
+      return {
+        name: attribute.name,
+        targetNoteId: attribute.value,
+        targetTitle: target?.title ?? attribute.value,
+        loreType: target?.attributes.find((candidate) => candidate.name === "loreType")?.value ?? null,
+      };
+    });
+
   return {
     noteId: note.noteId,
     title: note.title,
@@ -373,6 +742,8 @@ function serializeNote(note: NoteRecord) {
     dateModified: note.dateModified,
     attributes: note.attributes,
     parentNoteIds: note.parentNoteIds,
+    portraitImageNoteId,
+    resolvedRelations,
   };
 }
 

@@ -5,8 +5,8 @@ export default defineConfig({
   timeout: 30_000,
   fullyParallel: true,
   retries: 0,
-  outputDir: "test-results/artifacts",
-  reporter: [["list"], ["html", { outputFolder: "test-results/html-report", open: "never" }]],
+  outputDir: "tests/test-results/artifacts",
+  reporter: [["list"], ["html", { outputFolder: "tests/test-results/html-report", open: "never" }]],
   use: {
     baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",

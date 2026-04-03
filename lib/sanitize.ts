@@ -21,11 +21,20 @@ const ALLOWED_ATTR = [
   "data-note-id", // Trilium internal link attribute
 ];
 
+const PORTAL_SAFE_URI_REGEXP = /^(?:https?:|mailto:|#|\/api\/images\/|api\/images\/)/i;
+
+export function normalizeLoreHtmlForPortal(html: string): string {
+  return html
+    .replace(/src=["'][^"']*\/api\/lore\/([a-zA-Z0-9_]+)\/image["']/gi, 'src="/api/images/$1/image"')
+    .replace(/src=["']api\/images\//gi, 'src="/api/images/')
+    .replace(/src=["'][^"']*\/api\/images\//gi, 'src="/api/images/');
+}
+
 export function sanitizeLoreHtml(html: string): string {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS,
     ALLOWED_ATTR,
-    ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|#)/i,
+    ALLOWED_URI_REGEXP: PORTAL_SAFE_URI_REGEXP,
     FORCE_BODY: true,
   });
 }
@@ -40,7 +49,7 @@ export function sanitizePlayerView(html: string): string {
   const body = DOMPurify.sanitize(html, {
     ALLOWED_TAGS,
     ALLOWED_ATTR,
-    ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|#)/i,
+    ALLOWED_URI_REGEXP: PORTAL_SAFE_URI_REGEXP,
     FORCE_BODY: true,
     RETURN_DOM: true,
   }) as unknown as Element;

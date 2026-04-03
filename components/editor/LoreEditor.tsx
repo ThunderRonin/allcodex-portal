@@ -73,7 +73,7 @@ export const LoreEditor = ({
     return (
       <div
         className={cn(
-          "relative w-full overflow-hidden rounded-[1.5rem] border border-border/80 bg-card/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+          "relative w-full rounded-[1.5rem] border border-border/80 bg-card/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
           className,
         )}
       >
@@ -224,7 +224,7 @@ const MountedLoreEditor = ({
   return (
     <div 
       className={cn(
-        "relative w-full overflow-hidden rounded-[1.5rem] border border-border/80 bg-card/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-border",
+        "relative w-full rounded-[1.5rem] border border-border/80 bg-card/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors hover:border-border",
         "[&_.bn-container]:min-h-[480px] [&_.bn-container]:bg-transparent [&_.bn-container]:px-0 [&_.bn-container]:py-0",
         "[&_.bn-editor]:min-h-[440px] [&_.bn-editor]:bg-transparent [&_.bn-editor]:px-6 [&_.bn-editor]:pb-8 [&_.bn-editor]:pt-4 [&_.bn-editor]:text-[15px] [&_.bn-editor]:leading-7 [&_.bn-editor]:text-foreground",
         "[&_.bn-editor_[data-content-type='heading']]:font-semibold [&_.bn-editor_a]:text-primary [&_.bn-editor_a]:underline-offset-4",
