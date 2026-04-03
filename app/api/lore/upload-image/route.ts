@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
       mime: contentType,
     });
     
-    // ETAPI v1 returns the note directly
-    const noteId = createResult?.noteId;
+    // ETAPI POST /create-note returns { note: {...}, branch: {...} }
+    const noteId = createResult?.note?.noteId;
 
     if (!noteId) {
       throw new Error("Failed to create image note in ETAPI");
@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
       method: "PUT",
       headers: {
         Authorization: creds.token,
-        "Content-Type": contentType,
+        // Send as octet-stream so Express raw() parser accepts it on the AllCodex side.
+        // The note's mime was already set on creation; this is just the raw bytes.
+        "Content-Type": "application/octet-stream",
       },
       body: buffer,
     });

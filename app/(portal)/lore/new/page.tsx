@@ -128,6 +128,7 @@ function NewLoreContent() {
             <LoreEditor
               initialContent={content}
               onSave={setContent}
+              onChangeImmediate={setContent}
               className="min-h-[400px]"
               showSaveStatus={false}
             />

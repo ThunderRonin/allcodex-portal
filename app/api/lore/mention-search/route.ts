@@ -6,7 +6,8 @@ import { handleRouteError, notConfigured } from "@/lib/route-error";
 
 export async function GET(req: NextRequest) {
   try {
-    const q = req.nextUrl.searchParams.get("q");
+    const rawQuery = req.nextUrl.searchParams.get("q");
+    const q = rawQuery?.replace(/^@+/, "") ?? "";
     if (!q || q.length < 2) {
       return NextResponse.json([]);
     }

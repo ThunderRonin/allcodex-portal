@@ -23,6 +23,7 @@ type EditorType = (typeof loreEditorSchema)["BlockNoteEditor"];
 interface LoreEditorProps {
   initialContent?: string;
   onSave?: (html: string) => void;
+  onChangeImmediate?: (html: string) => void;
   className?: string;
   showSaveStatus?: boolean;
 }
@@ -58,6 +59,46 @@ async function uploadImageFile(file: File) {
 export const LoreEditor = ({
   initialContent,
   onSave,
+  onChangeImmediate,
+  className,
+  showSaveStatus = true,
+}: LoreEditorProps) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div
+        className={cn(
+          "relative w-full overflow-hidden rounded-[1.5rem] border border-border/80 bg-card/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]",
+          className,
+        )}
+      >
+        <div className="min-h-[440px] px-6 py-4 text-sm text-muted-foreground">
+          Loading editor...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <MountedLoreEditor
+      initialContent={initialContent}
+      onSave={onSave}
+      onChangeImmediate={onChangeImmediate}
+      className={className}
+      showSaveStatus={showSaveStatus}
+    />
+  );
+};
+
+const MountedLoreEditor = ({
+  initialContent,
+  onSave,
+  onChangeImmediate,
   className,
   showSaveStatus = true,
 }: LoreEditorProps) => {
@@ -66,9 +107,13 @@ export const LoreEditor = ({
     uploadFile: uploadImageFile,
   });
   const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "Unsaved">("Saved");
+  const [mentionSuggestions, setMentionSuggestions] = useState<MentionSuggestion[]>([]);
+  const [mentionRange, setMentionRange] = useState<{ from: number; to: number } | null>(null);
   const appliedContentRef = useRef<string | null>(null);
   const emittedContentRef = useRef<string | null>(null);
   const hydratingRef = useRef(false);
+  const mentionRequestRef = useRef(0);
+  const mentionRangeRef = useRef<{ from: number; to: number } | null>(null);
   const [debouncedSave] = useState(() =>
     debounce((html: string) => {
       emittedContentRef.current = html;
@@ -76,6 +121,74 @@ export const LoreEditor = ({
       setSaveStatus("Saved");
     }, 750)
   );
+
+  useEffect(() => {
+    mentionRangeRef.current = mentionRange;
+  }, [mentionRange]);
+
+  const clearMentionSuggestions = () => {
+    mentionRequestRef.current += 1;
+    setMentionRange(null);
+    setMentionSuggestions([]);
+  };
+
+  const refreshMentionSuggestions = async () => {
+    const { selection, doc } = editor._tiptapEditor.state;
+
+    if (!selection.empty || selection.$from.parent.type.spec.code) {
+      clearMentionSuggestions();
+      return;
+    }
+
+    const cursor = selection.from;
+    const blockStart = selection.$from.start();
+    const textBeforeCursor = doc.textBetween(blockStart, cursor, "\n", "\0");
+    const match = textBeforeCursor.match(/(?:^|\s)@([^\s@]{2,})$/);
+
+    if (!match) {
+      clearMentionSuggestions();
+      return;
+    }
+
+    const query = match[1];
+    const nextRange = {
+      from: cursor - query.length - 1,
+      to: cursor,
+    };
+
+    setMentionRange(nextRange);
+
+    const requestId = ++mentionRequestRef.current;
+    const suggestions = await getMentionMenuItems(editor, query);
+
+    if (mentionRequestRef.current !== requestId) {
+      return;
+    }
+
+    setMentionSuggestions(suggestions);
+  };
+
+  const insertMention = (item: MentionSuggestion) => {
+    const activeRange = mentionRangeRef.current;
+
+    if (!activeRange) {
+      return;
+    }
+
+    editor._tiptapEditor.chain().focus().deleteRange(activeRange).run();
+    editor.insertInlineContent([
+      {
+        type: "mention",
+        props: {
+          noteId: item.noteId,
+          title: item.title,
+          loreType: item.loreType,
+        },
+      },
+      " ",
+    ]);
+    clearMentionSuggestions();
+  };
 
   useEffect(() => {
     const nextContent = initialContent ?? "";
@@ -147,8 +260,11 @@ export const LoreEditor = ({
             return;
           }
 
+          const html = editor.blocksToHTMLLossy(editor.document);
           setSaveStatus("Saving...");
-          debouncedSave(editor.blocksToHTMLLossy(editor.document));
+          onChangeImmediate?.(html);
+          debouncedSave(html);
+          void refreshMentionSuggestions();
         }}
       >
         {/* Custom slash menu with autolinker command */}
@@ -176,32 +292,21 @@ export const LoreEditor = ({
             )
           }
         />
-        {/* @mention suggestion menu */}
-        <SuggestionMenuController
-          triggerCharacter="@"
-          getItems={async (query) => {
-            const suggestions = await getMentionMenuItems(editor, query);
-            return suggestions.map((item) => ({
-              title: item.title,
-              onItemClick: () => {
-                editor.insertInlineContent([
-                  {
-                    type: "mention",
-                    props: {
-                      noteId: item.noteId,
-                      title: item.title,
-                      loreType: item.loreType,
-                    },
-                  },
-                  " ",
-                ]);
-              },
-              badge: item.loreType,
-              group: "Lore",
-            }));
-          }}
-        />
       </BlockNoteView>
+
+      {mentionRange && mentionSuggestions.length > 0 && (
+        <div className="absolute bottom-6 left-6 z-20 w-full max-w-sm rounded-xl border border-border/80 bg-popover/95 p-2 shadow-2xl backdrop-blur">
+          {mentionSuggestions.map((item) => (
+            <div key={item.noteId} onMouseDown={(event) => event.preventDefault()}>
+              <MentionMenuItem
+                item={item}
+                isSelected={false}
+                onClick={() => insertMention(item)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <AutolinkerDialog />
     </div>

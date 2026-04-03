@@ -97,7 +97,13 @@ export default function LoreDetailPage({
 
   const { data: note, isLoading: noteLoading } = useQuery<Note>({
     queryKey: ["note", id],
-    queryFn: () => fetch(`/api/lore/${id}`).then((r) => r.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/lore/${id}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load note ${id}`);
+      }
+      return response.json();
+    },
   });
 
   const { data: content, isLoading: contentLoading } = useQuery<string>({
@@ -330,7 +336,7 @@ export default function LoreDetailPage({
           {note && (
             <ShareSettings
               noteId={id}
-              attributes={note.attributes.filter((a) => a.type === "label")}
+              attributes={(note.attributes ?? []).filter((a) => a.type === "label")}
             />
           )}
 

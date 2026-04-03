@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -30,49 +30,54 @@ export default function EditLorePage() {
   const [template, setTemplate] = useState<TemplateDef | null>(null);
   const [attributeValues, setAttributeValues] = useState<Record<string, string>>({});
 
-  const { isLoading: noteLoading } = useQuery<Note>({
+  const { isLoading: noteLoading, data: noteData } = useQuery<Note>({
     queryKey: ["note", id],
     queryFn: () => fetch(`/api/lore/${id}`).then((response) => response.json()),
-    onSuccess: (data: Note) => {
-      if (title === null) {
-        setTitle(data.title ?? "");
-      }
+  });
 
-      const draftAttr = data.attributes?.find((attribute) => attribute.name === "draft");
-      setIsDraft(!!draftAttr);
-      setDraftAttrId(draftAttr?.attributeId || null);
-
-      if (template === null) {
-        const loreTypeAttr = data.attributes?.find((attribute) => attribute.name === "loreType");
-        const foundTemplate = LORE_TEMPLATES.find((candidate) => candidate.value === loreTypeAttr?.value) || null;
-        setTemplate(foundTemplate);
-
-        if (foundTemplate && Object.keys(attributeValues).length === 0) {
-          const initialValues: Record<string, string> = {};
-          foundTemplate.attributes.forEach((attr) => {
-            const sanitizedKey = attr.replace(/\s+/g, "_");
-            const attrData = data.attributes?.find((attribute) => attribute.name === sanitizedKey);
-            if (attrData) {
-              initialValues[attr] = attrData.value;
-            }
-          });
-          setAttributeValues(initialValues);
-        }
-      }
-    },
-  } as any);
-
-  const { isLoading: contentLoading } = useQuery<string>({
+  const { isLoading: contentLoading, data: fetchedContent } = useQuery<string>({
     queryKey: ["note-content", id],
     queryFn: () => fetch(`/api/lore/${id}/content`).then((response) => response.text()),
-    onSuccess: (data: string) => {
-      if (content === null) {
-        setContent(data);
-      }
-    },
-  } as any);
+  });
 
-  const isLoading = noteLoading || (contentLoading && content === null);
+  // Sync note data into local state once (allow user edits to diverge)
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (!noteData || initializedRef.current) return;
+    initializedRef.current = true;
+
+    if (title === null) setTitle(noteData.title ?? "");
+
+    const draftAttr = noteData.attributes?.find((attribute) => attribute.name === "draft");
+    setIsDraft(!!draftAttr);
+    setDraftAttrId(draftAttr?.attributeId || null);
+
+    if (template === null) {
+      const loreTypeAttr = noteData.attributes?.find((attribute) => attribute.name === "loreType");
+      const foundTemplate = LORE_TEMPLATES.find((candidate) => candidate.value === loreTypeAttr?.value) || null;
+      setTemplate(foundTemplate);
+
+      if (foundTemplate && Object.keys(attributeValues).length === 0) {
+        const initialValues: Record<string, string> = {};
+        foundTemplate.attributes.forEach((attr) => {
+          const sanitizedKey = attr.replace(/\s+/g, "_");
+          const attrData = noteData.attributes?.find((attribute) => attribute.name === sanitizedKey);
+          if (attrData) {
+            initialValues[attr] = attrData.value;
+          }
+        });
+        setAttributeValues(initialValues);
+      }
+    }
+  }, [noteData]);
+
+  useEffect(() => {
+    if (fetchedContent !== undefined && content === null) {
+      setContent(fetchedContent);
+    }
+  }, [fetchedContent]);
+
+  const isLoading = noteLoading || contentLoading;
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
