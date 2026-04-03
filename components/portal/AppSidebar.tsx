@@ -27,8 +27,8 @@ import {
   BookMarked,
   Upload,
   Scroll,
-  Sparkles,
   Globe,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -95,7 +95,12 @@ export function AppSidebar() {
       <SidebarContent>
         {navItems.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupLabel
+              style={{ fontFamily: "var(--font-cinzel)" }}
+              className="text-[10px] tracking-[0.15em] uppercase font-medium"
+            >
+              {group.label}
+            </SidebarGroupLabel>
             <SidebarMenu>
               {group.items.map((item) => (
                 <SidebarMenuItem key={item.href}>
@@ -112,11 +117,14 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="px-4 py-2">
-        <p className="text-xs text-muted-foreground opacity-50 flex items-center gap-1">
-          <Sparkles className="h-3 w-3" />
-          Powered by AllKnower
-        </p>
+      <SidebarFooter className="px-3 py-3">
+        <Link
+          href="/lore/new"
+          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-secondary-foreground bg-secondary/40 hover:bg-secondary/60 transition-colors rounded-none border border-secondary/30"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          <span style={{ fontFamily: "var(--font-cinzel)" }} className="uppercase tracking-wider text-[10px]">New Entry</span>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );

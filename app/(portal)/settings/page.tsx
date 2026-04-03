@@ -1,21 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/portal/StatusBadge";
 import {
   CheckCircle2,
-  XCircle,
   Loader2,
   Link2,
   Unlink,
@@ -36,37 +28,6 @@ type ConnState = "unknown" | "checking" | "connected" | "disconnected" | "error"
 interface StatusPayload {
   allcodex: { ok: boolean; configured: boolean; url: string | null; version?: string; error?: string };
   allknower: { ok: boolean; configured: boolean; url: string | null; error?: string };
-}
-
-// ── Status badge ───────────────────────────────────────────────────────────────
-
-function StatusBadge({ state, version }: { state: ConnState; version?: string }) {
-  if (state === "connected")
-    return (
-      <Badge className="gap-1 bg-green-500/20 text-green-400 border-green-500/30">
-        <CheckCircle2 className="h-3 w-3" />
-        Connected{version ? ` · v${version}` : ""}
-      </Badge>
-    );
-  if (state === "checking")
-    return (
-      <Badge className="gap-1 bg-blue-500/20 text-blue-400 border-blue-500/30">
-        <Loader2 className="h-3 w-3 animate-spin" />
-        Checking…
-      </Badge>
-    );
-  if (state === "error")
-    return (
-      <Badge className="gap-1 bg-red-500/20 text-red-400 border-red-500/30">
-        <XCircle className="h-3 w-3" />
-        Error
-      </Badge>
-    );
-  return (
-    <Badge variant="outline" className="gap-1 text-muted-foreground">
-      Disconnected
-    </Badge>
-  );
 }
 
 // ── AllCodex card ──────────────────────────────────────────────────────────────
@@ -149,24 +110,19 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
   }
 
   return (
-    <Card className="relative border-border/60 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-              <Scroll className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle style={{ fontFamily: "var(--font-cinzel)" }}>AllCodex</CardTitle>
-              <CardDescription>Trilium notes — ETAPI</CardDescription>
-            </div>
+    <div className="rounded-none border border-border/30 border-l-2 border-l-primary/60 bg-card/40 overflow-hidden">
+      <div className="px-5 py-4 border-b border-border/20 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Scroll className="h-4 w-4 text-primary" />
+          <div>
+            <h3 className="text-sm font-semibold text-primary" style={{ fontFamily: "var(--font-cinzel)" }}>AllCodex</h3>
+            <p className="text-[11px] text-muted-foreground">Trilium notes — ETAPI</p>
           </div>
-          <StatusBadge state={state} version={version} />
         </div>
-      </CardHeader>
+        <StatusBadge state={state} version={version} />
+      </div>
 
-      <CardContent className="space-y-4">
+      <div className="px-5 py-4 space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="allcodex-url">Service URL</Label>
           <Input
@@ -176,16 +132,17 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             disabled={isConnected || loading}
+            className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
           />
         </div>
 
         {!isConnected && (
           <Tabs defaultValue="token" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="token">
+            <TabsList className="grid w-full grid-cols-2 rounded-none">
+              <TabsTrigger value="token" className="rounded-none">
                 <Key className="h-3.5 w-3.5 mr-1.5" /> ETAPI Token
               </TabsTrigger>
-              <TabsTrigger value="password">
+              <TabsTrigger value="password" className="rounded-none">
                 <Lock className="h-3.5 w-3.5 mr-1.5" /> Password Login
               </TabsTrigger>
             </TabsList>
@@ -200,10 +157,11 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   disabled={loading}
+                  className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
                 />
               </div>
               <Button
-                className="w-full gap-2"
+                className="w-full gap-2 rounded-none"
                 onClick={handleConnectToken}
                 disabled={loading || !url || !token}
               >
@@ -222,13 +180,14 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
+                  className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
                 The portal will call Trilium&apos;s login endpoint to obtain an ETAPI token automatically.
               </p>
               <Button
-                className="w-full gap-2"
+                className="w-full gap-2 rounded-none"
                 onClick={handleLoginPassword}
                 disabled={loading || !url || !password}
               >
@@ -242,7 +201,7 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
         {isConnected && (
           <Button
             variant="destructive"
-            className="w-full gap-2"
+            className="w-full gap-2 rounded-none"
             onClick={handleDisconnect}
             disabled={loading}
           >
@@ -252,12 +211,12 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
         )}
 
         {error && (
-          <p className="text-xs text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-2">
+          <p className="text-xs text-destructive rounded-none bg-destructive/10 border border-destructive/20 p-2">
             {error}
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -347,24 +306,19 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
   }
 
   return (
-    <Card className="relative border-border/60 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-transparent pointer-events-none" />
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-accent/30 border border-accent-foreground/10">
-              <Brain className="h-5 w-5 text-accent-foreground" />
-            </div>
-            <div>
-              <CardTitle style={{ fontFamily: "var(--font-cinzel)" }}>AllKnower</CardTitle>
-              <CardDescription>AI knowledge service</CardDescription>
-            </div>
+    <div className="rounded-none border border-border/30 border-l-2 border-l-[var(--accent)]/60 bg-card/40 overflow-hidden">
+      <div className="px-5 py-4 border-b border-border/20 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Brain className="h-4 w-4 text-[var(--accent)]" />
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--accent)]" style={{ fontFamily: "var(--font-cinzel)" }}>AllKnower</h3>
+            <p className="text-[11px] text-muted-foreground">AI knowledge service</p>
           </div>
-          <StatusBadge state={state} />
         </div>
-      </CardHeader>
+        <StatusBadge state={state} />
+      </div>
 
-      <CardContent className="space-y-4">
+      <div className="px-5 py-4 space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="allknower-url">Service URL</Label>
           <Input
@@ -374,13 +328,14 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             disabled={isConnected || loading}
+            className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
           />
         </div>
 
         {!isConnected && mode === "idle" && (
           <div className="flex gap-2">
             <Button
-              className="flex-1 gap-2"
+              className="flex-1 gap-2 rounded-none"
               onClick={() => switchMode("login")}
               disabled={!url}
             >
@@ -389,7 +344,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
             </Button>
             <Button
               variant="outline"
-              className="flex-1 gap-2"
+              className="flex-1 gap-2 rounded-none"
               onClick={() => switchMode("register")}
               disabled={!url}
             >
@@ -411,6 +366,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 autoComplete="email"
+                className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
               />
             </div>
             <div className="space-y-1.5">
@@ -423,11 +379,12 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 autoComplete="current-password"
+                className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
               />
             </div>
             <div className="flex gap-2">
               <Button
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 rounded-none"
                 onClick={handleLogin}
                 disabled={loading || !url || !email || !password}
               >
@@ -436,7 +393,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
               </Button>
               <Button
                 variant="ghost"
-                className="gap-2"
+                className="gap-2 rounded-none"
                 onClick={() => switchMode("idle")}
                 disabled={loading}
               >
@@ -458,6 +415,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
                 onChange={(e) => setName(e.target.value)}
                 disabled={loading}
                 autoComplete="name"
+                className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
               />
             </div>
             <div className="space-y-1.5">
@@ -470,6 +428,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 autoComplete="email"
+                className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
               />
             </div>
             <div className="space-y-1.5">
@@ -482,11 +441,12 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 autoComplete="new-password"
+                className="rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
               />
             </div>
             <div className="flex gap-2">
               <Button
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 rounded-none"
                 onClick={handleRegister}
                 disabled={loading || !url || !email || !name || !password}
               >
@@ -495,7 +455,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
               </Button>
               <Button
                 variant="ghost"
-                className="gap-2"
+                className="gap-2 rounded-none"
                 onClick={() => switchMode("idle")}
                 disabled={loading}
               >
@@ -508,7 +468,7 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
         {isConnected && (
           <Button
             variant="destructive"
-            className="w-full gap-2"
+            className="w-full gap-2 rounded-none"
             onClick={handleDisconnect}
             disabled={loading}
           >
@@ -518,12 +478,12 @@ function AllKnowerCard({ initialStatus }: { initialStatus?: StatusPayload["allkn
         )}
 
         {error && (
-          <p className="text-xs text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-2">
+          <p className="text-xs text-destructive rounded-none bg-destructive/10 border border-destructive/20 p-2">
             {error}
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -571,23 +531,18 @@ function ShareConfigCard() {
   }
 
   return (
-    <Card className="relative border-border/60 overflow-hidden col-span-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10 border border-border/40">
-            <Globe className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <CardTitle style={{ fontFamily: "var(--font-cinzel)" }}>Share Configuration</CardTitle>
-            <CardDescription>Configure which note is the public share root (gets #shareRoot label).</CardDescription>
-          </div>
+    <div className="rounded-none border border-border/30 border-l-2 border-l-primary/40 bg-card/40 overflow-hidden col-span-full">
+      <div className="px-5 py-4 border-b border-border/20 flex items-center gap-3">
+        <Globe className="h-4 w-4 text-primary" />
+        <div>
+          <h3 className="text-sm font-semibold text-primary" style={{ fontFamily: "var(--font-cinzel)" }}>Share Configuration</h3>
+          <p className="text-[11px] text-muted-foreground">Configure which note is the public share root (gets #shareRoot label).</p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+      <div className="px-5 py-4 space-y-4">
         {/* Current share root */}
         {current && (
-          <div className="rounded-md border border-border/40 bg-muted/20 p-3 space-y-1">
+          <div className="border-l-2 border-border/40 bg-muted/20 p-3 space-y-1">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Current share root</p>
             <p className="text-sm font-medium">{current.title}</p>
             <p className="text-xs font-mono text-muted-foreground">{current.noteId}</p>
@@ -628,14 +583,12 @@ function ShareConfigCard() {
         </div>
 
         {error && (
-          <p className="text-xs text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-2">{error}</p>
+          <p className="text-xs text-destructive rounded-none bg-destructive/10 border border-destructive/20 p-2">{error}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
-
-// ── Portal Config card ────────────────────────────────────────────────────────
 
 function PortalConfigCard() {
   const [loreRootId, setLoreRootId] = useState("");
@@ -671,20 +624,15 @@ function PortalConfigCard() {
   }
 
   return (
-    <Card className="relative border-border/60 overflow-hidden col-span-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 via-transparent to-transparent pointer-events-none" />
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-secondary border border-border/40">
-            <Scroll className="h-5 w-5 text-secondary-foreground" />
-          </div>
-          <div>
-            <CardTitle style={{ fontFamily: "var(--font-cinzel)" }}>Portal Configuration</CardTitle>
-            <CardDescription>Control how the Portal connects to your lore structure.</CardDescription>
-          </div>
+    <div className="rounded-none border border-border/30 border-l-2 border-l-secondary/60 bg-card/40 overflow-hidden col-span-full">
+      <div className="px-5 py-4 border-b border-border/20 flex items-center gap-3">
+        <Scroll className="h-4 w-4 text-secondary-foreground" />
+        <div>
+          <h3 className="text-sm font-semibold" style={{ fontFamily: "var(--font-cinzel)" }}>Portal Configuration</h3>
+          <p className="text-[11px] text-muted-foreground">Control how the Portal connects to your lore structure.</p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      </div>
+      <div className="px-5 py-4 space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="lore-root-id">Lore Root Note ID</Label>
           <div className="flex gap-2">
@@ -693,11 +641,11 @@ function PortalConfigCard() {
               placeholder="root (default) or a specific note ID"
               value={loreRootId}
               onChange={(e) => setLoreRootId(e.target.value)}
-              className="font-mono text-sm"
+              className="font-mono text-sm rounded-none bg-transparent border-x-0 border-t-0 border-b border-border/50 focus-visible:ring-0 px-0 h-9"
               disabled={loading}
             />
-            <Button onClick={handleSave} disabled={loading} className="shrink-0 gap-2">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="h-4 w-4 text-green-400" /> : "Save"}
+            <Button onClick={handleSave} disabled={loading} className="shrink-0 gap-2 rounded-none">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <CheckCircle2 className="h-4 w-4" /> : "Save"}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -706,10 +654,10 @@ function PortalConfigCard() {
           </p>
         </div>
         {error && (
-          <p className="text-xs text-red-400 rounded-md bg-red-500/10 border border-red-500/20 p-2">{error}</p>
+          <p className="text-xs text-destructive rounded-none bg-destructive/10 border border-destructive/20 p-2">{error}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -736,28 +684,25 @@ export default function SettingsPage() {
   }, [fetchStatus]);
 
   return (
-    <div className="space-y-8 max-w-4xl">
-      <div>
-        <h1
-          className="text-3xl font-bold tracking-tight text-primary"
-          style={{ fontFamily: "var(--font-cinzel)" }}
-        >
+    <div className="space-y-5 max-w-4xl">
+      <div className="mb-8">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1" style={{ fontFamily: "var(--font-cinzel)" }}>System</p>
+        <h1 className="text-2xl font-bold text-primary" style={{ fontFamily: "var(--font-cinzel)" }}>
           Service Connections
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Configure AllCodex and AllKnower connections. Credentials are stored as secure cookies — no need
-          to set environment variables.
+          Configure AllCodex and AllKnower connections. Credentials are stored as secure cookies.
         </p>
       </div>
 
       {loading ? (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-5">
           {[0, 1].map((i) => (
-            <div key={i} className="h-72 rounded-xl border border-border/60 bg-card animate-pulse" />
+            <div key={i} className="h-72 border border-border/30 bg-card/20 animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-5">
           <AllCodexCard initialStatus={status?.allcodex} />
           <AllKnowerCard initialStatus={status?.allknower} />
           <PortalConfigCard />
@@ -765,7 +710,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="rounded-lg border border-border/40 bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
+      <div className="border border-border/30 bg-card/20 p-4 text-xs text-muted-foreground space-y-1">
         <p className="font-semibold text-foreground/70 uppercase tracking-wider text-[10px]">Environment variables (optional override)</p>
         <p>
           If you prefer, you can still set <code className="bg-muted px-1 rounded">ALLCODEX_URL</code>,{" "}

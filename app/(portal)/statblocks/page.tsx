@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { Loader2, AlertCircle, BookOpen, Search } from "lucide-react";
-import { StatblockCardCompact } from "@/components/portal/StatblockCard";
+import { Loader2, AlertCircle, BookOpen, Search, ChevronRight } from "lucide-react";
+import { StatblockCard } from "@/components/portal/StatblockCard";
 
 interface StatblockNote {
   noteId: string;
@@ -30,6 +29,7 @@ function crToNum(cr: string | undefined): number {
 export default function StatblocksPage() {
   const [search, setSearch] = useState("");
   const [crFilter, setCrFilter] = useState<"all" | "low" | "mid" | "high">("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { data: statblocks, isLoading, isError } = useQuery<StatblockNote[]>({
     queryKey: ["statblocks"],
@@ -52,89 +52,116 @@ export default function StatblocksPage() {
     return true;
   });
 
-  // Sort by CR
   const sorted = [...filtered].sort((a, b) => {
     return crToNum(attr(a, "challengeRating") ?? attr(a, "crLevel")) -
            crToNum(attr(b, "challengeRating") ?? attr(b, "crLevel"));
   });
 
+  const selectedNote = statblocks?.find((n) => n.noteId === selectedId);
+
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-border/50 shrink-0">
-        <BookOpen className="h-5 w-5 text-primary" />
-        <h1 className="font-bold text-lg" style={{ fontFamily: "var(--font-cinzel)" }}>
-          Statblock Library
-        </h1>
-        {statblocks && (
-          <Badge variant="outline" className="ml-auto text-xs">
-            {statblocks.length} entries
-          </Badge>
-        )}
-      </div>
-
-      {/* Filters */}
-      <div className="px-6 py-3 border-b border-border/30 shrink-0 flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or type…"
-            className="pl-8 h-8 text-xs"
-          />
+    <div className="flex h-full overflow-hidden">
+      {/* Left pane */}
+      <div className="w-72 shrink-0 flex flex-col border-r border-border/30 overflow-hidden bg-card/20">
+        <div className="px-4 py-3 border-b border-border/30 shrink-0">
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold text-primary uppercase tracking-[0.12em]" style={{ fontFamily: "var(--font-cinzel)" }}>
+              Statblock Library
+            </span>
+            {statblocks && (
+              <span className="ml-auto text-[10px] text-muted-foreground">{statblocks.length}</span>
+            )}
+          </div>
+          <div className="relative mb-2">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground pointer-events-none" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search…"
+              className="pl-7 h-7 text-xs rounded-none bg-muted/20 border-border/40"
+            />
+          </div>
+          <div className="flex gap-1">
+            {(["all", "low", "mid", "high"] as const).map((tier) => (
+              <button
+                key={tier}
+                onClick={() => setCrFilter(tier)}
+                className={`flex-1 py-0.5 text-[10px] transition-colors ${
+                  crFilter === tier
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                }`}
+              >
+                {tier === "all" ? "All" : tier === "low" ? "0–4" : tier === "mid" ? "5–14" : "15+"}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          {(["all", "low", "mid", "high"] as const).map((tier) => (
-            <button
-              key={tier}
-              onClick={() => setCrFilter(tier)}
-              className={`px-2.5 py-1 rounded text-xs transition-colors ${
-                crFilter === tier
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}
-            >
-              {tier === "all" ? "All CR" : tier === "low" ? "CR 0–4" : tier === "mid" ? "CR 5–14" : "CR 15+"}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Content */}
-      <ScrollArea className="flex-1">
-        <div className="p-6">
+        <ScrollArea className="flex-1">
           {isLoading && (
-            <div className="flex items-center justify-center py-20 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin mr-2" />
-              Loading statblocks…
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <span className="text-xs">Loading…</span>
             </div>
           )}
           {isError && (
-            <div className="flex items-center justify-center py-20 text-destructive gap-2">
-              <AlertCircle className="h-5 w-5" />
-              Failed to load statblocks. Check your AllCodex connection in Settings.
+            <div className="flex items-center gap-2 p-4 text-destructive text-xs">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Connection error
             </div>
           )}
           {!isLoading && !isError && sorted.length === 0 && (
-            <div className="text-center py-20 text-muted-foreground">
-              <BookOpen className="h-8 w-8 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">
-                {statblocks?.length === 0
-                  ? "No statblocks found. Create notes with the #statblock label in AllCodex."
-                  : "No statblocks match your search."}
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground text-center py-8 italic">
+              {statblocks?.length === 0 ? "No statblocks found" : "No matches"}
+            </p>
           )}
-          {!isLoading && !isError && sorted.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-              {sorted.map((n) => (
-                <StatblockCardCompact key={n.noteId} note={n} />
-              ))}
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+          {sorted.map((n) => {
+            const name = attr(n, "crName") ?? n.title;
+            const cr = attr(n, "challengeRating") ?? attr(n, "crLevel");
+            const type = attr(n, "creatureType");
+            const isSelected = n.noteId === selectedId;
+            return (
+              <button
+                key={n.noteId}
+                onClick={() => setSelectedId(n.noteId)}
+                className={`w-full text-left px-4 py-2.5 border-b border-border/15 transition-colors flex items-center gap-2 ${
+                  isSelected
+                    ? "bg-primary/10 border-l-2 border-l-primary"
+                    : "hover:bg-card/50 border-l-2 border-l-transparent"
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs font-medium truncate ${isSelected ? "text-primary" : ""}`} style={{ fontFamily: "var(--font-cinzel)" }}>
+                    {name}
+                  </p>
+                  {type && <p className="text-[10px] text-muted-foreground capitalize truncate mt-0.5">{type}</p>}
+                </div>
+                {cr !== undefined && (
+                  <span className="text-[10px] text-primary/70 font-mono shrink-0">CR {cr}</span>
+                )}
+                {isSelected && <ChevronRight className="h-3 w-3 text-primary shrink-0" />}
+              </button>
+            );
+          })}
+        </ScrollArea>
+      </div>
+
+      {/* Right pane */}
+      <div className="flex-1 overflow-auto">
+        {!selectedNote ? (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <BookOpen className="h-10 w-10 mb-3 opacity-20" />
+            <p className="text-sm opacity-60" style={{ fontFamily: "var(--font-cinzel)" }}>Select a statblock</p>
+            <p className="text-xs opacity-40 mt-1">Choose an entry from the library</p>
+          </div>
+        ) : (
+          <div className="p-6 max-w-2xl">
+            <StatblockCard note={selectedNote} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

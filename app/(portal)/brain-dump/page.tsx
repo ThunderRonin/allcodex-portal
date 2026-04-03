@@ -6,12 +6,6 @@ import { useBrainDumpStore } from "@/lib/stores/brain-dump-store";
 import { LORE_TEMPLATES } from "@/components/editor/TemplatePicker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -268,17 +262,17 @@ export default function BrainDumpPage() {
       </div>
 
       {/* Input + mode tabs */}
-      <Card className="border-border/60">
-        <CardContent className="pt-4 space-y-3">
-          <div className="flex gap-1 p-1 bg-muted/40 rounded-lg border border-border/30">
+      <div className="rounded-none border border-border/30 bg-card/40 overflow-hidden">
+        <div className="p-4 space-y-3">
+          <div className="flex gap-0 border-b border-border/30">
             {MODE_TABS.map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
                 onClick={() => setDumpMode(value)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-medium transition-colors border-b-2 -mb-px ${
                   dumpMode === value
-                    ? "bg-background text-foreground shadow-sm border border-border/40"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -295,14 +289,14 @@ export default function BrainDumpPage() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={8}
-            className="resize-none font-[var(--font-crimson)] text-base leading-relaxed"
+            className="resize-none rounded-none border-border/50 focus-visible:border-primary/60 bg-muted/10 font-[var(--font-crimson)] text-base leading-relaxed"
             disabled={isPending}
           />
           <div className="flex items-center justify-between">
             <span className={`text-xs ${charCount < 10 ? "text-muted-foreground/50" : charCount > 45000 ? "text-destructive" : "text-muted-foreground"}`}>
               {charCount.toLocaleString()} / 50,000 characters
             </span>
-            <Button onClick={handleSubmit} disabled={!isReady} className="gap-2" size="sm">
+            <Button onClick={handleSubmit} disabled={!isReady} className="gap-2 rounded-none" size="sm">
               {isPending ? (
                 <><RefreshCw className="h-4 w-4 animate-spin" />{dumpMode === "review" ? "Analysing…" : "Processing…"}</>
               ) : dumpMode === "inbox" ? (
@@ -314,8 +308,8 @@ export default function BrainDumpPage() {
               )}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {dumpError && !isPending && <ServiceBanner service="AllKnower" error={dumpError} />}
 
@@ -326,7 +320,7 @@ export default function BrainDumpPage() {
             Inbox ({inboxItems.length})
           </h2>
           {inboxItems.map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-lg border border-border/40 bg-card/40">
+            <div key={i} className="flex items-start gap-3 p-3 border-b border-border/30 bg-card/30 hover:bg-card/50 transition-colors">
               <p className="flex-1 text-sm text-foreground/70 line-clamp-2 whitespace-pre-wrap">{item}</p>
               <div className="flex items-center gap-2 shrink-0">
                 <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs"
@@ -345,14 +339,14 @@ export default function BrainDumpPage() {
 
       {/* Review First — approval UI */}
       {reviewState && (
-        <Card className="border-accent/30 bg-card/60">
-          <CardHeader className="pb-3 border-b border-accent/20">
-            <CardTitle className="text-sm font-semibold text-accent flex items-center gap-2" style={{ fontFamily: "var(--font-cinzel)" }}>
+        <div className="rounded-none border border-[var(--accent)]/30 bg-card/60 border-l-2 border-l-[var(--accent)]/40">
+          <div className="pb-3 px-4 pt-4 border-b border-[var(--accent)]/20">
+            <h3 className="text-sm font-semibold text-[var(--accent)] flex items-center gap-2" style={{ fontFamily: "var(--font-cinzel)" }}>
               <Eye className="h-4 w-4" />
               Review Proposed Entities
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4 space-y-4">
+            </h3>
+          </div>
+          <div className="pt-4 px-4 pb-4 space-y-4">
             {reviewState.summary && (
               <p className="text-sm text-foreground/80 leading-relaxed italic border-l-2 border-accent/40 pl-3">
                 {reviewState.summary}
@@ -396,7 +390,7 @@ export default function BrainDumpPage() {
               </div>
             </div>
             <div className="flex gap-2 pt-2 border-t border-border/30">
-              <Button className="gap-2" disabled={reviewState.approvedIds.size === 0 || isCommitting}
+              <Button className="gap-2 rounded-none" disabled={reviewState.approvedIds.size === 0 || isCommitting}
                 onClick={() => {
                   const approved = reviewState.proposedEntities.filter((_, i) => reviewState.approvedIds.has(i));
                   commitReview({ rawText: text || "review commit", approvedEntities: approved });
@@ -404,25 +398,23 @@ export default function BrainDumpPage() {
                 {isCommitting ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 Commit {reviewState.approvedIds.size} Approved
               </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground"
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground rounded-none"
                 onClick={() => setReviewState(null)}>
                 <SkipForward className="h-4 w-4" />Discard
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
-
-      {/* Auto-mode result with entity cards */}
       {result && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardHeader className="pb-3 border-b border-primary/20">
-            <CardTitle className="text-sm font-semibold text-primary flex items-center gap-2" style={{ fontFamily: "var(--font-cinzel)" }}>
+        <div className="rounded-none border border-primary/30 bg-primary/5 border-l-2 border-l-primary/40">
+          <div className="pb-3 px-4 pt-4 border-b border-primary/20">
+            <h3 className="text-sm font-semibold text-primary flex items-center gap-2" style={{ fontFamily: "var(--font-cinzel)" }}>
               <Brain className="h-4 w-4" />
               Processing Complete
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4 space-y-4">
+            </h3>
+          </div>
+          <div className="pt-4 px-4 pb-4 space-y-4">
             <div className="flex gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary" style={{ fontFamily: "var(--font-cinzel)" }}>{result.created.length}</div>
@@ -471,11 +463,11 @@ export default function BrainDumpPage() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      {/* Step 12: Contradiction warnings */}
+      {/* Contradiction warnings */}
       {consistencyLoading && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
           <RefreshCw className="h-3 w-3 animate-spin" />
@@ -483,22 +475,22 @@ export default function BrainDumpPage() {
         </div>
       )}
       {consistencyResult && consistencyResult.issues.length > 0 && (
-        <Card className="border-yellow-500/30 bg-yellow-500/5">
-          <CardHeader className="pb-2 border-b border-yellow-500/20">
-            <CardTitle className="text-sm font-semibold text-yellow-400 flex items-center gap-2" style={{ fontFamily: "var(--font-cinzel)" }}>
+        <div className="rounded-none border border-destructive/30 bg-destructive/5 border-l-2 border-l-destructive/40">
+          <div className="pb-2 px-4 pt-4 border-b border-destructive/20">
+            <h3 className="text-sm font-semibold text-destructive flex items-center gap-2" style={{ fontFamily: "var(--font-cinzel)" }}>
               <AlertTriangle className="h-4 w-4" />
               Contradictions Found
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3 space-y-2">
+            </h3>
+          </div>
+          <div className="pt-3 px-4 pb-4 space-y-2">
             {consistencyResult.issues.map((issue, i) => (
-              <div key={i} className={`flex gap-2 p-2.5 rounded-md border ${
-                issue.severity === "high" ? "border-red-500/30 bg-red-500/5"
-                : issue.severity === "medium" ? "border-yellow-500/20 bg-yellow-500/5"
-                : "border-border/30 bg-muted/20"
+              <div key={i} className={`flex gap-2 p-2.5 border-l-2 ${
+                issue.severity === "high" ? "border-l-destructive bg-destructive/5"
+                : issue.severity === "medium" ? "border-l-yellow-500 bg-yellow-500/5"
+                : "border-l-border/50 bg-muted/20"
               }`}>
                 <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${
-                  issue.severity === "high" ? "text-red-400"
+                  issue.severity === "high" ? "text-destructive"
                   : issue.severity === "medium" ? "text-yellow-400"
                   : "text-muted-foreground"
                 }`} />
@@ -514,8 +506,8 @@ export default function BrainDumpPage() {
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* History */}
@@ -529,23 +521,23 @@ export default function BrainDumpPage() {
         ) : !history?.length ? (
           <p className="text-sm text-muted-foreground italic">No brain dumps yet.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-0">
             {history.map((entry) => {
               const isExpanded = expandedIds.includes(entry.id);
               const needsTruncation = entry.rawText.length > 120;
               return (
                 <Link key={entry.id} href={`/brain-dump/${entry.id}`}
-                  className="block rounded-lg border border-border/40 bg-card/40 p-3 hover:border-primary/30 hover:bg-card/70 transition-colors">
+                  className="block rounded-none border-b border-border/20 bg-card/40 p-4 hover:bg-card/70 transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm text-foreground/70 whitespace-pre-wrap break-words">
                       {isExpanded || !needsTruncation ? entry.rawText : entry.rawText.slice(0, 120) + "…"}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                       {entry.notesCreated.length > 0 && (
-                        <Badge variant="outline" className="text-[10px] text-green-400 border-green-500/40">+{entry.notesCreated.length}</Badge>
+                        <Badge variant="outline" className="text-[10px] text-[var(--accent)] border-[var(--accent)]/40 rounded-none">+{entry.notesCreated.length}</Badge>
                       )}
                       {entry.notesUpdated.length > 0 && (
-                        <Badge variant="outline" className="text-[10px] text-yellow-400 border-yellow-500/40">~{entry.notesUpdated.length}</Badge>
+                        <Badge variant="outline" className="text-[10px] text-primary/80 border-primary/40 rounded-none">~{entry.notesUpdated.length}</Badge>
                       )}
                     </div>
                   </div>
