@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useBrainDumpStore } from "@/lib/stores/brain-dump-store";
 import { LORE_TEMPLATES } from "@/components/editor/TemplatePicker";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,6 +128,78 @@ function normalizeResult(raw: BrainDumpResult) {
   };
 }
 
+// ── Scribe's Log — client-side stage simulation ──────────────────────────────
+
+const SCRIBE_STAGES: Record<string, Array<{ icon: string; label: string; ms: number }>> = {
+  auto: [
+    { icon: "📚", label: "Consulting the archives…", ms: 0 },
+    { icon: "🧠", label: "Channeling the AllKnower…", ms: 4500 },
+    { icon: "✍️", label: "Scribing the chronicles…", ms: 52000 },
+    { icon: "🕸️", label: "Weaving the threads of fate…", ms: 58000 },
+  ],
+  review: [
+    { icon: "📚", label: "Consulting the archives…", ms: 0 },
+    { icon: "🧠", label: "Channeling the AllKnower…", ms: 4500 },
+    { icon: "📋", label: "Preparing proposals…", ms: 52000 },
+  ],
+  inbox: [
+    { icon: "📥", label: "Queuing to inbox…", ms: 0 },
+  ],
+};
+
+function ScribeLog({ mode, stage }: { mode: string; stage: number }) {
+  const stages = SCRIBE_STAGES[mode] ?? SCRIBE_STAGES.auto;
+  return (
+    <div className="rounded-none border border-border/30 bg-card/40 p-4 space-y-2.5">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50" style={{ fontFamily: "var(--font-cinzel)" }}>
+        Scribe&apos;s Log
+      </p>
+      <div className="space-y-2">
+        {stages.map((s, i) => {
+          const isDone = i < stage;
+          const isActive = i === stage;
+          return (
+            <div
+              key={i}
+              className={`flex items-center gap-3 text-sm transition-all duration-500 ${
+                isActive ? "opacity-100" : isDone ? "opacity-40" : "opacity-20"
+              }`}
+            >
+              <span className={`text-base ${isActive ? "animate-pulse" : ""}`}>{s.icon}</span>
+              <span
+                className={`${
+                  isDone
+                    ? "line-through text-muted-foreground"
+                    : isActive
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground/50"
+                }`}
+              >
+                {s.label}
+              </span>
+              {isDone && (
+                <span className="ml-auto text-xs text-green-500/70">✓</span>
+              )}
+              {isActive && (
+                <span className="ml-auto flex gap-0.5">
+                  {[0, 1, 2].map((d) => (
+                    <span
+                      key={d}
+                      className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-bounce"
+                      style={{ animationDelay: `${d * 150}ms` }}
+                    />
+                  ))}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
 const MODE_TABS = [
   { value: "auto" as const, label: "Auto-Create", icon: Zap, desc: "AllKnower writes everything immediately" },
   { value: "review" as const, label: "Review First", icon: Eye, desc: "Approve each entity before it's saved" },
@@ -146,6 +218,10 @@ export default function BrainDumpPage() {
     expandedIds, toggleExpanded,
   } = useBrainDumpStore();
   const queryClient = useQueryClient();
+
+  // Scribe's Log — stage simulation
+  const [scribeStage, setScribeStage] = useState(0);
+  const requestStartRef = useRef<number | null>(null);
 
   const [consistencyResult, setConsistencyResult] = useState<{
     issues: Array<{ type: string; severity: string; description: string; affectedNoteIds: string[] }>;
@@ -184,6 +260,8 @@ export default function BrainDumpPage() {
 
   const { mutate: runDump, isPending, error: dumpError } = useMutation({
     mutationFn: async ({ rawText, mode }: { rawText: string; mode: string }) => {
+      requestStartRef.current = Date.now();
+      setScribeStage(0);
       const r = await fetch("/api/brain-dump", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -239,6 +317,22 @@ export default function BrainDumpPage() {
 
   const charCount = text.length;
   const isReady = charCount >= 10 && !isPending;
+
+  // Advance scribe stage based on elapsed time while pending
+  useEffect(() => {
+    if (!isPending) {
+      setScribeStage(0);
+      requestStartRef.current = null;
+      return;
+    }
+    const stages = SCRIBE_STAGES[dumpMode] ?? SCRIBE_STAGES.auto;
+    const interval = setInterval(() => {
+      const elapsed = requestStartRef.current ? Date.now() - requestStartRef.current : 0;
+      const activeStage = stages.reduce((acc, s, i) => (elapsed >= s.ms ? i : acc), 0);
+      setScribeStage(activeStage);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [isPending, dumpMode]);
 
   function handleSubmit() {
     if (dumpMode === "inbox") {
@@ -310,6 +404,8 @@ export default function BrainDumpPage() {
           </div>
         </div>
       </div>
+
+      {isPending && <ScribeLog mode={dumpMode} stage={scribeStage} />}
 
       {dumpError && !isPending && <ServiceBanner service="AllKnower" error={dumpError} />}
 

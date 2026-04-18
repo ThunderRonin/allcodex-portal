@@ -24,11 +24,17 @@ async function probeAllCodex(url: string, token: string): Promise<{ ok: boolean;
 
 async function probeAllKnower(url: string, token: string): Promise<{ ok: boolean; error?: string }> {
   try {
-    const res = await fetch(`${url}/health`, {
+    // Use /api/auth/session to validate the bearer token — the composite /health
+    // endpoint returns 503 when upstream deps (AllCodex, LanceDB) are degraded,
+    // which is unrelated to whether the Portal has valid AllKnower credentials.
+    const res = await fetch(`${url}/api/auth/get-session`, {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
+    const data = await res.json();
+    // better-auth returns { session, user } when valid, or null/empty when not
+    if (!data?.session) return { ok: false, error: "Invalid or expired session" };
     return { ok: true };
   } catch (err) {
     return { ok: false, error: String(err) };

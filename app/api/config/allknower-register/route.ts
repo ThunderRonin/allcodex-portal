@@ -2,13 +2,13 @@
  * POST /api/config/allknower-register
  *
  * Registers a new account on AllKnower (better-auth) and stores the session token.
- * Endpoint: POST {url}/api/auth/sign-up/email  →  { token: string, user: {...} }
+ * better-auth bearer plugin returns the token in the `set-auth-token` response header.
+ * Endpoint: POST {url}/api/auth/sign-up/email
  *
  * Body: { url: string; email: string; name: string; password: string }
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 const COOKIE_OPTS = {
   httpOnly: true,
@@ -47,18 +47,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // better-auth bearer plugin returns the token in the `set-auth-token` response header
+    const token: string = res.headers.get("set-auth-token") ?? "";
     const data = await res.json();
-    const token: string = data.token ?? data.session?.token;
 
     if (!token) {
-      return NextResponse.json({ error: "No token in response" }, { status: 502 });
+      return NextResponse.json({ error: "No token in response (set-auth-token header missing)" }, { status: 502 });
     }
 
-    const jar = await cookies();
-    jar.set("allknower_url", url, COOKIE_OPTS);
-    jar.set("allknower_token", token, COOKIE_OPTS);
-
-    return NextResponse.json({ ok: true, user: data.user ?? null });
+    const response = NextResponse.json({ ok: true, user: data.user ?? null });
+    response.cookies.set("allknower_url", url, COOKIE_OPTS);
+    response.cookies.set("allknower_token", token, COOKIE_OPTS);
+    return response;
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 502 });
   }
