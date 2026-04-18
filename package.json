@@ -9,7 +9,8 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
-    "test": "vitest run && playwright test"
+    "test": "vitest run && playwright test",
+    "check": "tsc --noEmit && vitest run"
   },
   "dependencies": {
     "@blocknote/core": "^0.47.3",
