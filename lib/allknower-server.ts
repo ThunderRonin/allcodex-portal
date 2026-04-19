@@ -6,6 +6,14 @@
  */
 
 import { ServiceError } from "./route-error";
+import {
+  ConsistencyResultSchema,
+  GapResultSchema,
+  RelationshipsResultSchema,
+  type ConsistencyResult,
+  type GapResult,
+  type RelationshipsResult,
+} from "./allknower-schemas";
 
 export interface AkCreds {
   url: string;
@@ -119,36 +127,8 @@ export interface RagChunk {
   score: number;
 }
 
-export interface ConsistencyIssue {
-  type: "contradiction" | "timeline" | "orphan" | "naming";
-  severity: "high" | "medium" | "low";
-  description: string;
-  affectedNoteIds: string[];
-}
-
-export interface ConsistencyResult {
-  issues: ConsistencyIssue[];
-  summary: string;
-}
-
-export interface RelationshipSuggestion {
-  targetNoteId: string;
-  targetTitle: string;
-  relationshipType: string;
-  description: string;
-}
-
-export interface GapArea {
-  area: string;
-  severity: "high" | "medium" | "low";
-  description: string;
-  suggestion: string;
-}
-
-export interface GapResult {
-  gaps: GapArea[];
-  summary: string;
-}
+// ConsistencyIssue, ConsistencyResult, RelationshipSuggestion, GapArea, GapResult
+// are now derived from Zod schemas in allknower-schemas.ts and re-exported from there.
 
 // ── Brain Dump ────────────────────────────────────────────────────────────────
 
@@ -218,15 +198,25 @@ export async function checkConsistency(creds: AkCreds, noteIds?: string[]): Prom
     method: "POST",
     body: JSON.stringify({ noteIds }),
   });
-  return res.json();
+  const raw = await res.json();
+  const parsed = ConsistencyResultSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /consistency/check returned unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
-export async function suggestRelationships(creds: AkCreds, text: string, noteId?: string): Promise<{ suggestions: RelationshipSuggestion[] }> {
+export async function suggestRelationships(creds: AkCreds, text: string, noteId?: string): Promise<RelationshipsResult> {
   const res = await akFetch(creds, "/suggest/relationships", {
     method: "POST",
     body: JSON.stringify({ text, ...(noteId ? { noteId } : {}) }),
   });
-  return res.json();
+  const raw = await res.json();
+  const parsed = RelationshipsResultSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /suggest/relationships returned unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
 export async function akFetchAutocomplete(creds: AkCreds, q: string): Promise<any[]> {
@@ -256,7 +246,12 @@ export async function applyRelationships(
 
 export async function getGaps(creds: AkCreds): Promise<GapResult> {
   const res = await akFetch(creds, "/suggest/gaps");
-  return res.json();
+  const raw = await res.json();
+  const parsed = GapResultSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /suggest/gaps returned unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
 export async function getHealth(creds: AkCreds): Promise<{ status: string; allcodex: string; ollama: string }> {
