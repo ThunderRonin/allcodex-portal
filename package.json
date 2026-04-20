@@ -58,5 +58,6 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "license": "AGPL-3.0"
 }
