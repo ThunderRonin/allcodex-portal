@@ -39,9 +39,15 @@ export function setupNextServerMock() {
       }
 
       static json(body: any, init?: any) {
+        const cookies = {
+          set: vi.fn(),
+          delete: vi.fn(),
+          get: vi.fn(),
+        };
         return {
           status: init?.status ?? 200,
           body,
+          cookies,
         };
       }
 

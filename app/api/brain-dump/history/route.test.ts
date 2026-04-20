@@ -28,9 +28,8 @@ describe('/api/brain-dump/history', () => {
       vi.mocked(getAkCreds).mockResolvedValue(mockAkCreds());
       vi.mocked(getBrainDumpHistory).mockResolvedValue([]);
 
-      const req = new MockNextRequest('http://localhost/api/brain-dump/history') as any;
-      const res = await GET(req) as any;
-      
+      const res = await GET() as any;
+
       expect(res.status).toBe(200);
       expect(res.body).toEqual([]);
     });
@@ -38,9 +37,8 @@ describe('/api/brain-dump/history', () => {
     it('returns 503 if not configured', async () => {
       vi.mocked(getEtapiCreds).mockResolvedValue(mockEtapiCreds());
       vi.mocked(getAkCreds).mockResolvedValue(mockNoCreds());
-      
-      const req = new MockNextRequest('http://localhost/api/brain-dump/history') as any;
-      const res = await GET(req) as any;
+
+      const res = await GET() as any;
       
       expect(res.status).toBe(503);
     });

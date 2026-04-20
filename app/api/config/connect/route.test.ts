@@ -23,14 +23,14 @@ describe('/api/config/connect', () => {
       }) as any;
       
       const res = await POST(req) as any;
-      
+
       expect(res.status).toBe(200);
-      expect(mockCookies.set).toHaveBeenCalledWith(
+      expect(res.cookies.set).toHaveBeenCalledWith(
         'allcodex_url',
         'url',
         expect.any(Object)
       );
-      expect(mockCookies.set).toHaveBeenCalledWith(
+      expect(res.cookies.set).toHaveBeenCalledWith(
         'allcodex_token',
         'token',
         expect.any(Object)

@@ -26,13 +26,13 @@ describe('/api/brain-dump', () => {
     it('returns brain dump result', async () => {
       vi.mocked(getEtapiCreds).mockResolvedValue(mockEtapiCreds());
       vi.mocked(getAkCreds).mockResolvedValue(mockAkCreds());
-      vi.mocked(runBrainDump).mockResolvedValue({ entities: [] });
+      vi.mocked(runBrainDump).mockResolvedValue({ summary: 'done', created: [], updated: [], skipped: [] });
 
       const req = new MockNextRequest('http://localhost/api/brain-dump', { method: 'POST', body: { rawText: 'text', mode: 'fast' } }) as any;
       const res = await POST(req) as any;
       
       expect(res.status).toBe(200);
-      expect(res.body.entities).toBeDefined();
+      expect(res.body.summary).toBeDefined();
       expect(runBrainDump).toHaveBeenCalledWith(mockAkCreds(), 'text', 'fast');
     });
 
