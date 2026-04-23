@@ -158,7 +158,8 @@ export async function commitBrainDump(
 
 export async function getBrainDumpHistory(creds: AkCreds): Promise<BrainDumpHistoryEntry[]> {
   const res = await akFetch(creds, "/brain-dump/history");
-  return res.json();
+  const data = await res.json();
+  return data.items ?? data;
 }
 
 export async function getBrainDumpEntry(creds: AkCreds, id: string): Promise<BrainDumpDetailEntry> {
