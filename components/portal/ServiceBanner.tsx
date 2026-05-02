@@ -1,22 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { AlertTriangle, WifiOff, Settings } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-
-type ErrorPayload = { error: string; message: string };
-
-function parseError(e: unknown): ErrorPayload {
-  if (
-    typeof e === "object" &&
-    e !== null &&
-    "error" in e &&
-    "message" in e
-  ) {
-    return e as ErrorPayload;
-  }
-  return { error: "SERVICE_ERROR", message: String(e) };
-}
+import { isRouteErrorPayload } from "@/lib/fetch-json";
 
 interface ServiceBannerProps {
   service: "AllCodex" | "AllKnower";
@@ -24,7 +11,8 @@ interface ServiceBannerProps {
 }
 
 export function ServiceBanner({ service, error }: ServiceBannerProps) {
-  const { error: code, message } = parseError(error);
+  const code = error instanceof Error ? "SERVICE_ERROR" : isRouteErrorPayload(error) ? error.error : "SERVICE_ERROR";
+  const message = error instanceof Error ? error.message : isRouteErrorPayload(error) ? error.message : String(error);
   const needsSettings = code === "NOT_CONFIGURED" || code === "UNAUTHORIZED";
   const Icon = code === "UNREACHABLE" ? WifiOff : AlertTriangle;
 

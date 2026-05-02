@@ -9,6 +9,7 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:report": "PLAYWRIGHT_HTML_OPEN=never PLAYWRIGHT_HTML_OUTPUT_DIR=tests/test-results/html-report playwright test --reporter=list,html",
     "test": "vitest run && playwright test",
     "check": "tsc --noEmit && vitest run"
   },

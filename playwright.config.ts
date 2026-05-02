@@ -5,9 +5,10 @@ export default defineConfig({
   snapshotDir: "./tests/snapshots",
   timeout: 30_000,
   fullyParallel: true,
+  workers: 1,
   retries: 0,
   outputDir: "tests/test-results/artifacts",
-  reporter: [["list"], ["html", { outputFolder: "tests/test-results/html-report", open: "never" }]],
+  reporter: [["list"]],
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.02,
@@ -24,8 +25,9 @@ export default defineConfig({
     command: "bun run dev",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: true,
-    cwd: "/Users/allmaker/projects/allcodex-aio/allcodex-portal",
+    cwd: __dirname,
     timeout: 120_000,
+    gracefulShutdown: { signal: "SIGTERM", timeout: 5_000 },
   },
   projects: [
     {

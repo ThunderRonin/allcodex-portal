@@ -6,8 +6,9 @@
  * Credentials are passed explicitly — resolved from cookies or env by get-creds.ts.
  */
 
-import { ServiceError } from "./route-error";
 import { isPortraitRelationName } from "./lore-presentation";
+import { ServiceError } from "./route-error";
+import { getThemeSongUrl as resolveThemeSongUrl } from "./theme-song";
 
 export interface EtapiCreds {
   url: string;
@@ -284,6 +285,10 @@ export function getPortraitImageNoteId(note: EtapiNote): string | null {
     (attr) => attr.type === "relation" && isPortraitRelationName(attr.name),
   );
   return portraitRelation?.value ?? null;
+}
+
+export function getThemeSongUrl(note: EtapiNote): string | null {
+  return resolveThemeSongUrl(note);
 }
 
 export async function resolveNoteRelations(
