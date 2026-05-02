@@ -7,6 +7,9 @@
 
 import { ServiceError } from "./route-error";
 import {
+  CopilotChatResponseSchema,
+  type CopilotChatResponse,
+  type CopilotRequest,
   ConsistencyResultSchema,
   GapResultSchema,
   RelationshipsResultSchema,
@@ -176,6 +179,22 @@ export async function queryRag(creds: AkCreds, text: string, topK = 10): Promise
   });
   const data = await res.json();
   return data.results ?? [];
+}
+
+export async function runArticleCopilot(
+  creds: AkCreds,
+  payload: CopilotRequest,
+): Promise<CopilotChatResponse> {
+  const res = await akFetch(creds, "/copilot/article", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const raw = await res.json();
+  const parsed = CopilotChatResponseSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /copilot/article returned unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
 export async function getRagStatus(creds: AkCreds): Promise<{ indexedNotes: number; lastIndexed: string | null; model: string | null }> {

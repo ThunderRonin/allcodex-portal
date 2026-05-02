@@ -1,5 +1,30 @@
 import { z } from "zod";
 
+export const CanonicalRelationshipTypeSchema = z.enum([
+  "ally",
+  "enemy",
+  "rival",
+  "family",
+  "member_of",
+  "leader_of",
+  "serves",
+  "located_in",
+  "originates_from",
+  "participated_in",
+  "caused",
+  "created",
+  "owns",
+  "wields",
+  "worships",
+  "inhabits",
+  "related_to",
+]);
+
+export const ChatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1),
+});
+
 export const ConsistencyIssueSchema = z.object({
   type: z.enum(["contradiction", "timeline", "orphan", "naming", "logic", "power"]),
   severity: z.enum(["high", "medium", "low"]),
@@ -38,6 +63,104 @@ export const RelationshipsResultSchema = z.object({
   suggestions: z.array(RelationshipSuggestionSchema),
 });
 
+export const CopilotLabelOpSchema = z.object({
+  name: z.string().min(1),
+  value: z.string(),
+});
+
+export const CopilotRelationAddSchema = z.object({
+  relationshipType: CanonicalRelationshipTypeSchema,
+  targetId: z.string().min(1),
+  targetKind: z.enum(["existing", "new"]),
+  description: z.string().optional(),
+  bidirectional: z.boolean().optional(),
+});
+
+export const CopilotRelationDeleteSchema = z.object({
+  relationshipType: CanonicalRelationshipTypeSchema,
+  targetId: z.string().min(1),
+});
+
+export const CopilotProposalTargetSchema = z.object({
+  kind: z.enum(["update", "create"]),
+  targetId: z.string().min(1),
+  title: z.string().min(1).optional(),
+  loreType: z.string().min(1).optional(),
+  contentHtml: z.string().optional(),
+  labelUpserts: z.array(CopilotLabelOpSchema).default([]),
+  labelDeletes: z.array(z.string().min(1)).default([]),
+  relationAdds: z.array(CopilotRelationAddSchema).default([]),
+  relationDeletes: z.array(CopilotRelationDeleteSchema).default([]),
+  rationale: z.string().min(1),
+}).superRefine((target, ctx) => {
+  if (target.kind === "create" && !target.loreType) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["loreType"],
+      message: "Create targets must include loreType.",
+    });
+  }
+});
+
+export const CopilotProposalSchema = z.object({
+  targets: z.array(CopilotProposalTargetSchema),
+});
+
+export const CopilotCitationSchema = z.object({
+  noteId: z.string(),
+  title: z.string(),
+  source: z.enum(["current", "linked", "rag"]),
+});
+
+export const CopilotChatResponseSchema = z.object({
+  assistantMessage: z.string(),
+  citations: z.array(CopilotCitationSchema),
+  proposal: CopilotProposalSchema.nullable(),
+});
+
+export const CopilotApplyResultSchema = z.object({
+  updatedNoteIds: z.array(z.string()),
+  createdNoteIds: z.array(z.string()),
+  skipped: z.array(z.string()),
+});
+
+export const CopilotNoteLabelSchema = z.object({
+  name: z.string(),
+  value: z.string(),
+});
+
+export const CopilotNoteRelationSchema = z.object({
+  name: z.string(),
+  targetNoteId: z.string(),
+  description: z.string().optional(),
+});
+
+export const CopilotNoteContextSchema = z.object({
+  noteId: z.string(),
+  title: z.string(),
+  loreType: z.string(),
+  contentHtml: z.string(),
+  parentNoteIds: z.array(z.string()),
+  labels: z.array(CopilotNoteLabelSchema),
+  relations: z.array(CopilotNoteRelationSchema),
+});
+
+export const CopilotRagChunkSchema = z.object({
+  noteId: z.string(),
+  title: z.string(),
+  excerpt: z.string(),
+  score: z.number(),
+});
+
+export const CopilotRequestSchema = z.object({
+  noteId: z.string(),
+  transcript: z.array(ChatMessageSchema),
+  currentNote: CopilotNoteContextSchema,
+  linkedNotes: z.array(CopilotNoteContextSchema),
+  ragContext: z.array(CopilotRagChunkSchema),
+  writableTargetIds: z.array(z.string()),
+});
+
 export const BrainDumpEntitySchema = z.object({
   noteId: z.string(),
   title: z.string(),
@@ -72,5 +195,18 @@ export type ConsistencyResult = z.infer<typeof ConsistencyResultSchema>;
 export type GapResult = z.infer<typeof GapResultSchema>;
 export type RelationshipSuggestion = z.infer<typeof RelationshipSuggestionSchema>;
 export type RelationshipsResult = z.infer<typeof RelationshipsResultSchema>;
+export type CanonicalRelationshipType = z.infer<typeof CanonicalRelationshipTypeSchema>;
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
+export type CopilotLabelOp = z.infer<typeof CopilotLabelOpSchema>;
+export type CopilotRelationAdd = z.infer<typeof CopilotRelationAddSchema>;
+export type CopilotRelationDelete = z.infer<typeof CopilotRelationDeleteSchema>;
+export type CopilotProposalTarget = z.infer<typeof CopilotProposalTargetSchema>;
+export type CopilotProposal = z.infer<typeof CopilotProposalSchema>;
+export type CopilotCitation = z.infer<typeof CopilotCitationSchema>;
+export type CopilotChatResponse = z.infer<typeof CopilotChatResponseSchema>;
+export type CopilotApplyResult = z.infer<typeof CopilotApplyResultSchema>;
+export type CopilotNoteContext = z.infer<typeof CopilotNoteContextSchema>;
+export type CopilotRagChunk = z.infer<typeof CopilotRagChunkSchema>;
+export type CopilotRequest = z.infer<typeof CopilotRequestSchema>;
 export type BrainDumpResult = z.infer<typeof BrainDumpResultSchema>;
 export type BrainDumpReviewResult = z.infer<typeof BrainDumpReviewResultSchema>;
