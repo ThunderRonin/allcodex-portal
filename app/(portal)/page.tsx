@@ -17,11 +17,13 @@ import {
   Database,
   Cpu,
   CheckCircle2,
-  XCircle,
   Brain,
   Microscope,
 } from "lucide-react";
 import Link from "next/link";
+import { ServiceBanner } from "@/components/portal/ServiceBanner";
+import { StatusBadge } from "@/components/portal/StatusBadge";
+import { fetchJsonOrThrow } from "@/lib/fetch-json";
 
 interface Note {
   noteId: string;
@@ -31,12 +33,29 @@ interface Note {
   attributes: Array<{ name: string; value: string }>;
 }
 
+interface RagStatus {
+  indexedNotes: number;
+  lastIndexed: string | null;
+  model: string | null;
+}
+
+interface ConfigStatus {
+  allcodex: { ok: boolean; configured: boolean; url: string | null; version?: string; error?: string };
+  allknower: { ok: boolean; configured: boolean; url: string | null; error?: string };
+}
+
 function getLoreType(note: Note): string {
   return (
     note.attributes?.find((a) => a.name === "loreType")?.value ??
     note.attributes?.find((a) => a.name === "template")?.value ??
     "lore"
   );
+}
+
+function getServiceState(status?: { ok: boolean; configured: boolean }, isError = false) {
+  if (isError) return "error" as const;
+  if (!status) return "checking" as const;
+  return status.ok ? "connected" as const : status.configured ? "error" as const : "disconnected" as const;
 }
 
 function StatCard({
@@ -75,18 +94,33 @@ function StatCard({
 }
 
 export default function DashboardPage() {
-  const { data: notes, isLoading } = useQuery<Note[]>({
-    queryKey: ["lore", "#lore"],
-    queryFn: async () => {
-      const r = await fetch("/api/lore?q=%23lore");
-      const data = await r.json();
-      return Array.isArray(data) ? data : [];
-    },
+  const {
+    data: configStatus,
+    isError: configStatusIsError,
+  } = useQuery<ConfigStatus>({
+    queryKey: ["config-status"],
+    queryFn: () => fetchJsonOrThrow<ConfigStatus>("/api/config/status"),
+    retry: false,
   });
 
-  const { data: ragStatus } = useQuery({
+  const {
+    data: notes,
+    isLoading: notesIsLoading,
+    isError: notesIsError,
+    error: notesError,
+  } = useQuery<Note[]>({
+    queryKey: ["lore", "#lore"],
+    queryFn: () => fetchJsonOrThrow<Note[]>("/api/lore?q=%23lore"),
+    retry: false,
+  });
+
+  const {
+    data: ragStatus,
+    isError: ragIsError,
+    error: ragError,
+  } = useQuery<RagStatus>({
     queryKey: ["rag-status"],
-    queryFn: () => fetch("/api/rag").then((r) => r.json()).catch(() => null),
+    queryFn: () => fetchJsonOrThrow<RagStatus>("/api/rag"),
     retry: false,
   });
 
@@ -130,21 +164,22 @@ export default function DashboardPage() {
         <StatCard
           icon={BookOpen}
           label="Total Lore Entries"
-          value={isLoading ? "—" : totalCount}
-          loading={isLoading}
+          value={notesIsLoading || notesIsError ? "—" : totalCount}
+          loading={notesIsLoading}
         />
         <StatCard
           icon={Clock}
           label="Updated This Week"
-          value={isLoading ? "—" : recentlyModified}
-          loading={isLoading}
+          value={notesIsLoading || notesIsError ? "—" : recentlyModified}
+          loading={notesIsLoading}
           sub="last 7 days"
         />
         <StatCard
           icon={Database}
           label="RAG Indexed"
-          value={ragStatus?.indexedNotes ?? "—"}
-          sub={ragStatus?.model ?? ""}
+          value={ragIsError ? "—" : ragStatus?.indexedNotes ?? "—"}
+          loading={ragIsError ? false : undefined}
+          sub={ragIsError ? "" : ragStatus?.model ?? ""}
         />
       </div>
 
@@ -162,11 +197,15 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {isLoading ? (
+              {notesIsLoading ? (
                 <div className="space-y-3 pt-4">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-12 w-full" />
                   ))}
+                </div>
+              ) : notesIsError ? (
+                <div className="pt-4">
+                  <ServiceBanner service="AllCodex" error={notesError} />
                 </div>
               ) : recent.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -177,11 +216,11 @@ export default function DashboardPage() {
                     Use the Brain Dump to begin your chronicle.
                   </p>
                   <Button asChild size="sm" className="mt-4 gap-2" variant="outline">
-                    <Link href="/brain-dump">
-                      <Brain className="h-4 w-4" />
-                      Open Brain Dump
-                    </Link>
-                  </Button>
+                      <Link href="/brain-dump">
+                        <Brain className="h-4 w-4" />
+                        Open Brain Dump
+                      </Link>
+                    </Button>
                 </div>
               ) : (
                 <ul className="divide-y divide-border/30">
@@ -207,7 +246,7 @@ export default function DashboardPage() {
                   ))}
                 </ul>
               )}
-              {!isLoading && totalCount > 8 && (
+              {!notesIsLoading && totalCount > 8 && (
                 <div className="border-t border-border/30 pt-3 mt-2">
                   <Button asChild variant="ghost" size="sm" className="w-full text-xs text-muted-foreground">
                     <Link href="/lore">View all {totalCount} entries →</Link>
@@ -266,35 +305,34 @@ export default function DashboardPage() {
                 System Status
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">AllCodex</span>
+              <CardContent className="pt-4 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Cpu className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">AllCodex</span>
+                  </div>
+                  <StatusBadge
+                    state={getServiceState(configStatus?.allcodex, configStatusIsError)}
+                    version={configStatus?.allcodex?.version}
+                  />
                 </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                  <span className="text-green-500">Online</span>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">AllKnower</span>
+                  </div>
+                  <StatusBadge state={getServiceState(configStatus?.allknower, configStatusIsError)} />
                 </div>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">AllKnower</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                  <span className="text-green-500">Online</span>
-                </div>
-              </div>
-              {ragStatus && (
+              {ragIsError ? (
+                <ServiceBanner service="AllKnower" error={ragError} />
+              ) : ragStatus ? (
                 <p className="text-xs text-muted-foreground/60 pt-1 border-t border-border/30">
                   {ragStatus.indexedNotes ?? 0} notes in RAG index
                   {ragStatus.lastIndexed
                     ? ` · last indexed ${new Date(ragStatus.lastIndexed).toLocaleDateString()}`
                     : ""}
                 </p>
-              )}
+              ) : null}
             </CardContent>
           </Card>
         </div>

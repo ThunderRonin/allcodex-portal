@@ -10,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { LoreTree } from "@/components/portal/LoreTree";
+import { ServiceBanner } from "@/components/portal/ServiceBanner";
+import { fetchJsonOrThrow } from "@/lib/fetch-json";
 
 interface Note {
   noteId: string;
@@ -81,13 +83,10 @@ function LorePageContent() {
 
   const query = "#lore";
 
-  const { data: notes, isLoading } = useQuery<Note[]>({
+  const { data: notes, isLoading, isError, error } = useQuery<Note[]>({
     queryKey: ["lore", query],
-    queryFn: async () => {
-      const r = await fetch(`/api/lore?q=${encodeURIComponent(query)}`);
-      if (!r.ok) throw new Error((await r.json()).error ?? r.statusText);
-      return r.json() as Promise<Note[]>;
-    },
+    queryFn: () => fetchJsonOrThrow<Note[]>(`/api/lore?q=${encodeURIComponent(query)}`),
+    retry: false,
   });
 
   const searched = Array.isArray(notes)
@@ -153,6 +152,8 @@ function LorePageContent() {
             <Skeleton key={i} className="h-28 rounded-lg" />
           ))}
         </div>
+      ) : isError ? (
+        <ServiceBanner service="AllCodex" error={error} />
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <BookOpen className="h-16 w-16 text-muted-foreground/20 mb-4" />

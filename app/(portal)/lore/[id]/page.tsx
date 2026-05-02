@@ -29,11 +29,13 @@ import { Breadcrumbs } from "@/components/portal/Breadcrumbs";
 import { TableOfContents } from "@/components/portal/TableOfContents";
 import { NotePreviewLink } from "@/components/portal/NotePreview";
 import { ShareSettings } from "@/components/portal/ShareSettings";
+import { ArticleCopilot } from "@/components/portal/ArticleCopilot";
 import { PreviewToggle, type PreviewMode } from "@/components/portal/PreviewToggle";
 import Link from "next/link";
 import Image from "next/image";
 import { use, useRef, useState } from "react";
 import { sanitizeLoreHtml } from "@/lib/sanitize";
+import { parseThemeSongUrl } from "@/lib/theme-song";
 import { cn } from "@/lib/utils";
 
 interface Attribute {
@@ -58,12 +60,13 @@ interface Note {
   dateModified: string;
   attributes: Attribute[];
   portraitImageNoteId: string | null;
+  themeSongUrl: string | null;
   resolvedRelations: ResolvedRelation[];
 }
 
 const HIDDEN_LABELS = [
   "template", "iconClass", "cssClass", "loreType", "lore", "pageTemplate", "bookTheme",
-  "draft", "gmOnly", "shareAlias", "shareCredentials", "shareRoot",
+  "draft", "gmOnly", "shareAlias", "shareCredentials", "shareRoot", "themeSongUrl",
 ];
 
 const RELATION_LABELS: Record<string, string> = {
@@ -151,6 +154,50 @@ function PortraitCard({ note }: { note: Note }) {
         <p className="text-sm text-muted-foreground">
           Add a `portraitImage` relation to an image note to populate this panel.
         </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ThemeSongCard({ note }: { note: Note }) {
+  const themeSong = parseThemeSongUrl(note.themeSongUrl);
+
+  if (!themeSong) {
+    return null;
+  }
+
+  const providerLabel = themeSong.provider === "appleMusic" ? "Apple Music" : themeSong.provider;
+
+  return (
+    <Card className="wiki-rail-card overflow-hidden">
+      <CardContent className="p-5 space-y-3">
+        <div className="space-y-1">
+          <p className="wiki-rail-kicker">Theme Song</p>
+          <p className="text-sm font-semibold text-foreground/90">{note.title}</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">{providerLabel}</p>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-muted/20">
+          <iframe
+            title={`${note.title} theme song`}
+            src={themeSong.embedUrl}
+            width="100%"
+            height={themeSong.height}
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            className="block w-full border-0"
+          />
+        </div>
+
+        <a
+          href={themeSong.externalUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex text-xs uppercase tracking-[0.25em] text-accent transition-colors hover:text-accent/80"
+        >
+          Open on provider
+        </a>
       </CardContent>
     </Card>
   );
@@ -391,6 +438,7 @@ export default function LoreDetailPage({
           ) : (
             <>
               <PortraitCard note={note} />
+              <ThemeSongCard note={note} />
 
               <Card className="wiki-rail-card">
                 <CardContent className="p-5 space-y-4">
@@ -436,6 +484,7 @@ export default function LoreDetailPage({
               )}
 
               <div className="grid gap-3">
+                <ArticleCopilot noteId={id} />
                 <Button asChild className="w-full gap-2">
                   <Link href={`/lore/${id}/edit`}>
                     <Edit2 className="h-4 w-4" />

@@ -13,6 +13,7 @@ import { Trash2, Eye, EyeOff, ArrowLeft, Save, ImagePlus, Loader2, Link2, X } fr
 import { TemplateDef, LORE_TEMPLATES } from "@/components/editor/TemplatePicker";
 import { PromotedFields } from "@/components/editor/PromotedFields";
 import { isPortraitRelationName } from "@/lib/lore-presentation";
+import { parseThemeSongUrl, THEME_SONG_LABEL_NAME } from "@/lib/theme-song";
 
 interface Note {
   noteId: string;
@@ -61,6 +62,7 @@ export default function EditLorePage() {
   const [template, setTemplate] = useState<TemplateDef | null>(null);
   const [attributeValues, setAttributeValues] = useState<Record<string, string>>({});
   const [portraitImageNoteId, setPortraitImageNoteId] = useState("");
+  const [themeSongUrl, setThemeSongUrl] = useState("");
   const [portraitSearchQuery, setPortraitSearchQuery] = useState("");
   const [portraitSearchResults, setPortraitSearchResults] = useState<NoteSearchResult[]>([]);
   const [portraitSearchOpen, setPortraitSearchOpen] = useState(false);
@@ -93,6 +95,10 @@ export default function EditLorePage() {
       (attribute) => attribute.type === "relation" && isPortraitRelationName(attribute.name),
     );
     setPortraitImageNoteId(portraitAttr?.value ?? "");
+    const themeSongAttr = noteData.attributes?.find(
+      (attribute) => attribute.type === "label" && attribute.name === THEME_SONG_LABEL_NAME,
+    );
+    setThemeSongUrl(themeSongAttr?.value ?? "");
 
     if (template === null) {
       const loreTypeAttr = noteData.attributes?.find((attribute) => attribute.name === "loreType");
@@ -159,10 +165,21 @@ export default function EditLorePage() {
   }, [portraitSearchQuery]);
 
   const isLoading = noteLoading || contentLoading;
+  const parsedThemeSong = parseThemeSongUrl(themeSongUrl);
+  const themeSongPreviewLabel = parsedThemeSong
+    ? parsedThemeSong.provider === "appleMusic"
+      ? "Apple Music"
+      : parsedThemeSong.provider
+    : null;
 
   const { mutate: save, isPending: saving } = useMutation({
     mutationFn: async () => {
       setSaveError(null);
+      const trimmedThemeSongUrl = themeSongUrl.trim();
+
+      if (trimmedThemeSongUrl && !parsedThemeSong) {
+        throw new Error("Theme song must be a supported HTTPS URL from Spotify, YouTube, SoundCloud, or Apple Music.");
+      }
 
       if (title !== null) {
         const response = await fetch(`/api/lore/${id}`, {
@@ -212,6 +229,9 @@ export default function EditLorePage() {
       const existingPortraitAttr = cachedNote?.attributes?.find(
         (attribute) => attribute.type === "relation" && isPortraitRelationName(attribute.name),
       );
+      const existingThemeSongAttrs = cachedNote?.attributes?.filter(
+        (attribute) => attribute.type === "label" && attribute.name === THEME_SONG_LABEL_NAME,
+      ) ?? [];
 
       if (
         existingPortraitAttr &&
@@ -228,6 +248,18 @@ export default function EditLorePage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ type: "relation", name: "portraitImage", value: normalizedPortraitId }),
+        });
+      }
+
+      for (const attribute of existingThemeSongAttrs) {
+        await fetch(`/api/lore/${id}/attributes?attrId=${attribute.attributeId}`, { method: "DELETE" });
+      }
+
+      if (trimmedThemeSongUrl) {
+        await fetch(`/api/lore/${id}/attributes`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "label", name: THEME_SONG_LABEL_NAME, value: trimmedThemeSongUrl }),
         });
       }
     },
@@ -425,6 +457,15 @@ export default function EditLorePage() {
                   Saved as a `portraitImage` relation so the lore detail rail can render a dedicated portrait.
                 </p>
               </div>
+              <div>
+                <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Theme Song</div>
+                <div className="mt-1 font-medium text-foreground">
+                  {themeSongUrl.trim() ? themeSongUrl.trim() : "No theme song linked"}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Stored as a `themeSongUrl` label and rendered as a provider-safe embed under the portrait.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -538,6 +579,30 @@ export default function EditLorePage() {
                   event.currentTarget.value = "";
                 }}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="theme-song-url">Theme song URL</Label>
+              <Input
+                id="theme-song-url"
+                value={themeSongUrl}
+                onChange={(event) => setThemeSongUrl(event.target.value)}
+                disabled={saving || portraitUploading}
+                placeholder="https://open.spotify.com/track/..."
+              />
+              <p className="text-sm text-muted-foreground">
+                Supports Spotify, YouTube, SoundCloud, and Apple Music HTTPS links.
+              </p>
+              {themeSongUrl.trim() && !parsedThemeSong && (
+                <p className="text-sm text-red-300">
+                  This URL will not save until it matches a supported provider.
+                </p>
+              )}
+              {parsedThemeSong && (
+                <p className="text-sm text-muted-foreground">
+                  Preview provider: {themeSongPreviewLabel}
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
