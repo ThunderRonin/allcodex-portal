@@ -141,9 +141,13 @@ export async function getNoteContent(creds: EtapiCreds, noteId: string): Promise
 
 /** Create a new note */
 export async function createNote(creds: EtapiCreds, params: CreateNoteParams): Promise<CreateNoteResponse> {
+  // ETAPI rejects text notes with empty/missing content — default to an empty paragraph.
+  const content =
+    params.content && params.content.trim() !== "" ? params.content : "<p></p>";
+
   const res = await etapiFetch(creds, "/create-note", {
     method: "POST",
-    body: JSON.stringify({ type: "text", ...params }),
+    body: JSON.stringify({ type: "text", ...params, content }),
   });
   return res.json();
 }

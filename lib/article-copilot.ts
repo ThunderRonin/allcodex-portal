@@ -392,66 +392,99 @@ export async function applyArticleCopilotProposal(
   const createdIdMap = new Map<string, string>();
   const createdNoteIds: string[] = [];
   const updatedNoteIds = new Set<string>();
+  const failedTargetIds = new Set<string>();
 
   for (const target of approvedTargets.filter((item) => item.kind === "create")) {
-    const created = await createNote(creds, {
-      parentNoteId: currentParentNoteId,
-      title: target.title ?? "Untitled Lore Entry",
-      content: "",
-    });
-    createdIdMap.set(target.targetId, created.note.noteId);
-    createdNoteIds.push(created.note.noteId);
-    existingTargets.set(created.note.noteId, created.note);
+    try {
+      const created = await createNote(creds, {
+        parentNoteId: currentParentNoteId,
+        title: target.title ?? "Untitled Lore Entry",
+        content: "",
+      });
+      createdIdMap.set(target.targetId, created.note.noteId);
+      createdNoteIds.push(created.note.noteId);
+      existingTargets.set(created.note.noteId, created.note);
 
-    await createAttribute(creds, {
-      noteId: created.note.noteId,
-      type: "label",
-      name: "lore",
-      value: "",
-    });
-    await createAttribute(creds, {
-      noteId: created.note.noteId,
-      type: "label",
-      name: "loreType",
-      value: target.loreType ?? "lore",
-    });
-  }
-
-  for (const target of approvedTargets) {
-    const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
-    const note = existingTargets.get(resolvedTargetId);
-    if (!note) continue;
-
-    if (target.title && target.title !== note.title) {
-      const patched = await patchNote(creds, resolvedTargetId, { title: target.title });
-      existingTargets.set(resolvedTargetId, patched);
-      updatedNoteIds.add(resolvedTargetId);
+      await createAttribute(creds, {
+        noteId: created.note.noteId,
+        type: "label",
+        name: "lore",
+        value: "",
+      });
+      await createAttribute(creds, {
+        noteId: created.note.noteId,
+        type: "label",
+        name: "loreType",
+        value: target.loreType ?? "lore",
+      });
+    } catch (e) {
+      console.error("Failed to create target", target.targetId, e);
+      failedTargetIds.add(target.targetId);
     }
   }
 
   for (const target of approvedTargets) {
-    const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
-    if (typeof target.contentHtml === "string") {
-      await putNoteContent(creds, resolvedTargetId, target.contentHtml);
-      updatedNoteIds.add(resolvedTargetId);
+    if (failedTargetIds.has(target.targetId)) continue;
+    try {
+      const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
+      const note = existingTargets.get(resolvedTargetId);
+      if (!note) continue;
+
+      if (target.title && target.title !== note.title) {
+        const patched = await patchNote(creds, resolvedTargetId, { title: target.title });
+        existingTargets.set(resolvedTargetId, patched);
+        updatedNoteIds.add(resolvedTargetId);
+      }
+    } catch (e) {
+      console.error("Failed to update title for target", target.targetId, e);
+      failedTargetIds.add(target.targetId);
     }
   }
 
   for (const target of approvedTargets) {
-    const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
-    const refreshed = await getNote(creds, resolvedTargetId);
-    await upsertLabels(creds, refreshed, target);
+    if (failedTargetIds.has(target.targetId)) continue;
+    try {
+      const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
+      if (typeof target.contentHtml === "string") {
+        await putNoteContent(creds, resolvedTargetId, target.contentHtml);
+        updatedNoteIds.add(resolvedTargetId);
+      }
+    } catch (e) {
+      console.error("Failed to update content for target", target.targetId, e);
+      failedTargetIds.add(target.targetId);
+    }
   }
 
   for (const target of approvedTargets) {
-    const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
-    const refreshed = await getNote(creds, resolvedTargetId);
-    await syncRelations(creds, refreshed, target, createdIdMap);
+    if (failedTargetIds.has(target.targetId)) continue;
+    try {
+      const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
+      const refreshed = await getNote(creds, resolvedTargetId);
+      await upsertLabels(creds, refreshed, target);
+      if (target.labelUpserts.length > 0 || target.labelDeletes.length > 0) updatedNoteIds.add(resolvedTargetId);
+    } catch (e) {
+      console.error("Failed to update labels for target", target.targetId, e);
+      failedTargetIds.add(target.targetId);
+    }
+  }
+
+  for (const target of approvedTargets) {
+    if (failedTargetIds.has(target.targetId)) continue;
+    try {
+      const resolvedTargetId = target.kind === "create" ? createdIdMap.get(target.targetId)! : target.targetId;
+      const refreshed = await getNote(creds, resolvedTargetId);
+      await syncRelations(creds, refreshed, target, createdIdMap);
+      if (target.relationAdds.length > 0 || target.relationDeletes.length > 0) updatedNoteIds.add(resolvedTargetId);
+    } catch (e) {
+      console.error("Failed to update relations for target", target.targetId, e);
+      failedTargetIds.add(target.targetId);
+    }
   }
 
   return {
     updatedNoteIds: [...updatedNoteIds],
     createdNoteIds,
     skipped: [],
+    failed: [...failedTargetIds],
   };
 }

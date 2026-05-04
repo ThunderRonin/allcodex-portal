@@ -122,6 +122,7 @@ export const CopilotApplyResultSchema = z.object({
   updatedNoteIds: z.array(z.string()),
   createdNoteIds: z.array(z.string()),
   skipped: z.array(z.string()),
+  failed: z.array(z.string()).optional(),
 });
 
 export const CopilotNoteLabelSchema = z.object({
