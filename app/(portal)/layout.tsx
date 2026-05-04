@@ -2,6 +2,9 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/portal/AppSidebar";
 import { Separator } from "@/components/ui/separator";
 import { Scroll } from "lucide-react";
+import { ThemeToggle } from "@/components/portal/ThemeToggle";
+import { CopilotProvider } from "@/components/portal/CopilotProvider";
+import { CommandPalette } from "@/components/portal/CommandPalette";
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -20,8 +23,16 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               All Reach Chronicle
             </span>
           </div>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-6">
+          <CopilotProvider>
+            {children}
+            <CommandPalette />
+          </CopilotProvider>
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
