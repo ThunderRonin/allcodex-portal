@@ -48,7 +48,7 @@ export default function GapsPage() {
   const { data, isLoading, error, refetch } = useQuery<{ gaps: Gap[] }>({
     queryKey: ["gaps"],
     queryFn: async () => {
-      const r = await fetch("/api/ai/gaps");
+      const r = await fetch("/api/ai/gaps", { method: "POST" });
       if (!r.ok) throw await r.json();
       return r.json();
     },

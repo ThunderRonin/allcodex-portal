@@ -217,6 +217,7 @@ export async function checkConsistency(creds: AkCreds, noteIds?: string[]): Prom
   const res = await akFetch(creds, "/consistency/check", {
     method: "POST",
     body: JSON.stringify({ noteIds }),
+    signal: AbortSignal.timeout(180_000),
   });
   const raw = await res.json();
   const parsed = ConsistencyResultSchema.safeParse(raw);
@@ -265,7 +266,10 @@ export async function applyRelationships(
 }
 
 export async function getGaps(creds: AkCreds): Promise<GapResult> {
-  const res = await akFetch(creds, "/suggest/gaps");
+  const res = await akFetch(creds, "/suggest/gaps", {
+    method: "POST",
+    signal: AbortSignal.timeout(120_000),
+  });
   const raw = await res.json();
   const parsed = GapResultSchema.safeParse(raw);
   if (!parsed.success) {
