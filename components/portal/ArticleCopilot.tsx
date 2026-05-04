@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Bot, CheckCircle2, Loader2, Sparkles, XCircle } from "lucide-react";
+import { Bot, CheckCircle2, Loader2, Sparkles, XCircle, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,22 +15,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { ServiceBanner } from "@/components/portal/ServiceBanner";
 import { fetchJsonOrThrow } from "@/lib/fetch-json";
 import { sanitizeLoreHtml } from "@/lib/sanitize";
-import type { ChatMessage, CopilotApplyResult, CopilotChatResponse, CopilotProposal, CopilotProposalTarget } from "@/lib/allknower-schemas";
+import { useCopilotStore } from "@/lib/stores/copilot-store";
+import type { CopilotApplyResult, CopilotChatResponse, CopilotProposalTarget } from "@/lib/allknower-schemas";
 
 type ExistingTargetSnapshot = {
   title: string;
   loreType: string;
   contentHtml: string;
   parentNoteIds: string[];
-};
-
-type ArticleCopilotProps = {
-  noteId: string;
 };
 
 function targetRoleLabel(noteId: string, target: CopilotProposalTarget) {
@@ -180,28 +177,35 @@ function ProposalCard({
   );
 }
 
-export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
-  const [open, setOpen] = useState(false);
+export function ArticleCopilot() {
+  const store = useCopilotStore();
+  const noteId = store.activeNoteId;
+  const conv = noteId ? store.conversations[noteId] : null;
+
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [pendingProposal, setPendingProposal] = useState<CopilotProposal | null>(null);
-  const [selectedTargetIds, setSelectedTargetIds] = useState<string[]>([]);
+  const [redirectDraft, setRedirectDraft] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [targetSnapshots, setTargetSnapshots] = useState<Record<string, ExistingTargetSnapshot>>({});
   const [newNoteParentLabel, setNewNoteParentLabel] = useState("current article primary parent");
   const [isSending, setIsSending] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [confirmApplyOpen, setConfirmApplyOpen] = useState(false);
-  const [lastError, setLastError] = useState<unknown>(null);
   const [errorService, setErrorService] = useState<"AllKnower" | "AllCodex">("AllKnower");
   const [lastResponse, setLastResponse] = useState<CopilotChatResponse | null>(null);
   const [applyResult, setApplyResult] = useState<CopilotApplyResult | null>(null);
   const queryClient = useQueryClient();
 
+  const messages = conv?.messages ?? [];
+  const pendingProposal = conv?.pendingProposal ?? null;
+  const selectedTargetIds = conv?.selectedTargetIds ?? [];
   const selectedCount = selectedTargetIds.length;
   const orderedTargets = pendingProposal?.targets ?? [];
+  const hasConversation = messages.length > 0;
+  const citations = useMemo(() => lastResponse?.citations ?? [], [lastResponse]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!pendingProposal) {
+    if (!pendingProposal || !noteId) {
       setTargetSnapshots({});
       return;
     }
@@ -232,43 +236,64 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
     return () => {
       cancelled = true;
     };
-  }, [pendingProposal]);
+  }, [pendingProposal, noteId]);
 
-  async function sendMessage() {
-    const content = draft.trim();
+  useEffect(() => {
+    if (store.isOpen) {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length, pendingProposal, applyResult, store.isOpen]);
+
+  async function sendMessage(contentOverride?: string) {
+    if (!noteId) return;
+    const content = contentOverride ?? draft.trim();
     if (!content || isSending) return;
 
-    const nextMessages = [...messages, { role: "user" as const, content }];
-    setDraft("");
+    if (!contentOverride) {
+      setDraft("");
+    }
+    
+    // Add user message to store immediately
+    store.sendMessage(noteId, content);
     setIsSending(true);
-    setLastError(null);
     setApplyResult(null);
-    setMessages(nextMessages);
 
     try {
+      const currentMessages = store.conversations[noteId]?.messages || [];
+      const nextMessages = [...currentMessages, { role: "user" as const, content }];
+      
       const response = await fetchJsonOrThrow<CopilotChatResponse>(`/api/lore/${noteId}/copilot/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages }),
       });
 
-      setMessages([...nextMessages, { role: "assistant", content: response.assistantMessage }]);
+      store.setAssistantResponse(noteId, response.assistantMessage, response.proposal);
       setLastResponse(response);
-      setPendingProposal(response.proposal);
-      setSelectedTargetIds(response.proposal?.targets.map((target) => target.targetId) ?? []);
+      setIsRedirecting(false);
+      setRedirectDraft("");
     } catch (error) {
       setErrorService("AllKnower");
-      setLastError(error);
+      store.setLastError(error as { message: string });
     } finally {
       setIsSending(false);
     }
   }
 
+  async function handleRedirect() {
+    if (!noteId) return;
+    const instructions = redirectDraft.trim();
+    if (!instructions) return;
+    store.redirectWithInstructions(noteId, instructions);
+    // Send it immediately
+    await sendMessage(`I'm rejecting the previous proposal. Instead: ${instructions}`);
+  }
+
   async function applySelectedChanges() {
-    if (!pendingProposal || selectedTargetIds.length === 0 || isApplying) return;
+    if (!pendingProposal || selectedTargetIds.length === 0 || isApplying || !noteId) return;
 
     setIsApplying(true);
-    setLastError(null);
+    store.setLastError(null);
 
     try {
       const response = await fetchJsonOrThrow<{ applied: CopilotApplyResult }>(`/api/lore/${noteId}/copilot/apply`, {
@@ -281,9 +306,10 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
       });
 
       setApplyResult(response.applied);
-      setPendingProposal(null);
-      setSelectedTargetIds([]);
       setConfirmApplyOpen(false);
+      
+      // Clear proposal explicitly
+      store.setAssistantResponse(noteId, "Changes successfully applied to AllCodex.", null);
 
       const touchedNoteIds = new Set([
         noteId,
@@ -298,23 +324,16 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
       void queryClient.invalidateQueries({ queryKey: ["lore"] });
     } catch (error) {
       setErrorService("AllCodex");
-      setLastError(error);
+      store.setLastError(error as { message: string });
     } finally {
       setIsApplying(false);
     }
   }
 
-  const hasConversation = messages.length > 0;
-  const citations = useMemo(() => lastResponse?.citations ?? [], [lastResponse]);
+  if (!noteId) return null;
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" className="w-full gap-2 border-accent/40 text-accent hover:bg-accent/10">
-          <Bot className="h-4 w-4" />
-          Lore Copilot
-        </Button>
-      </SheetTrigger>
+    <Sheet open={store.isOpen} onOpenChange={(val) => (val ? undefined : store.close())}>
       <SheetContent side="right" className="w-full border-l-border/60 bg-background/95 sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
@@ -327,7 +346,7 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
         </SheetHeader>
 
         <div className="mt-6 flex h-[calc(100vh-8rem)] flex-col gap-4">
-          {lastError ? <ServiceBanner service={errorService} error={lastError} /> : null}
+          {store.lastError ? <ServiceBanner service={errorService} error={store.lastError} /> : null}
 
           <ScrollArea className="flex-1 rounded-lg border border-border/60 bg-card/40 p-4">
             <div className="space-y-4">
@@ -371,16 +390,6 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
                       <p className="text-sm font-semibold">Review Proposal</p>
                       <p className="text-xs text-muted-foreground">{selectedCount} selected for apply</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setPendingProposal(null);
-                        setSelectedTargetIds([]);
-                      }}
-                    >
-                      Dismiss proposal
-                    </Button>
                   </div>
 
                   {orderedTargets.map((target) => (
@@ -389,15 +398,62 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
                       noteId={noteId}
                       target={target}
                       checked={selectedTargetIds.includes(target.targetId)}
-                      onCheckedChange={(checked) => {
-                        setSelectedTargetIds((current) => checked
-                          ? [...new Set([...current, target.targetId])]
-                          : current.filter((id) => id !== target.targetId));
-                      }}
+                      onCheckedChange={() => store.toggleTargetSelection(noteId, target.targetId)}
                       snapshot={targetSnapshots[target.targetId]}
                       newNoteParentLabel={newNoteParentLabel}
                     />
                   ))}
+
+                  <Card className="border-border/60 bg-background/80 mt-4">
+                    <CardContent className="p-4 space-y-4">
+                      {isRedirecting ? (
+                        <div className="space-y-3">
+                          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Redirect Instructions</p>
+                          <Textarea
+                            value={redirectDraft}
+                            onChange={(e) => setRedirectDraft(e.target.value)}
+                            placeholder="Instead of this proposal, please..."
+                            className="min-h-24"
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button variant="ghost" size="sm" onClick={() => setIsRedirecting(false)}>
+                              Nevermind
+                            </Button>
+                            <Button size="sm" onClick={handleRedirect} disabled={isSending || !redirectDraft.trim()}>
+                              {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                              Send Revision
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="default"
+                            onClick={() => setConfirmApplyOpen(true)}
+                            disabled={selectedTargetIds.length === 0 || isApplying}
+                          >
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Apply Selected
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => store.dismissProposal(noteId)}
+                          >
+                            <XCircle className="mr-2 h-4 w-4 text-muted-foreground" />
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsRedirecting(true)}
+                            className="border-accent/40 text-accent hover:bg-accent/10"
+                          >
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            Cancel + Redirect...
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 </div>
               )}
 
@@ -411,9 +467,11 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
                     <p>Updated: {applyResult.updatedNoteIds.join(", ") || "none"}</p>
                     <p>Created: {applyResult.createdNoteIds.join(", ") || "none"}</p>
                     {applyResult.skipped.length > 0 && <p>Skipped: {applyResult.skipped.join(", ")}</p>}
+                    {applyResult.failed && applyResult.failed.length > 0 && <p className="text-red-300">Failed: {applyResult.failed.join(", ")}</p>}
                   </CardContent>
                 </Card>
               )}
+              <div ref={scrollRef} />
             </div>
           </ScrollArea>
 
@@ -426,31 +484,13 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
             />
             <div className="flex items-center justify-between gap-3">
               <div className="text-xs text-muted-foreground">
-                Page reload clears this session.
+                Copilot context is preserved while navigating.
               </div>
-              <div className="flex items-center gap-2">
-                {pendingProposal && (
-                  <Button
-                    variant="default"
-                    onClick={() => setConfirmApplyOpen(true)}
-                    disabled={selectedTargetIds.length === 0 || isApplying}
-                  >
-                    {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                    Apply selected changes
-                  </Button>
-                )}
-                <Button variant="outline" onClick={sendMessage} disabled={isSending || !draft.trim()}>
-                  {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                  Send
-                </Button>
-              </div>
+              <Button variant="outline" onClick={() => sendMessage()} disabled={isSending || !draft.trim()}>
+                {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                Send
+              </Button>
             </div>
-            {pendingProposal && selectedTargetIds.length === 0 && (
-              <div className="flex items-center gap-2 text-xs text-amber-300">
-                <XCircle className="h-3.5 w-3.5" />
-                Select at least one proposal card before applying.
-              </div>
-            )}
           </div>
         </div>
       </SheetContent>
@@ -458,9 +498,13 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Apply selected copilot changes?</DialogTitle>
-            <DialogDescription>
-              This will write {selectedTargetIds.length} selected target{selectedTargetIds.length === 1 ? "" : "s"} to AllCodex.
-            </DialogDescription>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p>This will write {selectedTargetIds.length} selected target{selectedTargetIds.length === 1 ? "" : "s"} to AllCodex.</p>
+              <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-red-300 font-medium text-sm flex items-center gap-2">
+                <XCircle className="h-4 w-4 shrink-0" />
+                This action cannot be undone.
+              </div>
+            </div>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmApplyOpen(false)} disabled={isApplying}>
@@ -468,7 +512,7 @@ export function ArticleCopilot({ noteId }: ArticleCopilotProps) {
             </Button>
             <Button onClick={applySelectedChanges} disabled={isApplying}>
               {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-              Apply
+              Write to Codex
             </Button>
           </DialogFooter>
         </DialogContent>

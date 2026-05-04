@@ -14,6 +14,7 @@ import { TemplateDef, LORE_TEMPLATES } from "@/components/editor/TemplatePicker"
 import { PromotedFields } from "@/components/editor/PromotedFields";
 import { isPortraitRelationName } from "@/lib/lore-presentation";
 import { parseThemeSongUrl, THEME_SONG_LABEL_NAME } from "@/lib/theme-song";
+import { CopilotTrigger } from "@/components/portal/CopilotTrigger";
 
 interface Note {
   noteId: string;
@@ -377,6 +378,7 @@ export default function EditLorePage() {
             {isDraft ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             {isDraft ? "Publish" : "Revert to Draft"}
           </Button>
+          <CopilotTrigger noteId={id} />
           <Button
             variant="default"
             onClick={() => save()}

@@ -29,7 +29,7 @@ import { Breadcrumbs } from "@/components/portal/Breadcrumbs";
 import { TableOfContents } from "@/components/portal/TableOfContents";
 import { NotePreviewLink } from "@/components/portal/NotePreview";
 import { ShareSettings } from "@/components/portal/ShareSettings";
-import { ArticleCopilot } from "@/components/portal/ArticleCopilot";
+import { CopilotTrigger } from "@/components/portal/CopilotTrigger";
 import { PreviewToggle, type PreviewMode } from "@/components/portal/PreviewToggle";
 import Link from "next/link";
 import Image from "next/image";
@@ -484,7 +484,7 @@ export default function LoreDetailPage({
               )}
 
               <div className="grid gap-3">
-                <ArticleCopilot noteId={id} />
+                <CopilotTrigger noteId={id} />
                 <Button asChild className="w-full gap-2">
                   <Link href={`/lore/${id}/edit`}>
                     <Edit2 className="h-4 w-4" />

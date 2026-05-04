@@ -12,6 +12,8 @@ import Link from "next/link";
 import { LoreTree } from "@/components/portal/LoreTree";
 import { ServiceBanner } from "@/components/portal/ServiceBanner";
 import { fetchJsonOrThrow } from "@/lib/fetch-json";
+import { CopilotTrigger } from "@/components/portal/CopilotTrigger";
+import { useCopilotStore } from "@/lib/stores/copilot-store";
 
 interface Note {
   noteId: string;
@@ -223,6 +225,11 @@ function LorePageContent() {
           })}
         </div>
       )}
+      </div>
+
+      {/* Floating Copilot Trigger */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <CopilotTrigger noteId={useCopilotStore.getState().activeNoteId || filtered[0]?.noteId || ""} />
       </div>
     </div>
   );
