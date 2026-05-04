@@ -8,8 +8,10 @@ The portal gives you a clean interface for browsing lore, running brain dumps, a
 
 - **Lore Browser** — browse, create, and edit notes tagged with `#lore` in AllCodex
 - **Brain Dump** — paste raw worldbuilding thoughts and let AllKnower extract and file entities automatically
+- **Article Copilot** — AI writing assistant that opens as a side sheet on any lore page; proposes edits, linked notes, and relation changes within an explicit writable scope; conversation persists across navigation
 - **AI Tools** — consistency checker, lore gap detector, and relationship suggestions powered by AllKnower
 - **Semantic Search** — RAG-based search across your lore using AllKnower's vector index, plus direct ETAPI label queries
+- **Light / Dark theme** — parchment (light) and grimoire (dark) modes toggled per-session
 - **Settings** — connect to AllCodex via ETAPI token or password login, and AllKnower via bearer token or sign-in
 
 ## Requirements
