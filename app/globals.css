@@ -59,14 +59,70 @@
 :root {
   --radius: 0.6rem;
 
+  /* ── Light Theme (parchment, ink, gold) ── */
+  --background:          oklch(0.96 0.015 85);
+  --foreground:          oklch(0.15 0.02 275);
+
+  --card:                oklch(0.98 0.01 85);
+  --card-foreground:     oklch(0.15 0.02 275);
+
+  --popover:             oklch(1.0 0 0);
+  --popover-foreground:  oklch(0.15 0.02 275);
+
+  --primary:             oklch(0.65 0.15 65); /* dark gold */
+  --primary-foreground:  oklch(0.98 0.01 85);
+
+  --secondary:           oklch(0.92 0.02 85);
+  --secondary-foreground:oklch(0.25 0.03 275);
+
+  --muted:               oklch(0.94 0.015 85);
+  --muted-foreground:    oklch(0.45 0.03 275);
+
+  --accent:              oklch(0.55 0.15 195); /* deep teal */
+  --accent-foreground:   oklch(0.98 0.01 85);
+
+  --destructive:         oklch(0.55 0.20 15); /* deep crimson */
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border:              oklch(0.88 0.02 85);
+  --input:               oklch(0.98 0.01 85);
+  --ring:                oklch(0.65 0.15 65);
+
+  --gm-only:             oklch(0.55 0.20 15);
+  --gm-only-bg:          oklch(0.92 0.04 15);
+  --ai-feature:          oklch(0.55 0.15 195);
+  --ai-feature-bg:       oklch(0.92 0.04 195);
+  --canon-safe:          oklch(0.55 0.15 145);
+  --canon-safe-bg:       oklch(0.92 0.04 145);
+  --warning:             oklch(0.65 0.15 70);
+  --warning-bg:          oklch(0.94 0.04 70);
+  --draft:               oklch(0.60 0.10 285);
+
+  --chart-1: oklch(0.65 0.15 65);
+  --chart-2: oklch(0.55 0.15 195);
+  --chart-3: oklch(0.60 0.18 310);
+  --chart-4: oklch(0.55 0.15 145);
+  --chart-5: oklch(0.55 0.20 15);
+
+  --sidebar:                    oklch(0.94 0.015 85);
+  --sidebar-foreground:         oklch(0.20 0.02 275);
+  --sidebar-primary:            oklch(0.65 0.15 65);
+  --sidebar-primary-foreground: oklch(0.98 0.01 85);
+  --sidebar-accent:             oklch(0.90 0.02 85);
+  --sidebar-accent-foreground:  oklch(0.15 0.02 275);
+  --sidebar-border:             oklch(0.88 0.02 85);
+  --sidebar-ring:               oklch(0.65 0.15 65);
+}
+
+.dark {
   /* ── Base surfaces — void black with a touch of violet depth ── */
-  --background:          oklch(0.055 0.022 275);
+  --background:          oklch(0.06 0.020 275);
   --foreground:          oklch(0.95 0.012 80);
 
-  --card:                oklch(0.09 0.028 275);
+  --card:                oklch(0.105 0.028 275);
   --card-foreground:     oklch(0.95 0.012 80);
 
-  --popover:             oklch(0.10 0.030 278);
+  --popover:             oklch(0.12 0.030 278);
   --popover-foreground:  oklch(0.95 0.012 80);
 
   /* ── Neon amber — primary interactive ("arcane fire") ── */
@@ -74,11 +130,11 @@
   --primary-foreground:  oklch(0.07 0.01 275);
 
   /* ── Electric violet — secondary surfaces ── */
-  --secondary:           oklch(0.17 0.055 285);
+  --secondary:           oklch(0.20 0.055 285);
   --secondary-foreground:oklch(0.90 0.025 285);
 
   --muted:               oklch(0.12 0.025 278);
-  --muted-foreground:    oklch(0.55 0.030 280);
+  --muted-foreground:    oklch(0.62 0.025 280);
 
   /* ── Spectral teal — accent (AI features, relations, links) ── */
   --accent:              oklch(0.72 0.20 195);
@@ -89,8 +145,8 @@
   --destructive-foreground: oklch(0.98 0 0);
 
   /* ── Borders glow subtly violet ── */
-  --border:              oklch(0.28 0.055 282);
-  --input:               oklch(0.14 0.035 280);
+  --border:              oklch(0.32 0.050 282);
+  --input:               oklch(0.17 0.035 280);
   --ring:                oklch(0.82 0.20 68);
 
   /* ── Extended semantic tokens ── */
@@ -116,13 +172,11 @@
   --sidebar-foreground:         oklch(0.90 0.018 80);
   --sidebar-primary:            oklch(0.82 0.20 68);
   --sidebar-primary-foreground: oklch(0.07 0.01 275);
-  --sidebar-accent:             oklch(0.14 0.045 282);
+  --sidebar-accent:             oklch(0.18 0.050 282);
   --sidebar-accent-foreground:  oklch(0.90 0.025 285);
-  --sidebar-border:             oklch(0.22 0.050 282);
+  --sidebar-border:             oklch(0.28 0.050 282);
   --sidebar-ring:               oklch(0.82 0.20 68);
 }
-
-/* No separate .dark block — this is always dark */
 
 @layer base {
   * {
@@ -208,7 +262,7 @@
 
 /* ── Wiki-style lore detail treatment ──────────────────────────────────────── */
 .wiki-hero {
-  @apply rounded-3xl border border-border/45 bg-[radial-gradient(circle_at_top_left,oklch(0.18_0.07_286/.6),transparent_45%),linear-gradient(180deg,oklch(0.11_0.03_280),oklch(0.08_0.025_276))] px-6 py-8 shadow-[0_24px_80px_rgba(0,0,0,0.28)];
+  @apply rounded-3xl border border-border/60 bg-[radial-gradient(circle_at_top_left,oklch(0.18_0.07_286/.6),transparent_45%),linear-gradient(180deg,oklch(0.11_0.03_280),oklch(0.08_0.025_276))] px-6 py-8 shadow-[0_24px_80px_rgba(0,0,0,0.28)];
 }
 .wiki-page-title {
   font-family: var(--font-cinzel), "Palatino Linotype", serif;
@@ -231,7 +285,7 @@
   @apply flex items-center gap-3 rounded-2xl border border-red-500/35 bg-red-950/70 px-5 py-4 text-sm font-medium text-red-100 shadow-[0_0_0_1px_rgba(127,29,29,0.15)_inset];
 }
 .wiki-panel {
-  @apply border-border/45 bg-card/70 shadow-[0_20px_60px_rgba(0,0,0,0.22)];
+  @apply border-border/60 bg-card/80 shadow-[0_20px_60px_rgba(0,0,0,0.22)];
 }
 .wiki-article {
   @apply min-h-[18rem];
@@ -244,7 +298,7 @@
   @apply text-2xl uppercase tracking-[0.14em];
 }
 .wiki-rail-card {
-  @apply border-border/45 bg-card/72 shadow-[0_16px_50px_rgba(0,0,0,0.22)];
+  @apply border-border/60 bg-card/80 shadow-[0_16px_50px_rgba(0,0,0,0.22)];
 }
 .wiki-rail-kicker {
   font-family: var(--font-cinzel), serif;
