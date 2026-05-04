@@ -626,7 +626,7 @@ export default function BrainDumpPage() {
                   className="block rounded-none border-b border-border/20 bg-card/40 p-4 hover:bg-card/70 transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <p className="text-sm text-foreground/70 whitespace-pre-wrap break-words">
-                      {isExpanded || !needsTruncation ? entry.rawText : entry.rawText.slice(0, 120) + "…"}
+                      {entry.summary || (isExpanded || !needsTruncation ? entry.rawText : entry.rawText.slice(0, 120) + "…")}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
                       {entry.notesCreated.length > 0 && (
