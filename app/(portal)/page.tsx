@@ -151,7 +151,7 @@ export default function DashboardPage() {
             The living record of All Reach
           </p>
         </div>
-        <Button asChild size="sm" className="gap-2">
+        <Button asChild size="sm" className="min-h-11 gap-2">
           <Link href="/lore/new">
             <Plus className="h-4 w-4" />
             New Lore Entry
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                     <br />
                     Use the Brain Dump to begin your chronicle.
                   </p>
-                  <Button asChild size="sm" className="mt-4 gap-2" variant="outline">
+                  <Button asChild size="sm" className="mt-4 min-h-11 gap-2" variant="outline">
                       <Link href="/brain-dump">
                         <Brain className="h-4 w-4" />
                         Open Brain Dump
@@ -248,7 +248,7 @@ export default function DashboardPage() {
               )}
               {!notesIsLoading && totalCount > 8 && (
                 <div className="border-t border-border/30 pt-3 mt-2">
-                  <Button asChild variant="ghost" size="sm" className="w-full text-xs text-muted-foreground">
+                  <Button asChild variant="ghost" size="sm" className="min-h-11 w-full text-xs text-muted-foreground">
                     <Link href="/lore">View all {totalCount} entries →</Link>
                   </Button>
                 </div>
@@ -269,25 +269,25 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-2">
-              <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2">
+              <Button asChild variant="outline" size="sm" className="min-h-11 w-full justify-start gap-2">
                 <Link href="/brain-dump">
                   <Brain className="h-4 w-4 text-primary" />
                   Brain Dump
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2">
+              <Button asChild variant="outline" size="sm" className="min-h-11 w-full justify-start gap-2">
                 <Link href="/ai/consistency">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
                   Consistency Check
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2">
+              <Button asChild variant="outline" size="sm" className="min-h-11 w-full justify-start gap-2">
                 <Link href="/ai/gaps">
                   <Microscope className="h-4 w-4 text-primary" />
                   Gap Detector
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2">
+              <Button asChild variant="outline" size="sm" className="min-h-11 w-full justify-start gap-2">
                 <Link href="/lore/new">
                   <Plus className="h-4 w-4 text-primary" />
                   New Entry

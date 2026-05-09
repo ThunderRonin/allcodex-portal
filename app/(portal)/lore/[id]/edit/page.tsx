@@ -13,7 +13,7 @@ import { Trash2, Eye, EyeOff, ArrowLeft, Save, ImagePlus, Loader2, Link2, X } fr
 import { TemplateDef, LORE_TEMPLATES } from "@/components/editor/TemplatePicker";
 import { PromotedFields } from "@/components/editor/PromotedFields";
 import { isPortraitRelationName } from "@/lib/lore-presentation";
-import { parseThemeSongUrl, THEME_SONG_LABEL_NAME } from "@/lib/theme-song";
+import { getThemeSongStorageUrl, parseThemeSongUrl, THEME_SONG_LABEL_NAME } from "@/lib/theme-song";
 import { CopilotTrigger } from "@/components/portal/CopilotTrigger";
 
 interface Note {
@@ -177,8 +177,9 @@ export default function EditLorePage() {
     mutationFn: async () => {
       setSaveError(null);
       const trimmedThemeSongUrl = themeSongUrl.trim();
+      const storageThemeSongUrl = getThemeSongStorageUrl(trimmedThemeSongUrl);
 
-      if (trimmedThemeSongUrl && !parsedThemeSong) {
+      if (trimmedThemeSongUrl && !storageThemeSongUrl) {
         throw new Error("Theme song must be a supported HTTPS URL from Spotify, YouTube, SoundCloud, or Apple Music.");
       }
 
@@ -256,11 +257,11 @@ export default function EditLorePage() {
         await fetch(`/api/lore/${id}/attributes?attrId=${attribute.attributeId}`, { method: "DELETE" });
       }
 
-      if (trimmedThemeSongUrl) {
+      if (storageThemeSongUrl) {
         await fetch(`/api/lore/${id}/attributes`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "label", name: THEME_SONG_LABEL_NAME, value: trimmedThemeSongUrl }),
+          body: JSON.stringify({ type: "label", name: THEME_SONG_LABEL_NAME, value: storageThemeSongUrl }),
         });
       }
     },
@@ -590,10 +591,10 @@ export default function EditLorePage() {
                 value={themeSongUrl}
                 onChange={(event) => setThemeSongUrl(event.target.value)}
                 disabled={saving || portraitUploading}
-                placeholder="https://open.spotify.com/track/..."
+                placeholder="https://open.spotify.com/track/... or Spotify iframe embed code"
               />
               <p className="text-sm text-muted-foreground">
-                Supports Spotify, YouTube, SoundCloud, and Apple Music HTTPS links.
+                Supports Spotify, YouTube, SoundCloud, Apple Music HTTPS links, and Spotify iframe embed code. Iframe input stores only the sanitized URL.
               </p>
               {themeSongUrl.trim() && !parsedThemeSong && (
                 <p className="text-sm text-red-300">

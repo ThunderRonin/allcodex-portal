@@ -12,7 +12,15 @@ export interface ThemeSongEmbed {
 }
 
 const SPOTIFY_ENTITY_TYPES = new Set(["track", "album", "playlist", "artist", "episode", "show"]);
-const YOUTUBE_HOSTS = new Set(["youtube.com", "www.youtube.com", "music.youtube.com", "m.youtube.com", "youtu.be"]);
+const YOUTUBE_HOSTS = new Set([
+  "youtube.com",
+  "www.youtube.com",
+  "music.youtube.com",
+  "m.youtube.com",
+  "youtu.be",
+  "youtube-nocookie.com",
+  "www.youtube-nocookie.com",
+]);
 const SOUNDCLOUD_HOSTS = new Set(["soundcloud.com", "www.soundcloud.com"]);
 const APPLE_MUSIC_HOSTS = new Set(["music.apple.com", "embed.music.apple.com"]);
 
@@ -25,14 +33,14 @@ export function getThemeSongUrl(note: Pick<EtapiNote, "attributes">): string | n
 }
 
 export function parseThemeSongUrl(rawValue: string | null | undefined): ThemeSongEmbed | null {
-  const trimmed = rawValue?.trim();
-  if (!trimmed || trimmed.includes("<") || trimmed.includes(">")) {
+  const candidate = normalizeThemeSongCandidate(rawValue);
+  if (!candidate) {
     return null;
   }
 
   let url: URL;
   try {
-    url = new URL(trimmed);
+    url = new URL(candidate);
   } catch {
     return null;
   }
@@ -62,8 +70,55 @@ export function parseThemeSongUrl(rawValue: string | null | undefined): ThemeSon
   return null;
 }
 
+export function getThemeSongStorageUrl(rawValue: string | null | undefined): string | null {
+  const candidate = normalizeThemeSongCandidate(rawValue);
+  const parsed = parseThemeSongUrl(candidate);
+  if (!candidate || !parsed) {
+    return null;
+  }
+
+  const isEmbedInput = (() => {
+    try {
+      const url = new URL(candidate);
+      return url.hostname.toLowerCase() === "open.spotify.com" && url.pathname.startsWith("/embed/");
+    } catch {
+      return false;
+    }
+  })();
+
+  return isEmbedInput ? parsed.embedUrl : parsed.sourceUrl;
+}
+
+function normalizeThemeSongCandidate(rawValue: string | null | undefined): string | null {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (!trimmed.includes("<") && !trimmed.includes(">")) {
+    return trimmed;
+  }
+
+  return extractIframeSrc(trimmed);
+}
+
+function extractIframeSrc(rawValue: string): string | null {
+  if (!/^\s*<iframe\b[\s\S]*<\/iframe>\s*$/i.test(rawValue)) {
+    return null;
+  }
+
+  const srcMatch = rawValue.match(/\bsrc\s*=\s*(["'])(.*?)\1/i);
+  const src = srcMatch?.[2]?.trim();
+  return src || null;
+}
+
 function parseSpotifyUrl(url: URL): ThemeSongEmbed | null {
-  const [entityType, entityId] = url.pathname.split("/").filter(Boolean);
+  const pathParts = url.pathname.split("/").filter(Boolean);
+  if (pathParts[0] === "embed") {
+    pathParts.shift();
+  }
+
+  const [entityType, entityId] = pathParts;
   if (!entityType || !entityId || !SPOTIFY_ENTITY_TYPES.has(entityType)) {
     return null;
   }

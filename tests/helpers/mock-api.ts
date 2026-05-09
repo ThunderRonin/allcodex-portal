@@ -69,6 +69,22 @@ type MentionSuggestion = {
   loreType: string;
 };
 
+type BacklinkEntry = {
+  noteId: string;
+  title: string;
+  loreType: string | null;
+};
+
+function isLoreNoteRecord(note: NoteRecord | undefined): boolean {
+  return (
+    note?.attributes.some(
+      (attribute) =>
+        attribute.type === "label" &&
+        (attribute.name === "lore" || attribute.name === "loreType"),
+    ) ?? false
+  );
+}
+
 function normalizePortalImageHtml(html: string) {
   return html
     .replace(/src=["'][^"']*\/api\/lore\/([a-zA-Z0-9_]+)\/image["']/gi, 'src="/api/images/$1/image"')
@@ -107,6 +123,7 @@ export type PortalMockOptions = {
   gaps?: GapsResponse;
   consistency?: ConsistencyResponse;
   mentionSuggestions?: MentionSuggestion[];
+  backlinks?: Record<string, BacklinkEntry[]>;
   autolinkMatches?: AutolinkMatch[];
   breadcrumbs?: Record<string, Array<{ noteId: string; title: string }>>;
   searchResults?: SearchResult[];
@@ -211,6 +228,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
       },
     ],
   };
+  const backlinks = options.backlinks ?? {};
   const gaps = options.gaps ?? {
     body: {
       gaps: [
@@ -428,7 +446,13 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
   });
 
   await page.route("**/api/lore/*/backlinks", async (route) => {
-    await fulfillJson(route, []);
+    const noteId = route.request().url().match(/\/api\/lore\/([^/]+)\/backlinks/)?.[1];
+    const rawBacklinks = noteId ? backlinks[noteId] ?? [] : [];
+    const filteredBacklinks = rawBacklinks.filter((entry) => {
+      const backlinkNote = notes.get(entry.noteId);
+      return entry.loreType !== null || isLoreNoteRecord(backlinkNote);
+    });
+    await fulfillJson(route, filteredBacklinks);
   });
 
   await page.route("**/api/lore/*/attributes**", async (route) => {

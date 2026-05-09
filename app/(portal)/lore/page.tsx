@@ -126,7 +126,7 @@ function LorePageContent() {
             {isLoading ? "Loading entries…" : `${filtered.length} entries`}
           </p>
         </div>
-        <Button asChild size="sm" className="gap-2">
+        <Button asChild size="sm" className="min-h-11 gap-2">
           <Link href="/lore/new">
             <Plus className="h-4 w-4" />
             New Entry
@@ -173,11 +173,13 @@ function LorePageContent() {
           {filtered.map((note) => {
             const loreType = getLoreType(note);
             const colorClass = TYPE_COLORS[loreType] ?? "border-white/20 text-muted-foreground bg-white/5";
+            const modifiedDate = new Date(note.dateModified).toLocaleDateString();
             return (
               <Link
                 key={note.noteId}
                 href={`/lore/${note.noteId}`}
-                className="group block rounded-lg border border-border bg-card/80 p-4 hover:border-primary/50 hover:bg-white/[0.05] transition-all"
+                aria-label={`${note.title}, ${loreType}, modified ${modifiedDate}`}
+                className="group block min-h-11 rounded-lg border border-border bg-card/80 p-4 hover:border-primary/50 hover:bg-white/[0.05] transition-all"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-sm font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -199,27 +201,8 @@ function LorePageContent() {
                 </div>
                 <div className="grimoire-divider mt-3 mb-2" />
                 <p className="text-xs text-muted-foreground">
-                  Modified {new Date(note.dateModified).toLocaleDateString()}
+                  Modified {modifiedDate}
                 </p>
-                {/* Attributes preview */}
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {note.attributes
-                    ?.filter(
-                      (a) =>
-                        a.type !== "relation" &&
-                        !["template", "loreType"].includes(a.name) &&
-                        a.value
-                    )
-                    .slice(0, 3)
-                    .map((attr) => (
-                      <span
-                        key={attr.name}
-                        className="text-[10px] text-muted-foreground/70 bg-secondary/50 rounded px-1.5 py-0.5"
-                      >
-                        {attr.name}: {attr.value}
-                      </span>
-                    ))}
-                </div>
               </Link>
             );
           })}

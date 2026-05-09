@@ -27,12 +27,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             <ThemeToggle />
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6">
           <CopilotProvider>
             {children}
             <CommandPalette />
           </CopilotProvider>
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

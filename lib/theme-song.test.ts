@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   THEME_SONG_LABEL_NAME,
+  getThemeSongStorageUrl,
   parseThemeSongUrl,
 } from "./theme-song";
 
@@ -19,6 +20,31 @@ describe("theme-song", () => {
       height: 152,
       externalUrl: "https://open.spotify.com/track/5ChkMS8OtdzJeqyybCc9R5",
     });
+  });
+
+  it("extracts trusted Spotify embed iframe HTML into embed metadata", () => {
+    expect(
+      parseThemeSongUrl('<iframe src="https://open.spotify.com/embed/track/7j43FohbLVulScL7S9sQZk?utm_source=generator&theme=0"></iframe>'),
+    ).toEqual({
+      provider: "spotify",
+      sourceUrl: "https://open.spotify.com/track/7j43FohbLVulScL7S9sQZk",
+      embedUrl: "https://open.spotify.com/embed/track/7j43FohbLVulScL7S9sQZk",
+      title: "Theme song",
+      height: 152,
+      externalUrl: "https://open.spotify.com/track/7j43FohbLVulScL7S9sQZk",
+    });
+  });
+
+  it("normalizes Spotify iframe HTML to a sanitized storage URL", () => {
+    expect(
+      getThemeSongStorageUrl('<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/7j43FohbLVulScL7S9sQZk?utm_source=generator&theme=0" width="100%"></iframe>'),
+    ).toBe("https://open.spotify.com/embed/track/7j43FohbLVulScL7S9sQZk");
+  });
+
+  it("normalizes regular provider URLs to canonical storage URLs", () => {
+    expect(getThemeSongStorageUrl("https://open.spotify.com/track/5ChkMS8OtdzJeqyybCc9R5?si=abc")).toBe(
+      "https://open.spotify.com/track/5ChkMS8OtdzJeqyybCc9R5",
+    );
   });
 
   it("normalizes YouTube Music URLs to a privacy-safe embed", () => {
@@ -54,8 +80,9 @@ describe("theme-song", () => {
     });
   });
 
-  it("rejects iframe HTML and untrusted providers", () => {
-    expect(parseThemeSongUrl('<iframe src="https://open.spotify.com/embed/track/abc"></iframe>')).toBeNull();
+  it("rejects untrusted iframe HTML and providers", () => {
+    expect(parseThemeSongUrl('<iframe src="https://example.com/embed/track/abc"></iframe>')).toBeNull();
+    expect(getThemeSongStorageUrl('<iframe src="https://example.com/embed/track/abc"></iframe>')).toBeNull();
     expect(parseThemeSongUrl("https://example.com/some-song")).toBeNull();
     expect(parseThemeSongUrl("javascript:alert(1)")).toBeNull();
   });

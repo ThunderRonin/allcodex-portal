@@ -11,7 +11,7 @@ export function CopilotTrigger({ noteId }: { noteId: string }) {
     <Button
       variant="outline"
       onClick={() => open(noteId)}
-      className="gap-2 border-accent/40 text-accent hover:bg-accent/10"
+      className="min-h-11 gap-2 border-accent/40 text-accent hover:bg-accent/10"
     >
       <Bot className="h-4 w-4" />
       Lore Copilot

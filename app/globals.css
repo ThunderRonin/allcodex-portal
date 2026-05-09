@@ -57,7 +57,7 @@
  * Heavy contrast ratios throughout for readability during sessions.
  */
 :root {
-  --radius: 0.6rem;
+  --radius: 0.75rem;
 
   /* ── Light Theme (parchment, ink, gold) ── */
   --background:          oklch(0.96 0.015 85);
@@ -69,14 +69,14 @@
   --popover:             oklch(1.0 0 0);
   --popover-foreground:  oklch(0.15 0.02 275);
 
-  --primary:             oklch(0.65 0.15 65); /* dark gold */
-  --primary-foreground:  oklch(0.98 0.01 85);
+  --primary:             oklch(0.48 0.135 62); /* deep readable gold */
+  --primary-foreground:  oklch(0.16 0.025 70);
 
   --secondary:           oklch(0.92 0.02 85);
   --secondary-foreground:oklch(0.25 0.03 275);
 
   --muted:               oklch(0.94 0.015 85);
-  --muted-foreground:    oklch(0.45 0.03 275);
+  --muted-foreground:    oklch(0.34 0.035 275);
 
   --accent:              oklch(0.55 0.15 195); /* deep teal */
   --accent-foreground:   oklch(0.98 0.01 85);
@@ -94,8 +94,8 @@
   --ai-feature-bg:       oklch(0.92 0.04 195);
   --canon-safe:          oklch(0.55 0.15 145);
   --canon-safe-bg:       oklch(0.92 0.04 145);
-  --warning:             oklch(0.65 0.15 70);
-  --warning-bg:          oklch(0.94 0.04 70);
+  --warning:             oklch(0.36 0.105 62);
+  --warning-bg:          oklch(0.92 0.055 78);
   --draft:               oklch(0.60 0.10 285);
 
   --chart-1: oklch(0.65 0.15 65);
@@ -106,8 +106,8 @@
 
   --sidebar:                    oklch(0.94 0.015 85);
   --sidebar-foreground:         oklch(0.20 0.02 275);
-  --sidebar-primary:            oklch(0.65 0.15 65);
-  --sidebar-primary-foreground: oklch(0.98 0.01 85);
+  --sidebar-primary:            oklch(0.48 0.135 62);
+  --sidebar-primary-foreground: oklch(0.16 0.025 70);
   --sidebar-accent:             oklch(0.90 0.02 85);
   --sidebar-accent-foreground:  oklch(0.15 0.02 275);
   --sidebar-border:             oklch(0.88 0.02 85);
@@ -134,7 +134,7 @@
   --secondary-foreground:oklch(0.90 0.025 285);
 
   --muted:               oklch(0.12 0.025 278);
-  --muted-foreground:    oklch(0.62 0.025 280);
+  --muted-foreground:    oklch(0.72 0.025 280);
 
   /* ── Spectral teal — accent (AI features, relations, links) ── */
   --accent:              oklch(0.72 0.20 195);
@@ -279,10 +279,10 @@
   @apply uppercase tracking-[0.22em] text-[10px];
 }
 .wiki-state-badge--draft {
-  @apply border-amber-400/30 bg-amber-400/10 text-amber-300;
+  @apply border-[var(--warning)]/45 bg-[var(--warning-bg)] text-[var(--warning)];
 }
 .wiki-warning-banner {
-  @apply flex items-center gap-3 rounded-2xl border border-red-500/35 bg-red-950/70 px-5 py-4 text-sm font-medium text-red-100 shadow-[0_0_0_1px_rgba(127,29,29,0.15)_inset];
+  @apply flex items-center gap-3 rounded-2xl border border-[var(--warning)]/45 bg-[var(--warning-bg)] px-5 py-4 text-sm font-medium text-[var(--warning)] shadow-[0_0_0_1px_rgba(127,29,29,0.15)_inset];
 }
 .wiki-panel {
   @apply border-border/60 bg-card/80 shadow-[0_20px_60px_rgba(0,0,0,0.22)];
@@ -305,7 +305,7 @@
   @apply text-[11px] uppercase tracking-[0.24em] text-accent/85;
 }
 .wiki-detail-label {
-  @apply text-[11px] uppercase tracking-[0.16em] text-muted-foreground/75;
+  @apply text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground;
 }
 .wiki-portrait-frame {
   @apply relative aspect-[4/5] overflow-hidden border-b border-border/45 bg-[radial-gradient(circle_at_top,oklch(0.18_0.085_295),oklch(0.07_0.02_275)_68%)];
@@ -321,19 +321,19 @@
   @apply inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:brightness-110;
 }
 .wiki-relation-chip--violet {
-  @apply border-violet-400/25 bg-violet-500/12 text-violet-100;
+  @apply border-violet-500/40 bg-violet-500/15 text-violet-950 dark:border-violet-400/25 dark:bg-violet-500/12 dark:text-violet-100;
 }
 .wiki-relation-chip--emerald {
-  @apply border-emerald-400/25 bg-emerald-500/12 text-emerald-100;
+  @apply border-emerald-600/40 bg-emerald-500/15 text-emerald-950 dark:border-emerald-400/25 dark:bg-emerald-500/12 dark:text-emerald-100;
 }
 .wiki-relation-chip--rose {
-  @apply border-rose-400/25 bg-rose-500/12 text-rose-100;
+  @apply border-rose-600/40 bg-rose-500/15 text-rose-950 dark:border-rose-400/25 dark:bg-rose-500/12 dark:text-rose-100;
 }
 .wiki-relation-chip--amber {
-  @apply border-amber-400/25 bg-amber-500/12 text-amber-100;
+  @apply border-amber-700/40 bg-amber-500/15 text-amber-950 dark:border-amber-400/25 dark:bg-amber-500/12 dark:text-amber-100;
 }
 .wiki-relation-chip--cyan {
-  @apply border-cyan-400/25 bg-cyan-500/12 text-cyan-100;
+  @apply border-cyan-700/40 bg-cyan-500/15 text-cyan-950 dark:border-cyan-400/25 dark:bg-cyan-500/12 dark:text-cyan-100;
 }
 .wiki-related-card {
   @apply h-full rounded-2xl border border-border/45 bg-[linear-gradient(180deg,oklch(0.11_0.03_280),oklch(0.08_0.02_276))] p-5 transition-transform duration-150 hover:-translate-y-0.5 hover:border-primary/35;
