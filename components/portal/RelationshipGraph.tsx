@@ -53,6 +53,27 @@ interface RelationshipsResponse {
   suggestions: Suggestion[];
 }
 
+interface ApplyRelationshipsResult {
+  applied: Array<{
+    sourceNoteId: string;
+    targetNoteId: string;
+    relationshipType: string;
+    relationName: string;
+  }>;
+  skipped: Array<{
+    sourceNoteId: string;
+    targetNoteId: string;
+    relationshipType: string;
+    reason: string;
+  }>;
+  failed: Array<{
+    sourceNoteId: string;
+    targetNoteId: string;
+    relationshipType: string;
+    error: string;
+  }>;
+}
+
 interface Edge {
   targetId: string;
   targetTitle: string;
@@ -62,7 +83,8 @@ interface Edge {
 
 // ── Mermaid DSL builder ───────────────────────────────────────────────────────
 
-function sanitizeLabel(text: string): string {
+function sanitizeLabel(text: string | undefined): string {
+  if (!text) return "Unknown";
   return text
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
@@ -74,6 +96,39 @@ function sanitizeLabel(text: string): string {
     .replace(/\{/g, "&#123;")
     .replace(/}/g, "&#125;")
     .replace(/\|/g, "&#124;");
+}
+
+const RELATION_NAME_TO_CANONICAL: Record<string, string> = {
+  relAlly: "ally",
+  relEnemy: "enemy",
+  relRival: "rival",
+  relFamily: "family",
+  relMemberOf: "member_of",
+  relLeaderOf: "leader_of",
+  relServes: "serves",
+  relLocatedIn: "located_in",
+  relOriginatesFrom: "originates_from",
+  relParticipatedIn: "participated_in",
+  relCaused: "caused",
+  relCreated: "created",
+  relOwns: "owns",
+  relWields: "wields",
+  relWorships: "worships",
+  relInhabits: "inhabits",
+  relRelatedTo: "related_to",
+  relOther: "related_to",
+};
+
+function normalizeRelationshipType(type: string): string {
+  return RELATION_NAME_TO_CANONICAL[type] ?? type;
+}
+
+function formatRelationshipLabel(type: string): string {
+  return normalizeRelationshipType(type).replace(/_/g, " ");
+}
+
+function suggestionKey(suggestion: Pick<Suggestion, "targetNoteId" | "relationshipType">): string {
+  return `${suggestion.targetNoteId}::${normalizeRelationshipType(suggestion.relationshipType)}`;
 }
 
 function buildMermaidDSL(
@@ -89,12 +144,14 @@ function buildMermaidDSL(
   lines.push(`  center["${sanitizeLabel(centerTitle)}"]`);
   lines.push(`  style center fill:#6b4c2a,stroke:#d4a843,stroke-width:2px,color:#e8dcc8`);
 
-  // Deduplicate edges by targetId (prefer existing over AI)
+  // Deduplicate only exact semantic duplicates; multiple relationship types to
+  // the same target are distinct.
   const seen = new Map<string, Edge>();
   for (const edge of edges) {
-    const existing = seen.get(edge.targetId);
+    const key = `${edge.targetId}::${normalizeRelationshipType(edge.type)}`;
+    const existing = seen.get(key);
     if (!existing || (edge.source === "existing" && existing.source === "ai")) {
-      seen.set(edge.targetId, edge);
+      seen.set(key, edge);
     }
   }
 
@@ -104,7 +161,7 @@ function buildMermaidDSL(
   uniqueEdges.forEach((edge, i) => {
     const nodeKey = `n${i}`;
     const label = sanitizeLabel(edge.targetTitle);
-    const typeLabel = edge.type.replace(/_/g, " ");
+    const typeLabel = formatRelationshipLabel(edge.type);
     const isDashed = edge.source === "ai";
 
     lines.push(`  ${nodeKey}["${label}"]`);
@@ -123,7 +180,7 @@ function buildMermaidDSL(
     }
 
     // Track edge color
-    const color = EDGE_COLORS[edge.type] ?? EDGE_COLORS.related_to;
+    const color = EDGE_COLORS[normalizeRelationshipType(edge.type)] ?? EDGE_COLORS.related_to;
     edgeStyleIndices.push({ idx: i, color });
 
     // Click handler → navigate to lore entry
@@ -150,6 +207,7 @@ interface RelationshipGraphProps {
 export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps) {
   const [expanded, setExpanded] = useState(false);
   const [applied, setApplied] = useState<Set<string>>(new Set());
+  const [failures, setFailures] = useState<Record<string, string>>({});
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -188,12 +246,36 @@ export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps)
         }),
       });
       if (!r.ok) throw new Error("Failed to apply relation");
-      return r.json();
+      return r.json() as Promise<ApplyRelationshipsResult>;
     },
-    onSuccess: (_, { key }) => {
-      setApplied((prev) => new Set(prev).add(key));
-      // Invalidate the note query so the sidebar relations section refreshes
+    onSuccess: (result, { key }) => {
+      const appliedKeys = new Set(result.applied.map((rel) => `${rel.targetNoteId}::${rel.relationshipType}`));
+      const skippedKeys = new Set(result.skipped.map((rel) => `${rel.targetNoteId}::${rel.relationshipType}`));
+      const failedByKey = Object.fromEntries(
+        result.failed.map((rel) => [`${rel.targetNoteId}::${rel.relationshipType}`, rel.error]),
+      );
+
+      setApplied((prev) => {
+        const next = new Set(prev);
+        if (appliedKeys.has(key) || skippedKeys.has(key)) next.add(key);
+        return next;
+      });
+      setFailures((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        for (const [failedKey, error] of Object.entries(failedByKey)) {
+          next[failedKey] = error;
+        }
+        return next;
+      });
       queryClient.invalidateQueries({ queryKey: ["note", noteId] });
+      queryClient.invalidateQueries({ queryKey: ["relationships", noteId] });
+    },
+    onError: (error, { key }) => {
+      setFailures((prev) => ({
+        ...prev,
+        [key]: error instanceof Error ? error.message : "Failed to apply relation.",
+      }));
     },
   });
 
@@ -204,7 +286,7 @@ export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps)
       edges.push({
         targetId: rel.targetNoteId,
         targetTitle: rel.targetTitle,
-        type: rel.name,
+        type: normalizeRelationshipType(rel.name),
         source: "existing",
       });
     }
@@ -224,7 +306,10 @@ export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps)
     router.push(`/lore/${nodeId}`);
   };
 
-  const aiSuggestions = data?.suggestions ?? [];
+  const existingKeys = new Set((data?.existing ?? []).map((rel) => `${rel.targetNoteId}::${normalizeRelationshipType(rel.name)}`));
+  const aiSuggestions = (data?.suggestions ?? []).filter(
+    (suggestion) => !applied.has(suggestionKey(suggestion)) && !existingKeys.has(suggestionKey(suggestion))
+  );
 
   return (
     <Card className="border-primary/20 bg-card/60">
@@ -305,9 +390,10 @@ export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps)
                 AI Suggestions
               </p>
               {aiSuggestions.map((s) => {
-                const key = `${s.targetNoteId}::${s.relationshipType}`;
+                const key = suggestionKey(s);
                 const isApplied = applied.has(key);
                 const isApplying = applyingKey?.key === key;
+                const failure = failures[key];
                 return (
                   <div
                     key={key}
@@ -319,7 +405,7 @@ export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps)
                           variant="outline"
                           className="text-[10px] capitalize px-1.5 py-0"
                         >
-                          {s.relationshipType.replace(/_/g, " ")}
+                          {formatRelationshipLabel(s.relationshipType)}
                         </Badge>
                         <Link
                           href={`/lore/${s.targetNoteId}`}
@@ -332,6 +418,11 @@ export function RelationshipGraph({ noteId, noteTitle }: RelationshipGraphProps)
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
                         {s.description}
                       </p>
+                      {failure && (
+                        <p className="text-[11px] text-destructive leading-relaxed">
+                          Failed: {failure}
+                        </p>
+                      )}
                     </div>
                     <Button
                       size="sm"

@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Network, RefreshCw, ArrowRight, Plus, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { ServiceBanner } from "@/components/portal/ServiceBanner";
 
 interface Suggestion {
@@ -33,9 +33,31 @@ const RELATION_COLORS: Record<string, string> = {
   other: "text-muted-foreground border-border",
 };
 
+interface ApplyRelationshipsResult {
+  applied: Array<{
+    sourceNoteId: string;
+    targetNoteId: string;
+    relationshipType: string;
+    relationName: string;
+  }>;
+  skipped: Array<{
+    sourceNoteId: string;
+    targetNoteId: string;
+    relationshipType: string;
+    reason: string;
+  }>;
+  failed: Array<{
+    sourceNoteId: string;
+    targetNoteId: string;
+    relationshipType: string;
+    error: string;
+  }>;
+}
+
 function RelationshipsContent() {
   const searchParams = useSearchParams();
   const noteId = searchParams.get("noteId");
+  const [failures, setFailures] = useState<Record<string, string>>({});
   const {
     relationText: text,
     setRelationText: setText,
@@ -83,6 +105,7 @@ function RelationshipsContent() {
     onSuccess: (data: { suggestions: Suggestion[] }) => {
       setSuggestions(data.suggestions ?? []);
       resetApplied(); // reset applied state on new results
+      setFailures({});
     },
   });
 
@@ -103,10 +126,33 @@ function RelationshipsContent() {
         }),
       });
       if (!r.ok) throw new Error("Failed to apply relation");
-      return r.json();
+      return r.json() as Promise<ApplyRelationshipsResult>;
     },
-    onSuccess: (_, { key }) => {
-      addApplied(key);
+    onSuccess: (result, { key }) => {
+      const appliedKeys = new Set(result.applied.map((rel) => `${rel.targetNoteId}::${rel.relationshipType}`));
+      const skippedKeys = new Set(result.skipped.map((rel) => `${rel.targetNoteId}::${rel.relationshipType}`));
+      const failedByKey = Object.fromEntries(
+        result.failed.map((rel) => [`${rel.targetNoteId}::${rel.relationshipType}`, rel.error]),
+      );
+
+      if (appliedKeys.has(key) || skippedKeys.has(key)) {
+        addApplied(key);
+      }
+      
+      setFailures((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        for (const [failedKey, error] of Object.entries(failedByKey)) {
+          next[failedKey] = error;
+        }
+        return next;
+      });
+    },
+    onError: (error, { key }) => {
+      setFailures((prev) => ({
+        ...prev,
+        [key]: error instanceof Error ? error.message : "Failed to apply relation.",
+      }));
     },
   });
 
@@ -180,6 +226,7 @@ function RelationshipsContent() {
             const key = `${s.targetNoteId}::${s.relationshipType}`;
             const isApplied = appliedRelations.includes(key);
             const isApplying = applyingVars?.key === key;
+            const failure = failures[key];
             return (
               <div
                 key={i}
@@ -230,6 +277,11 @@ function RelationshipsContent() {
                 <p className="text-sm text-foreground/70 leading-relaxed">
                   {s.description}
                 </p>
+                {failure && (
+                  <p className="text-sm text-destructive leading-relaxed mt-1">
+                    Failed: {failure}
+                  </p>
+                )}
               </div>
             );
           })}
