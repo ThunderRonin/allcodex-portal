@@ -63,6 +63,33 @@ export const RelationshipsResultSchema = z.object({
   suggestions: z.array(RelationshipSuggestionSchema),
 });
 
+export const AppliedRelationshipSchema = z.object({
+  sourceNoteId: z.string(),
+  targetNoteId: z.string(),
+  relationshipType: CanonicalRelationshipTypeSchema,
+  relationName: z.string(),
+});
+
+export const SkippedRelationshipSchema = z.object({
+  sourceNoteId: z.string(),
+  targetNoteId: z.string(),
+  relationshipType: CanonicalRelationshipTypeSchema,
+  reason: z.string(),
+});
+
+export const FailedRelationshipSchema = z.object({
+  sourceNoteId: z.string(),
+  targetNoteId: z.string(),
+  relationshipType: CanonicalRelationshipTypeSchema,
+  error: z.string(),
+});
+
+export const ApplyRelationshipsResultSchema = z.object({
+  applied: z.array(AppliedRelationshipSchema),
+  skipped: z.array(SkippedRelationshipSchema),
+  failed: z.array(FailedRelationshipSchema),
+});
+
 export const CopilotLabelOpSchema = z.object({
   name: z.string().min(1),
   value: z.string(),
@@ -196,6 +223,7 @@ export type ConsistencyResult = z.infer<typeof ConsistencyResultSchema>;
 export type GapResult = z.infer<typeof GapResultSchema>;
 export type RelationshipSuggestion = z.infer<typeof RelationshipSuggestionSchema>;
 export type RelationshipsResult = z.infer<typeof RelationshipsResultSchema>;
+export type ApplyRelationshipsResult = z.infer<typeof ApplyRelationshipsResultSchema>;
 export type CanonicalRelationshipType = z.infer<typeof CanonicalRelationshipTypeSchema>;
 export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 export type CopilotLabelOp = z.infer<typeof CopilotLabelOpSchema>;

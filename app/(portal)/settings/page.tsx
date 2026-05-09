@@ -100,7 +100,10 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
 
   async function handleDisconnect() {
     setLoading(true);
-    await fetch("/api/config/disconnect?service=allcodex", { method: "DELETE" });
+    try {
+      await fetch("/api/integrations/allcodex", { method: "DELETE" });
+      await fetch("/api/config/disconnect?service=allcodex", { method: "DELETE" });
+    } catch(e) {}
     setState("disconnected");
     setVersion(undefined);
     setToken("");
@@ -661,6 +664,72 @@ function PortalConfigCard() {
   );
 }
 
+function DevDebugCard() {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleWipeDB() {
+    if (!confirm("Are you sure you want to wipe ALL lore notes and the entire RAG database? This action cannot be undone.")) {
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/config/wipe", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Wipe failed");
+      setMessage("Success: Database and Lore wiped.");
+    } catch (e: any) {
+      setMessage(`Error: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-destructive/30 bg-card/80 p-6 shadow-lg shadow-destructive/5 relative overflow-hidden">
+      <div className="absolute top-0 right-0 p-4 opacity-10">
+        <Brain className="w-24 h-24 text-destructive" />
+      </div>
+      <div className="relative z-10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-destructive/10">
+              <Brain className="h-5 w-5 text-destructive" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-destructive" style={{ fontFamily: "var(--font-cinzel)" }}>
+                Dev / Debug Options
+              </h2>
+              <p className="text-sm text-muted-foreground">Dangerous operations for development and debugging</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-4 space-y-3">
+          <Button
+            variant="destructive"
+            onClick={handleWipeDB}
+            disabled={loading}
+            className="w-full sm:w-auto"
+          >
+            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            Wipe DB Lore & RAG
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            This will permanently delete all notes labeled <code className="bg-muted px-1 rounded">#lore</code> in AllCodex and drop the LanceDB vector table in AllKnower.
+          </p>
+          {message && (
+            <p className={`text-xs mt-2 p-2 rounded ${message.startsWith("Error") ? "bg-destructive/10 text-destructive border border-destructive/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+              {message}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -707,6 +776,7 @@ export default function SettingsPage() {
           <AllKnowerCard initialStatus={status?.allknower} />
           <PortalConfigCard />
           <ShareConfigCard />
+          <DevDebugCard />
         </div>
       )}
 

@@ -10,9 +10,11 @@ import {
   CopilotChatResponseSchema,
   type CopilotChatResponse,
   type CopilotRequest,
+  ApplyRelationshipsResultSchema,
   ConsistencyResultSchema,
   GapResultSchema,
   RelationshipsResultSchema,
+  type ApplyRelationshipsResult,
   type ConsistencyResult,
   type GapResult,
   type RelationshipsResult,
@@ -23,16 +25,19 @@ export interface AkCreds {
   token: string;
 }
 
+function buildJsonHeaders(initHeaders: HeadersInit | undefined, token?: string): HeadersInit {
+  const headers = new Headers(initHeaders);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  return headers;
+}
+
 async function akFetch(creds: AkCreds, path: string, init: RequestInit = {}): Promise<Response> {
   let res: Response;
   try {
     res = await fetch(`${creds.url}${path}`, {
       ...init,
-      headers: {
-        Authorization: `Bearer ${creds.token}`,
-        "Content-Type": "application/json",
-        ...(init.headers ?? {}),
-      },
+      headers: buildJsonHeaders(init.headers, creds.token),
     });
   } catch {
     throw new ServiceError("UNREACHABLE", 503, `AllKnower is unreachable at ${creds.url}`);
@@ -45,6 +50,115 @@ async function akFetch(creds: AkCreds, path: string, init: RequestInit = {}): Pr
     throw new ServiceError("SERVICE_ERROR", 502, `AllKnower ${init.method ?? "GET"} ${path} → ${res.status}: ${body}`);
   }
   return res;
+}
+
+async function akPublicFetch(url: string, path: string, init: RequestInit = {}): Promise<Response> {
+  try {
+    return await fetch(`${url}${path}`, {
+      ...init,
+      headers: buildJsonHeaders(init.headers),
+    });
+  } catch {
+    throw new ServiceError("UNREACHABLE", 503, `AllKnower is unreachable at ${url}`);
+  }
+}
+
+export async function loginAllKnower(
+  url: string,
+  email: string,
+  password: string,
+): Promise<{ token: string; user: unknown }> {
+  const res = await akPublicFetch(url, "/api/auth/sign-in/email", {
+    method: "POST",
+    headers: { Origin: url },
+    body: JSON.stringify({ email, password }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ServiceError("UNAUTHORIZED", 401, `AllKnower login failed (${res.status})${body ? `: ${body}` : ""}`);
+  }
+  const token = res.headers.get("set-auth-token") ?? "";
+  const data = await res.json().catch(() => ({}));
+  if (!token) {
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower login did not return a session token.");
+  }
+  return { token, user: data.user ?? null };
+}
+
+export async function registerAllKnower(
+  url: string,
+  email: string,
+  password: string,
+  name: string,
+): Promise<{ token: string; user: unknown }> {
+  const res = await akPublicFetch(url, "/api/auth/sign-up/email", {
+    method: "POST",
+    headers: { Origin: url },
+    body: JSON.stringify({ email, password, name }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower registration failed (${res.status})${body ? `: ${body}` : ""}`);
+  }
+  const token = res.headers.get("set-auth-token") ?? "";
+  const data = await res.json().catch(() => ({}));
+  if (!token) {
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower registration did not return a session token.");
+  }
+  return { token, user: data.user ?? null };
+}
+
+export async function getAllKnowerSession(creds: AkCreds): Promise<{ session: unknown; user: unknown }> {
+  const res = await akFetch(creds, "/api/auth/get-session", { method: "GET" });
+  const data = await res.json().catch(() => ({}));
+  return { session: data.session ?? null, user: data.user ?? null };
+}
+
+export async function logoutAllKnower(creds: AkCreds): Promise<void> {
+  await akFetch(creds, "/api/auth/sign-out", { method: "POST", body: JSON.stringify({}) });
+}
+
+export interface AllCodexIntegrationStatus {
+  connected: boolean;
+  baseUrl?: string;
+  tokenLast4?: string | null;
+  updatedAt?: string;
+}
+
+export async function connectAllCodexIntegration(
+  creds: AkCreds,
+  baseUrl: string,
+  token: string,
+): Promise<AllCodexIntegrationStatus> {
+  const res = await akFetch(creds, "/integrations/allcodex/connect", {
+    method: "POST",
+    body: JSON.stringify({ baseUrl, token }),
+  });
+  return res.json();
+}
+
+export async function getAllCodexIntegrationStatus(creds: AkCreds): Promise<AllCodexIntegrationStatus> {
+  const res = await akFetch(creds, "/integrations/allcodex/status");
+  return res.json();
+}
+
+export async function deleteAllCodexIntegration(creds: AkCreds): Promise<{ ok: boolean }> {
+  const res = await akFetch(creds, "/integrations/allcodex", { method: "DELETE" });
+  return res.json();
+}
+
+export async function resolveAllCodexCredentials(
+  creds: AkCreds,
+  portalInternalSecret: string,
+): Promise<{ baseUrl: string; token: string }> {
+  const res = await akFetch(creds, "/internal/integrations/allcodex/credentials", {
+    method: "POST",
+    headers: { "X-Portal-Internal-Secret": portalInternalSecret },
+    body: JSON.stringify({}),
+  });
+  return res.json();
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -246,23 +360,22 @@ export async function akFetchAutocomplete(creds: AkCreds, q: string): Promise<an
   return data.suggestions ?? [];
 }
 
-export interface ApplyRelationsResult {
-  applied: number;
-  skipped: number;
-  errors: string[];
-}
-
 export async function applyRelationships(
   creds: AkCreds,
   sourceNoteId: string,
   relations: Array<{ targetNoteId: string; relationshipType: string; description?: string }>,
   bidirectional = true
-): Promise<ApplyRelationsResult> {
+): Promise<ApplyRelationshipsResult> {
   const res = await akFetch(creds, "/suggest/relationships/apply", {
     method: "POST",
     body: JSON.stringify({ sourceNoteId, relations, bidirectional }),
   });
-  return res.json();
+  const raw = await res.json();
+  const parsed = ApplyRelationshipsResultSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /suggest/relationships/apply returned unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
 export async function getGaps(creds: AkCreds): Promise<GapResult> {

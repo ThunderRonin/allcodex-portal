@@ -1,10 +1,13 @@
 /**
  * Server-only credential resolver.
- * Reads connection settings from HTTP-only cookies (set by /api/config/connect).
- * Falls back to environment variables so existing .env.local configs still work.
+ * v1 user Core credentials are resolved through AllKnower's internal
+ * credential route. Environment fallback is retained only for explicit local
+ * development when there is no signed-in AllKnower session.
  */
 
 import { cookies } from "next/headers";
+import { resolveAllCodexCredentials } from "./allknower-server";
+import { ServiceError } from "./route-error";
 
 export interface EtapiCreds {
   url: string;
@@ -18,9 +21,33 @@ export interface AkCreds {
 
 export async function getEtapiCreds(): Promise<EtapiCreds> {
   const jar = await cookies();
+  const allknowerUrl = jar.get("allknower_url")?.value ?? process.env.ALLKNOWER_URL ?? "";
+  const allknowerToken = jar.get("allknower_token")?.value ?? "";
+  const portalInternalSecret = process.env.PORTAL_INTERNAL_SECRET ?? "";
+
+  if (allknowerUrl && allknowerToken && portalInternalSecret) {
+    const creds = await resolveAllCodexCredentials(
+      { url: allknowerUrl, token: allknowerToken },
+      portalInternalSecret,
+    );
+    return { url: creds.baseUrl, token: creds.token };
+  }
+
+  if (allknowerToken && !portalInternalSecret) {
+    throw new ServiceError(
+      "NOT_CONFIGURED",
+      503,
+      "PORTAL_INTERNAL_SECRET is required to resolve per-user AllCodex credentials.",
+    );
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    return { url: "", token: "" };
+  }
+
   return {
-    url: jar.get("allcodex_url")?.value ?? process.env.ALLCODEX_URL ?? "",
-    token: jar.get("allcodex_token")?.value ?? process.env.ALLCODEX_ETAPI_TOKEN ?? "",
+    url: process.env.ALLCODEX_URL ?? "",
+    token: process.env.ALLCODEX_ETAPI_TOKEN ?? "",
   };
 }
 

@@ -274,14 +274,27 @@ export async function searchBacklinks(
     );
     const data = await res.json();
     const notes: EtapiNote[] = data.results ?? [];
-    return notes.map((n) => ({
-      noteId: n.noteId,
-      title: n.title,
-      loreType: n.attributes?.find((a) => a.name === "loreType")?.value ?? null,
-    }));
+    return notes
+      .filter((note) => note.noteId !== noteId)
+      .filter(isLoreNote)
+      .map((n) => ({
+        noteId: n.noteId,
+        title: n.title,
+        loreType: n.attributes?.find((a) => a.name === "loreType")?.value ?? null,
+      }));
   } catch {
     return [];
   }
+}
+
+function isLoreNote(note: Pick<EtapiNote, "attributes">): boolean {
+  return (
+    note.attributes?.some(
+      (attribute) =>
+        attribute.type === "label" &&
+        (attribute.name === "lore" || attribute.name === "loreType"),
+    ) ?? false
+  );
 }
 
 export function getPortraitImageNoteId(note: EtapiNote): string | null {
