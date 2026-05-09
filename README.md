@@ -31,16 +31,18 @@ Open [http://localhost:3000](http://localhost:3000) and go to Settings to connec
 
 ### Environment variables (optional)
 
-If you prefer env vars over the Settings UI, create a `.env.local`:
+If you prefer env vars over the Settings UI for local development, create a `.env.local`:
 
 ```env
+ALLKNOWER_URL=http://localhost:3001
+PORTAL_INTERNAL_SECRET=your_secret_here # Required to resolve per-user AllCodex credentials
+
+# Used ONLY for local dev fallback when no user is signed in:
 ALLCODEX_URL=http://localhost:8080
 ALLCODEX_ETAPI_TOKEN=your_token_here
-ALLKNOWER_URL=http://localhost:3001
-ALLKNOWER_BEARER_TOKEN=your_token_here
 ```
 
-Cookie-based settings take priority when present.
+Cookie-based settings take priority when present. The Portal enforces a strict integration boundary: backend tokens never reach the browser. AllCodex ETAPI tokens are generated server-side and passed to AllKnower for encrypted, per-user storage.
 
 ## Project Structure
 
