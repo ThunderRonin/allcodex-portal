@@ -17,7 +17,7 @@ The portal gives you a clean interface for browsing lore, running brain dumps, a
 ## Requirements
 
 - [AllCodex](https://github.com/ThunderRonin/AllCodex) running and accessible (ETAPI enabled)
-- [AllKnower](https://github.com/ThunderRonin/AllKnower) running for AI features
+- [AllKnower](https://github.com/ThunderRonin/AllKnower) running for AI features (Refer to AllKnower's `.env.example` for current LLM model preferences)
 - Node.js 20+ or Bun
 
 ## Getting Started
