@@ -34,7 +34,7 @@ export async function getEtapiCreds(): Promise<EtapiCreds> {
     return { url: creds.baseUrl, token: creds.token };
   }
 
-  if (allknowerToken && !portalInternalSecret) {
+  if (allknowerToken && !portalInternalSecret && process.env.NODE_ENV === "production") {
     throw new ServiceError(
       "NOT_CONFIGURED",
       503,

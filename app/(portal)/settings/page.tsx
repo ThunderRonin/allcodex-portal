@@ -78,7 +78,7 @@ function AllCodexCard({ initialStatus }: { initialStatus?: StatusPayload["allcod
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/config/allcodex-login", {
+      const res = await fetch("/api/config/allknower-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url, password }),
