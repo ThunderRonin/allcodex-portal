@@ -31,7 +31,7 @@ interface NoteSearchResult {
 }
 
 async function uploadPortraitImage(file: File) {
-  if (!file.type.includes("image/")) {
+  if (!file.type.startsWith("image/")) {
     throw new Error("Only image uploads are supported");
   }
 
@@ -415,12 +415,19 @@ export default function EditLorePage() {
 
             <LoreEditor
               initialContent={content ?? ""}
-              onSave={(html) => {
-                fetch(`/api/lore/${id}/content`, {
-                  method: "PUT",
-                  headers: { "Content-Type": "text/html" },
-                  body: html,
-                });
+              onSave={async (html) => {
+                try {
+                  const res = await fetch(`/api/lore/${id}/content`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "text/html" },
+                    body: html,
+                  });
+                  if (!res.ok) {
+                    setSaveError("Failed to save content. Please try again.");
+                  }
+                } catch {
+                  setSaveError("Unable to reach server. Content not saved.");
+                }
               }}
             />
           </div>

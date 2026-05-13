@@ -36,7 +36,7 @@ import type {
   BrainDumpResult,
   BrainDumpReviewResult,
   ProposedEntity,
-} from "@/lib/allknower-server";
+} from "@/lib/allknower-schemas";
 
 // ── Entity type helpers ───────────────────────────────────────────────────────
 

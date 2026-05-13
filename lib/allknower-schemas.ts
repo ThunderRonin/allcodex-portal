@@ -195,27 +195,36 @@ export const BrainDumpEntitySchema = z.object({
   type: z.string(),
 });
 
+export const BrainDumpDuplicateSchema = z.object({
+  proposedTitle: z.string(),
+  proposedType: z.string(),
+  matches: z.array(z.object({ noteId: z.string(), title: z.string(), score: z.number() })),
+});
+
 export const BrainDumpResultSchema = z
   .object({
+    mode: z.literal("auto").optional(),
     summary: z.string(),
     created: z.array(BrainDumpEntitySchema),
     updated: z.array(BrainDumpEntitySchema),
     skipped: z.array(z.object({ title: z.string(), reason: z.string() })),
+    duplicates: z.array(BrainDumpDuplicateSchema).optional(),
   })
   .passthrough();
+
+export const ProposedEntitySchema = z.object({
+  title: z.string(),
+  type: z.string(),
+  action: z.enum(["create", "update"]),
+  content: z.string().optional(),
+  existingNoteId: z.string().optional(),
+});
 
 export const BrainDumpReviewResultSchema = z.object({
   mode: z.literal("review"),
   summary: z.string(),
-  proposedEntities: z.array(
-    z.object({
-      title: z.string(),
-      type: z.string(),
-      action: z.enum(["create", "update"]),
-      content: z.string().optional(),
-      existingNoteId: z.string().optional(),
-    })
-  ),
+  proposedEntities: z.array(ProposedEntitySchema),
+  duplicates: z.array(BrainDumpDuplicateSchema).optional(),
 }).passthrough();
 
 export const BrainDumpInboxResultSchema = z.object({
@@ -252,3 +261,4 @@ export type BrainDumpResult = z.infer<typeof BrainDumpResultSchema>;
 export type BrainDumpReviewResult = z.infer<typeof BrainDumpReviewResultSchema>;
 export type BrainDumpInboxResult = z.infer<typeof BrainDumpInboxResultSchema>;
 export type BrainDumpAnyResult = z.infer<typeof BrainDumpAnyResultSchema>;
+export type ProposedEntity = z.infer<typeof ProposedEntitySchema>;

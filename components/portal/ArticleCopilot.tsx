@@ -43,7 +43,10 @@ async function fetchTargetSnapshot(noteId: string): Promise<ExistingTargetSnapsh
       parentNoteIds?: string[];
       attributes: Array<{ name: string; value: string }>;
     }>(`/api/lore/${noteId}`),
-    fetch(`/api/lore/${noteId}/content`).then((response) => response.text()),
+    fetch(`/api/lore/${noteId}/content`).then((response) => {
+      if (!response.ok) throw new Error(`Content fetch failed: ${response.status}`);
+      return response.text();
+    }),
   ]);
 
   return {
@@ -253,14 +256,15 @@ export function ArticleCopilot() {
       setDraft("");
     }
     
-    // Add user message to store immediately
+    // Read current messages BEFORE dispatching to store to avoid double user message
+    const currentMessages = useCopilotStore.getState().conversations[noteId]?.messages || [];
+    const nextMessages = [...currentMessages, { role: "user" as const, content }];
+
     store.sendMessage(noteId, content);
     setIsSending(true);
     setApplyResult(null);
 
     try {
-      const currentMessages = store.conversations[noteId]?.messages || [];
-      const nextMessages = [...currentMessages, { role: "user" as const, content }];
       
       const response = await fetchJsonOrThrow<CopilotChatResponse>(`/api/lore/${noteId}/copilot/chat`, {
         method: "POST",
