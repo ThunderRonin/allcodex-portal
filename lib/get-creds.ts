@@ -8,6 +8,7 @@
 import { cookies } from "next/headers";
 import { resolveAllCodexCredentials } from "./allknower-server";
 import { ServiceError } from "./route-error";
+import { validateAllKnowerUrl } from "./url-validation";
 
 export interface EtapiCreds {
   url: string;
@@ -53,15 +54,22 @@ export async function getEtapiCreds(): Promise<EtapiCreds> {
 
 export async function getAkCreds(): Promise<AkCreds> {
   const jar = await cookies();
-  const url = jar.get("allknower_url")?.value;
+  const rawUrl = jar.get("allknower_url")?.value;
   const token = jar.get("allknower_token")?.value;
 
   if (process.env.NODE_ENV === "production" && !token) {
     return { url: "", token: "" };
   }
 
+  let url = "";
+  try {
+    url = rawUrl ? validateAllKnowerUrl(rawUrl) : (process.env.ALLKNOWER_URL || "");
+  } catch {
+    return { url: "", token: "" };
+  }
+
   return {
-    url: url ?? process.env.ALLKNOWER_URL ?? "",
+    url,
     token: token ?? process.env.ALLKNOWER_BEARER_TOKEN ?? "",
   };
 }

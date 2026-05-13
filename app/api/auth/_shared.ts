@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validateAllKnowerUrl } from "@/lib/url-validation";
 
 export const AUTH_COOKIE_OPTS = {
   httpOnly: true,
@@ -9,9 +10,9 @@ export const AUTH_COOKIE_OPTS = {
 };
 
 export function resolveAllKnowerUrl(url?: unknown): string {
-  return typeof url === "string" && url.trim()
-    ? url.trim().replace(/\/$/, "")
-    : process.env.ALLKNOWER_URL ?? "";
+  const raw = typeof url === "string" && url.trim() ? url.trim() : process.env.ALLKNOWER_URL ?? "";
+  if (!raw) return "";
+  return validateAllKnowerUrl(raw);
 }
 
 export function setAllKnowerSessionCookies(
