@@ -46,7 +46,7 @@ async function ensureMermaid() {
           nodeSpacing: 50,
           rankSpacing: 60,
         },
-        securityLevel: "loose",
+        securityLevel: "antiscript",
       });
       mermaidInstance = m;
     })();

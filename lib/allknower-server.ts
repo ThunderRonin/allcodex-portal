@@ -306,7 +306,8 @@ export async function runArticleCopilot(
   const raw = await res.json();
   const parsed = CopilotChatResponseSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /copilot/article returned unexpected shape: ${parsed.error.message}`);
+    console.error(`[runArticleCopilot] AllKnower schema mismatch:`, parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
   }
   return parsed.data;
 }
@@ -336,7 +337,8 @@ export async function checkConsistency(creds: AkCreds, noteIds?: string[]): Prom
   const raw = await res.json();
   const parsed = ConsistencyResultSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /consistency/check returned unexpected shape: ${parsed.error.message}`);
+    console.error(`[checkConsistency] AllKnower schema mismatch:`, parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
   }
   return parsed.data;
 }
@@ -349,7 +351,8 @@ export async function suggestRelationships(creds: AkCreds, text: string, noteId?
   const raw = await res.json();
   const parsed = RelationshipsResultSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /suggest/relationships returned unexpected shape: ${parsed.error.message}`);
+    console.error(`[suggestRelationships] AllKnower schema mismatch:`, parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
   }
   return parsed.data;
 }
@@ -373,7 +376,8 @@ export async function applyRelationships(
   const raw = await res.json();
   const parsed = ApplyRelationshipsResultSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /suggest/relationships/apply returned unexpected shape: ${parsed.error.message}`);
+    console.error(`[applyRelationships] AllKnower schema mismatch:`, parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
   }
   return parsed.data;
 }
@@ -386,7 +390,8 @@ export async function getGaps(creds: AkCreds): Promise<GapResult> {
   const raw = await res.json();
   const parsed = GapResultSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new ServiceError("SERVICE_ERROR", 502, `AllKnower /suggest/gaps returned unexpected shape: ${parsed.error.message}`);
+    console.error(`[getGaps] AllKnower schema mismatch:`, parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
   }
   return parsed.data;
 }

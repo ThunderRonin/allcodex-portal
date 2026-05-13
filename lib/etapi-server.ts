@@ -165,7 +165,7 @@ export async function patchNote(creds: EtapiCreds, noteId: string, patch: { titl
 export async function putNoteContent(creds: EtapiCreds, noteId: string, html: string): Promise<void> {
   await etapiFetch(creds, `/notes/${noteId}/content`, {
     method: "PUT",
-    headers: { "Content-Type": "text/plain" },
+    headers: { "Content-Type": "text/html" },
     body: html,
   });
 }

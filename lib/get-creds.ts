@@ -53,9 +53,16 @@ export async function getEtapiCreds(): Promise<EtapiCreds> {
 
 export async function getAkCreds(): Promise<AkCreds> {
   const jar = await cookies();
+  const url = jar.get("allknower_url")?.value;
+  const token = jar.get("allknower_token")?.value;
+
+  if (process.env.NODE_ENV === "production" && !token) {
+    return { url: "", token: "" };
+  }
+
   return {
-    url: jar.get("allknower_url")?.value ?? process.env.ALLKNOWER_URL ?? "",
-    token: jar.get("allknower_token")?.value ?? process.env.ALLKNOWER_BEARER_TOKEN ?? "",
+    url: url ?? process.env.ALLKNOWER_URL ?? "",
+    token: token ?? process.env.ALLKNOWER_BEARER_TOKEN ?? "",
   };
 }
 

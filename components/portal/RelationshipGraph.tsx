@@ -95,7 +95,11 @@ function sanitizeLabel(text: string | undefined): string {
     .replace(/\)/g, "&#41;")
     .replace(/\{/g, "&#123;")
     .replace(/}/g, "&#125;")
-    .replace(/\|/g, "&#124;");
+    .replace(/\|/g, "&#124;")
+    .replace(/`/g, "&#96;")
+    .replace(/\\/g, "&#92;")
+    .replace(/;/g, "&#59;")
+    .replace(/[\n\r]/g, " ");
 }
 
 const RELATION_NAME_TO_CANONICAL: Record<string, string> = {
