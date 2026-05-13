@@ -218,6 +218,17 @@ export const BrainDumpReviewResultSchema = z.object({
   ),
 }).passthrough();
 
+export const BrainDumpInboxResultSchema = z.object({
+  mode: z.literal("inbox"),
+  queued: z.literal(true),
+}).passthrough();
+
+export const BrainDumpAnyResultSchema = z.union([
+  BrainDumpReviewResultSchema,
+  BrainDumpInboxResultSchema,
+  BrainDumpResultSchema,
+]);
+
 // Derived TypeScript types — replace manual interfaces in allknower-server.ts
 export type ConsistencyResult = z.infer<typeof ConsistencyResultSchema>;
 export type GapResult = z.infer<typeof GapResultSchema>;
@@ -239,3 +250,5 @@ export type CopilotRagChunk = z.infer<typeof CopilotRagChunkSchema>;
 export type CopilotRequest = z.infer<typeof CopilotRequestSchema>;
 export type BrainDumpResult = z.infer<typeof BrainDumpResultSchema>;
 export type BrainDumpReviewResult = z.infer<typeof BrainDumpReviewResultSchema>;
+export type BrainDumpInboxResult = z.infer<typeof BrainDumpInboxResultSchema>;
+export type BrainDumpAnyResult = z.infer<typeof BrainDumpAnyResultSchema>;

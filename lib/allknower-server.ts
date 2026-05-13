@@ -11,6 +11,8 @@ import {
   type CopilotChatResponse,
   type CopilotRequest,
   ApplyRelationshipsResultSchema,
+  BrainDumpAnyResultSchema,
+  BrainDumpResultSchema,
   ConsistencyResultSchema,
   GapResultSchema,
   RelationshipsResultSchema,
@@ -257,8 +259,15 @@ export async function runBrainDump(
   const res = await akFetch(creds, "/brain-dump", {
     method: "POST",
     body: JSON.stringify({ rawText, mode }),
+    signal: AbortSignal.timeout(180_000),
   });
-  return res.json();
+  const raw = await res.json();
+  const parsed = BrainDumpAnyResultSchema.safeParse(raw);
+  if (!parsed.success) {
+    console.error("[runBrainDump] AllKnower schema mismatch:", parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
+  }
+  return parsed.data;
 }
 
 export async function commitBrainDump(
@@ -269,8 +278,15 @@ export async function commitBrainDump(
   const res = await akFetch(creds, "/brain-dump/commit", {
     method: "POST",
     body: JSON.stringify({ rawText, approvedEntities }),
+    signal: AbortSignal.timeout(180_000),
   });
-  return res.json();
+  const raw = await res.json();
+  const parsed = BrainDumpResultSchema.safeParse(raw);
+  if (!parsed.success) {
+    console.error("[commitBrainDump] AllKnower schema mismatch:", parsed.error.message);
+    throw new ServiceError("SERVICE_ERROR", 502, "AllKnower returned an unexpected response format.");
+  }
+  return parsed.data;
 }
 
 export async function getBrainDumpHistory(creds: AkCreds): Promise<BrainDumpHistoryEntry[]> {
@@ -302,6 +318,7 @@ export async function runArticleCopilot(
   const res = await akFetch(creds, "/copilot/article", {
     method: "POST",
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(120_000),
   });
   const raw = await res.json();
   const parsed = CopilotChatResponseSchema.safeParse(raw);
@@ -347,6 +364,7 @@ export async function suggestRelationships(creds: AkCreds, text: string, noteId?
   const res = await akFetch(creds, "/suggest/relationships", {
     method: "POST",
     body: JSON.stringify({ text, ...(noteId ? { noteId } : {}) }),
+    signal: AbortSignal.timeout(120_000),
   });
   const raw = await res.json();
   const parsed = RelationshipsResultSchema.safeParse(raw);
@@ -372,6 +390,7 @@ export async function applyRelationships(
   const res = await akFetch(creds, "/suggest/relationships/apply", {
     method: "POST",
     body: JSON.stringify({ sourceNoteId, relations, bidirectional }),
+    signal: AbortSignal.timeout(120_000),
   });
   const raw = await res.json();
   const parsed = ApplyRelationshipsResultSchema.safeParse(raw);
