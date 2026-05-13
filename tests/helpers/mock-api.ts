@@ -778,7 +778,7 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
   });
 
   await page.route("**/api/brain-dump/history**", async (route) => {
-    await fulfillJson(route, brainDumpHistory);
+    await fulfillJson(route, { items: brainDumpHistory, hasMore: false });
   });
 
   await page.route("**/api/ai/relationships", async (route) => {

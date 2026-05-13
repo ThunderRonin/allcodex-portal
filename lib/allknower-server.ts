@@ -289,10 +289,17 @@ export async function commitBrainDump(
   return parsed.data;
 }
 
-export async function getBrainDumpHistory(creds: AkCreds): Promise<BrainDumpHistoryEntry[]> {
-  const res = await akFetch(creds, "/brain-dump/history");
+export async function getBrainDumpHistory(
+  creds: AkCreds,
+  cursor?: string,
+): Promise<{ items: BrainDumpHistoryEntry[]; nextCursor?: string; hasMore: boolean }> {
+  const params = new URLSearchParams();
+  if (cursor) params.set("cursor", cursor);
+  const qs = params.toString();
+  const res = await akFetch(creds, `/brain-dump/history${qs ? `?${qs}` : ""}`);
   const data = await res.json();
-  return data.items ?? data;
+  const items = data.items ?? (Array.isArray(data) ? data : []);
+  return { items, nextCursor: data.nextCursor, hasMore: !!data.nextCursor };
 }
 
 export async function getBrainDumpEntry(creds: AkCreds, id: string): Promise<BrainDumpDetailEntry> {

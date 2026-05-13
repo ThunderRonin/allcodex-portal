@@ -62,37 +62,54 @@ describe("allknower-server", () => {
 
       const result = await getBrainDumpHistory(creds);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("hist-1");
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].id).toBe("hist-1");
+      expect(result.hasMore).toBe(false);
+      expect(result.nextCursor).toBeUndefined();
     });
 
-    it("handles a paginated { items } response (new format)", async () => {
+    it("handles a paginated { items, nextCursor } response", async () => {
       mockFetch.mockResolvedValueOnce(
-        makeOkResponse({ items: [entry], total: 1, page: 1, pageSize: 20 })
+        makeOkResponse({ items: [entry], nextCursor: "cur_abc" })
       );
 
       const result = await getBrainDumpHistory(creds);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("hist-1");
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].id).toBe("hist-1");
+      expect(result.hasMore).toBe(true);
+      expect(result.nextCursor).toBe("cur_abc");
     });
 
-    it("returns empty array when items is empty", async () => {
+    it("returns empty items when items is empty", async () => {
       mockFetch.mockResolvedValueOnce(
-        makeOkResponse({ items: [], total: 0, page: 1, pageSize: 20 })
+        makeOkResponse({ items: [] })
       );
 
       const result = await getBrainDumpHistory(creds);
 
-      expect(result).toEqual([]);
+      expect(result.items).toEqual([]);
+      expect(result.hasMore).toBe(false);
     });
 
-    it("returns empty array for flat empty array response", async () => {
+    it("returns empty items for flat empty array response", async () => {
       mockFetch.mockResolvedValueOnce(makeOkResponse([]));
 
       const result = await getBrainDumpHistory(creds);
 
-      expect(result).toEqual([]);
+      expect(result.items).toEqual([]);
+      expect(result.hasMore).toBe(false);
+    });
+
+    it("forwards cursor as query parameter", async () => {
+      mockFetch.mockResolvedValueOnce(makeOkResponse({ items: [] }));
+
+      await getBrainDumpHistory(creds, "cur_xyz");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("/brain-dump/history?cursor=cur_xyz"),
+        expect.anything(),
+      );
     });
 
     it("throws ServiceError on 401", async () => {

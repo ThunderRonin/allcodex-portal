@@ -234,7 +234,8 @@ export default function BrainDumpPage() {
     queryFn: async () => {
       const r = await fetch("/api/brain-dump/history");
       if (!r.ok) throw await r.json();
-      return r.json();
+      const data = await r.json();
+      return data.items ?? (Array.isArray(data) ? data : []);
     },
   });
 
