@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { ServiceBanner } from "@/components/portal/ServiceBanner";
+import { useSSEStream } from "@/hooks/use-sse-stream";
 import { fetchJsonOrThrow } from "@/lib/fetch-json";
 import { sanitizeLoreHtml } from "@/lib/sanitize";
 import { useCopilotStore } from "@/lib/stores/copilot-store";
@@ -197,6 +198,7 @@ export function ArticleCopilot() {
   const [lastResponse, setLastResponse] = useState<CopilotChatResponse | null>(null);
   const [applyResult, setApplyResult] = useState<CopilotApplyResult | null>(null);
   const queryClient = useQueryClient();
+  const { stream, cancel: cancelStream } = useSSEStream();
 
   const messages = conv?.messages ?? [];
   const pendingProposal = conv?.pendingProposal ?? null;
@@ -255,27 +257,35 @@ export function ArticleCopilot() {
     if (!contentOverride) {
       setDraft("");
     }
-    
-    // Read current messages BEFORE dispatching to store to avoid double user message
+
     const currentMessages = useCopilotStore.getState().conversations[noteId]?.messages || [];
     const nextMessages = [...currentMessages, { role: "user" as const, content }];
 
     store.sendMessage(noteId, content);
+    store.addMessage(noteId, { role: "assistant", content: "" });
     setIsSending(true);
     setApplyResult(null);
 
     try {
-      
-      const response = await fetchJsonOrThrow<CopilotChatResponse>(`/api/lore/${noteId}/copilot/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
-      });
-
-      store.setAssistantResponse(noteId, response.assistantMessage, response.proposal);
-      setLastResponse(response);
-      setIsRedirecting(false);
-      setRedirectDraft("");
+      let accumulated = "";
+      for await (const event of stream(`/api/lore/${noteId}/copilot/stream`, { messages: nextMessages })) {
+        if (event.event === "token") {
+          accumulated += (event.data as { content: string }).content;
+          store.updateLastMessage(noteId, accumulated);
+        } else if (event.event === "result") {
+          const response = event.data as CopilotChatResponse;
+          store.updateLastMessage(noteId, response.assistantMessage);
+          store.setPendingProposal(noteId, response.proposal ?? null);
+          setLastResponse(response);
+          setIsRedirecting(false);
+          setRedirectDraft("");
+        } else if (event.event === "error") {
+          const errData = event.data as { error: string };
+          store.updateLastMessage(noteId, `Error: ${errData.error}`);
+          setErrorService("AllKnower");
+          store.setLastError({ message: errData.error });
+        }
+      }
     } catch (error) {
       setErrorService("AllKnower");
       store.setLastError(error as { message: string });
@@ -337,7 +347,12 @@ export function ArticleCopilot() {
   if (!noteId) return null;
 
   return (
-    <Sheet open={store.isOpen} onOpenChange={(val) => (val ? undefined : store.close())}>
+    <Sheet open={store.isOpen} onOpenChange={(val) => {
+      if (!val) {
+        cancelStream();
+        store.close();
+      }
+    }}>
       <SheetContent side="right" className="w-full border-l-border/60 bg-background/95 sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">

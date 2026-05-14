@@ -19,7 +19,10 @@ export interface CopilotState {
   
   sendMessage: (noteId: string, content: string) => void;
   setAssistantResponse: (noteId: string, assistantMessage: string, proposal: CopilotProposal | null) => void;
-  
+  addMessage: (noteId: string, message: ChatMessage) => void;
+  updateLastMessage: (noteId: string, content: string) => void;
+  setPendingProposal: (noteId: string, proposal: CopilotProposal | null) => void;
+
   dismissProposal: (noteId: string) => void;
   redirectWithInstructions: (noteId: string, instructions: string) => void;
   
@@ -73,6 +76,44 @@ export const useCopilotStore = create<CopilotState>()((set, get) => ({
         [noteId]: {
           ...conv,
           messages: [...conv.messages, { role: "assistant", content: assistantMessage }],
+          pendingProposal: proposal,
+          selectedTargetIds: proposal ? proposal.targets.map(t => t.targetId) : [],
+        },
+      },
+    };
+  }),
+
+  addMessage: (noteId, message) => set((state) => {
+    const conv = state.conversations[noteId] || { messages: [], pendingProposal: null, selectedTargetIds: [] };
+    return {
+      conversations: {
+        ...state.conversations,
+        [noteId]: { ...conv, messages: [...conv.messages, message] },
+      },
+    };
+  }),
+
+  updateLastMessage: (noteId, content) => set((state) => {
+    const conv = state.conversations[noteId];
+    if (!conv?.messages.length) return state;
+    const messages = [...conv.messages];
+    messages[messages.length - 1] = { ...messages[messages.length - 1], content };
+    return {
+      conversations: {
+        ...state.conversations,
+        [noteId]: { ...conv, messages },
+      },
+    };
+  }),
+
+  setPendingProposal: (noteId, proposal) => set((state) => {
+    const conv = state.conversations[noteId];
+    if (!conv) return state;
+    return {
+      conversations: {
+        ...state.conversations,
+        [noteId]: {
+          ...conv,
           pendingProposal: proposal,
           selectedTargetIds: proposal ? proposal.targets.map(t => t.targetId) : [],
         },
