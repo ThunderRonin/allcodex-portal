@@ -39,7 +39,25 @@ export async function proxySSE(
     );
   }
 
-  return new Response(res.body, {
+  const upstream = res.body;
+  const safe = new ReadableStream({
+    async start(controller) {
+      const reader = upstream.getReader();
+      try {
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          controller.enqueue(value);
+        }
+      } catch {
+        // Upstream closed (AllKnower finished) — not an error for the client
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(safe, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
