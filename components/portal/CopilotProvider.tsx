@@ -10,7 +10,7 @@ export function CopilotProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "k") {
         const isNotePage = pathname.startsWith("/lore");
         if (!isNotePage) return;
 
