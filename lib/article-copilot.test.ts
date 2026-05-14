@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyArticleCopilotProposal,
   loadArticleCopilotContext,
+  trimCopilotTranscript,
 } from "./article-copilot";
 import type { EtapiNote } from "./etapi-server";
 
@@ -207,5 +208,208 @@ describe("article copilot Portal helpers", () => {
     });
     expect(putNoteContent).toHaveBeenCalledWith(creds, "created-note", "<p>Created body</p>");
     expect(result.createdNoteIds).toEqual(["created-note"]);
+  });
+
+  it("returns empty result when no targets are approved", async () => {
+    vi.mocked(getNote).mockResolvedValue(note({ noteId: "note-current" }));
+
+    const proposal = {
+      targets: [
+        {
+          kind: "update",
+          targetId: "note-current",
+          labelUpserts: [],
+          labelDeletes: [],
+          relationAdds: [],
+          relationDeletes: [],
+          rationale: "Should be filtered.",
+        },
+      ],
+    };
+
+    const result = await applyArticleCopilotProposal(creds, "note-current", proposal, []);
+
+    expect(result).toEqual({ updatedNoteIds: [], createdNoteIds: [], skipped: [] });
+    expect(putNoteContent).not.toHaveBeenCalled();
+  });
+
+  it("rejects approved IDs not in proposal targets", async () => {
+    vi.mocked(getNote).mockResolvedValue(note({ noteId: "note-current" }));
+
+    const proposal = { targets: [] };
+
+    await expect(
+      applyArticleCopilotProposal(creds, "note-current", proposal, ["ghost-id"]),
+    ).rejects.toThrow("not present in the proposal");
+  });
+
+  it("updates note title when proposal specifies a different title", async () => {
+    const { patchNote } = await import("./etapi-server");
+    vi.mocked(patchNote).mockResolvedValue(note({ noteId: "note-current", title: "New Title" }));
+    vi.mocked(getNote).mockResolvedValue(
+      note({ noteId: "note-current", title: "Old Title" }),
+    );
+
+    const proposal = {
+      targets: [
+        {
+          kind: "update",
+          targetId: "note-current",
+          title: "New Title",
+          labelUpserts: [],
+          labelDeletes: [],
+          relationAdds: [],
+          relationDeletes: [],
+          rationale: "Rename.",
+        },
+      ],
+    };
+
+    const result = await applyArticleCopilotProposal(creds, "note-current", proposal, ["note-current"]);
+
+    expect(patchNote).toHaveBeenCalledWith(creds, "note-current", { title: "New Title" });
+    expect(result.updatedNoteIds).toContain("note-current");
+  });
+
+  it("rejects immutable label in labelDeletes", async () => {
+    vi.mocked(getNote).mockResolvedValue(note({ noteId: "note-current" }));
+
+    const proposal = {
+      targets: [
+        {
+          kind: "update",
+          targetId: "note-current",
+          labelUpserts: [],
+          labelDeletes: ["template"],
+          relationAdds: [],
+          relationDeletes: [],
+          rationale: "Delete system label.",
+        },
+      ],
+    };
+
+    await expect(
+      applyArticleCopilotProposal(creds, "note-current", proposal, ["note-current"]),
+    ).rejects.toThrow("immutable");
+  });
+
+  it("rejects share-prefixed label as immutable", async () => {
+    vi.mocked(getNote).mockResolvedValue(note({ noteId: "note-current" }));
+
+    const proposal = {
+      targets: [
+        {
+          kind: "update",
+          targetId: "note-current",
+          labelUpserts: [{ name: "shareAlias", value: "evil" }],
+          labelDeletes: [],
+          relationAdds: [],
+          relationDeletes: [],
+          rationale: "Edit share label.",
+        },
+      ],
+    };
+
+    await expect(
+      applyArticleCopilotProposal(creds, "note-current", proposal, ["note-current"]),
+    ).rejects.toThrow("immutable");
+  });
+
+  it("includes backlinks as writable when they have safe reverse relations", async () => {
+    vi.mocked(getNote).mockImplementation(async (_creds, noteId) => {
+      if (noteId === "backlinker") {
+        return note({
+          noteId: "backlinker",
+          title: "Backlinker",
+          attributes: [
+            { attributeId: "a1", noteId: "backlinker", type: "relation", name: "ally", value: "note-current", isInheritable: false },
+            { attributeId: "a2", noteId: "backlinker", type: "label", name: "lore", value: "", isInheritable: false },
+          ],
+        });
+      }
+      return note({ noteId: "note-current" });
+    });
+    vi.mocked(searchBacklinks).mockResolvedValue([
+      { noteId: "backlinker", title: "Backlinker", loreType: "character" },
+    ]);
+
+    const context = await loadArticleCopilotContext(creds, akCreds, "note-current", "test");
+
+    expect(context.writableTargetIds).toContain("backlinker");
+  });
+
+  it("filters RAG results that overlap writable notes", async () => {
+    vi.mocked(getNote).mockResolvedValue(note({ noteId: "note-current" }));
+    vi.mocked(queryRag).mockResolvedValue([
+      { noteId: "note-current", noteTitle: "Current", content: "dup", score: 0.9 },
+      { noteId: "rag-note", noteTitle: "External", content: "new info", score: 0.8 },
+    ]);
+
+    const context = await loadArticleCopilotContext(creds, akCreds, "note-current", "find something");
+
+    expect(context.ragContext).toHaveLength(1);
+    expect(context.ragContext[0].noteId).toBe("rag-note");
+  });
+
+  it("skips RAG when user message is blank", async () => {
+    vi.mocked(getNote).mockResolvedValue(note({ noteId: "note-current" }));
+
+    const context = await loadArticleCopilotContext(creds, akCreds, "note-current", "  ");
+
+    expect(queryRag).not.toHaveBeenCalled();
+    expect(context.ragContext).toEqual([]);
+  });
+});
+
+describe("trimCopilotTranscript", () => {
+  it("returns empty array for empty input", () => {
+    expect(trimCopilotTranscript([])).toEqual([]);
+  });
+
+  it("passes through messages under both limits", () => {
+    const messages = [
+      { role: "user" as const, content: "Hello" },
+      { role: "assistant" as const, content: "Hi there" },
+    ];
+    expect(trimCopilotTranscript(messages)).toEqual(messages);
+  });
+
+  it("keeps only the last 12 messages", () => {
+    const messages = Array.from({ length: 20 }, (_, i) => ({
+      role: (i % 2 === 0 ? "user" : "assistant") as "user" | "assistant",
+      content: `msg-${i}`,
+    }));
+
+    const result = trimCopilotTranscript(messages);
+
+    expect(result.length).toBe(12);
+    expect(result[0].content).toBe("msg-8");
+    expect(result[11].content).toBe("msg-19");
+  });
+
+  it("truncates by character budget, keeping most recent messages", () => {
+    const long = "x".repeat(30_000);
+    const messages = [
+      { role: "user" as const, content: long },
+      { role: "assistant" as const, content: "short reply" },
+      { role: "user" as const, content: "follow up" },
+    ];
+
+    const result = trimCopilotTranscript(messages);
+
+    expect(result.length).toBe(2);
+    expect(result[0].content).toBe("short reply");
+    expect(result[1].content).toBe("follow up");
+  });
+
+  it("truncates a single oversized message to fit budget", () => {
+    const huge = "a".repeat(50_000);
+    const messages = [{ role: "user" as const, content: huge }];
+
+    const result = trimCopilotTranscript(messages);
+
+    expect(result.length).toBe(1);
+    expect(result[0].content.length).toBe(30_000);
+    expect(result[0].content).toBe(huge.slice(20_000));
   });
 });
