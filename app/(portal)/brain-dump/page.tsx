@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { useBrainDumpStore } from "@/lib/stores/brain-dump-store";
+import { useSSEStream } from "@/hooks/use-sse-stream";
 import { LORE_TEMPLATES } from "@/components/editor/TemplatePicker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -216,8 +217,11 @@ export default function BrainDumpPage() {
     reviewState, setReviewState, toggleReviewApproval,
     inboxItems, addToInbox, removeFromInbox,
     expandedIds, toggleExpanded,
+    streamStatus, setStreamStatus, appendStreamToken, resetStream,
   } = useBrainDumpStore();
   const queryClient = useQueryClient();
+  const { stream, cancel: _cancelStream } = useSSEStream();
+  const [isStreaming, setIsStreaming] = useState(false);
 
   // Scribe's Log — stage simulation
   const [scribeStage, setScribeStage] = useState(0);
@@ -317,7 +321,7 @@ export default function BrainDumpPage() {
   });
 
   const charCount = text.length;
-  const isReady = charCount >= 10 && !isPending;
+  const isReady = charCount >= 10 && !isPending && !isStreaming;
 
   // Advance scribe stage based on elapsed time while pending
   useEffect(() => {
@@ -335,11 +339,62 @@ export default function BrainDumpPage() {
     return () => clearInterval(interval);
   }, [isPending, dumpMode]);
 
+  async function handleAutoStream(rawText: string) {
+    resetStream();
+    setIsStreaming(true);
+    setResult(null);
+    setReviewState(null);
+
+    try {
+      for await (const event of stream("/api/brain-dump/stream", { rawText })) {
+        switch (event.event) {
+          case "status":
+            setStreamStatus(event.data as { stage: string; message: string });
+            break;
+          case "token":
+            appendStreamToken((event.data as { content: string }).content);
+            break;
+          case "done": {
+            const doneData = event.data as { raw: string; tokensUsed: number; model: string; latencyMs: number };
+            try {
+              const parsed = JSON.parse(doneData.raw);
+              const normalized = normalizeResult(parsed);
+              setResult(normalized);
+              setText("");
+              void queryClient.invalidateQueries({ queryKey: ["brain-dump-history"] });
+              void queryClient.invalidateQueries({ queryKey: ["lore"] });
+              const newNoteIds = [
+                ...normalized.created.map((e) => e.noteId),
+                ...normalized.updated.map((e) => e.noteId),
+              ];
+              void runConsistencyCheck(newNoteIds);
+            } catch {
+              // cached or malformed result — still show as complete
+            }
+            break;
+          }
+          case "error":
+            setStreamStatus({ stage: "error", message: (event.data as { error: string }).error });
+            break;
+        }
+      }
+    } catch (err) {
+      setStreamStatus({ stage: "error", message: err instanceof Error ? err.message : "Stream failed" });
+    } finally {
+      setIsStreaming(false);
+    }
+  }
+
   function handleSubmit() {
     if (dumpMode === "inbox") {
       addToInbox(text);
       return;
     }
+    if (dumpMode === "auto") {
+      handleAutoStream(text);
+      return;
+    }
+    // review mode still uses blocking call
     runDump({ rawText: text, mode: dumpMode });
   }
 
@@ -385,14 +440,14 @@ export default function BrainDumpPage() {
             onChange={(e) => setText(e.target.value)}
             rows={8}
             className="resize-none rounded-none border-border/50 focus-visible:border-primary/60 bg-muted/10 font-[var(--font-crimson)] text-base leading-relaxed"
-            disabled={isPending}
+            disabled={isPending || isStreaming}
           />
           <div className="flex items-center justify-between">
             <span className={`text-xs ${charCount < 10 ? "text-muted-foreground/50" : charCount > 45000 ? "text-destructive" : "text-muted-foreground"}`}>
               {charCount.toLocaleString()} / 50,000 characters
             </span>
-            <Button onClick={handleSubmit} disabled={!isReady} className="gap-2 rounded-none" size="sm">
-              {isPending ? (
+            <Button onClick={handleSubmit} disabled={!isReady || isCommitting} className="gap-2 rounded-none" size="sm">
+              {(isPending || isStreaming) ? (
                 <><RefreshCw className="h-4 w-4 animate-spin" />{dumpMode === "review" ? "Analysing…" : "Processing…"}</>
               ) : dumpMode === "inbox" ? (
                 <><Inbox className="h-4 w-4" />Add to Inbox</>
@@ -406,9 +461,30 @@ export default function BrainDumpPage() {
         </div>
       </div>
 
-      {isPending && <ScribeLog mode={dumpMode} stage={scribeStage} />}
+      {(isPending || isStreaming) && (
+        streamStatus ? (
+          <div className="rounded-none border border-border/30 bg-card/40 p-4 space-y-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50" style={{ fontFamily: "var(--font-cinzel)" }}>
+              Scribe&apos;s Log
+            </p>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-base animate-pulse">{"\u{1F9E0}"}</span>
+              <span className="text-primary font-medium">{streamStatus.message}</span>
+              <span className="ml-auto flex gap-0.5">
+                {[0, 1, 2].map((d) => (
+                  <span key={d} className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: `${d * 150}ms` }} />
+                ))}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <ScribeLog mode={dumpMode} stage={scribeStage} />
+        )
+      )}
 
-      {dumpError && !isPending && <ServiceBanner service="AllKnower" error={dumpError} />}
+      {((dumpError && !isPending) || (streamStatus?.stage === "error" && !isStreaming)) && (
+        <ServiceBanner service="AllKnower" error={dumpError ?? { error: "SERVICE_ERROR", message: streamStatus?.message ?? "Unknown error" }} />
+      )}
 
       {/* Inbox queue */}
       {inboxItems.length > 0 && (

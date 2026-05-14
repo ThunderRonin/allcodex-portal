@@ -38,6 +38,11 @@ interface BrainDumpState {
   addToInbox: (text: string) => void;
   removeFromInbox: (idx: number) => void;
   toggleExpanded: (id: string) => void;
+  streamStatus: { stage: string; message: string } | null;
+  streamTokens: string;
+  setStreamStatus: (status: { stage: string; message: string } | null) => void;
+  appendStreamToken: (token: string) => void;
+  resetStream: () => void;
 }
 
 export const useBrainDumpStore = create<BrainDumpState>()(
@@ -77,6 +82,11 @@ export const useBrainDumpStore = create<BrainDumpState>()(
             : [...expandedIds, id],
         });
       },
+      streamStatus: null,
+      streamTokens: "",
+      setStreamStatus: (streamStatus) => set({ streamStatus }),
+      appendStreamToken: (token) => set((s) => ({ streamTokens: s.streamTokens + token })),
+      resetStream: () => set({ streamStatus: null, streamTokens: "" }),
     }),
     {
       name: "brain-dump-ui",
