@@ -260,11 +260,12 @@ export interface RagChunk {
 export async function runBrainDump(
   creds: AkCreds,
   rawText: string,
-  mode: "auto" | "review" | "inbox" = "auto"
+  mode: "auto" | "review" | "inbox" = "auto",
+  model?: string
 ): Promise<BrainDumpAnyResult> {
   const res = await akFetch(creds, "/brain-dump", {
     method: "POST",
-    body: JSON.stringify({ rawText, mode }),
+    body: JSON.stringify({ rawText, mode, ...(model && { model }) }),
     signal: AbortSignal.timeout(180_000),
   });
   const raw = await res.json();
@@ -430,5 +431,15 @@ export async function getGaps(creds: AkCreds): Promise<GapResult> {
 
 export async function getHealth(creds: AkCreds): Promise<{ status: string; allcodex: string; ollama: string }> {
   const res = await akFetch(creds, "/health");
+  return res.json();
+}
+
+export interface ModelChainConfig {
+  models: string[];
+  autoMode: boolean;
+}
+
+export async function getModelChains(creds: AkCreds): Promise<Record<string, ModelChainConfig>> {
+  const res = await akFetch(creds, "/config/models");
   return res.json();
 }

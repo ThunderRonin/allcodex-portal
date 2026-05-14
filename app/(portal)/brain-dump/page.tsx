@@ -29,9 +29,17 @@ import {
   ArrowRight,
   Trash2,
   ExternalLink,
+  Cpu,
 } from "lucide-react";
 import Link from "next/link";
 import { ServiceBanner } from "@/components/portal/ServiceBanner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   BrainDumpAnyResult,
   BrainDumpResult,
@@ -213,6 +221,7 @@ export default function BrainDumpPage() {
   const {
     text, setText,
     dumpMode, setDumpMode,
+    selectedModel, setSelectedModel,
     result, setResult,
     reviewState, setReviewState, toggleReviewApproval,
     inboxItems, addToInbox, removeFromInbox,
@@ -226,6 +235,18 @@ export default function BrainDumpPage() {
   // Scribe's Log — stage simulation
   const [scribeStage, setScribeStage] = useState(0);
   const requestStartRef = useRef<number | null>(null);
+
+  const { data: modelChains } = useQuery<Record<string, { models: string[]; autoMode: boolean }>>({
+    queryKey: ["model-chains"],
+    queryFn: async () => {
+      const r = await fetch("/api/config/models");
+      if (!r.ok) return {};
+      return r.json();
+    },
+    staleTime: 60_000,
+  });
+  const brainDumpModels = modelChains?.["brain-dump"]?.models ?? [];
+  const isAutoMode = modelChains?.["brain-dump"]?.autoMode ?? false;
 
   const [consistencyResult, setConsistencyResult] = useState<{
     issues: Array<{ type: string; severity: string; description: string; affectedNoteIds: string[] }>;
@@ -264,13 +285,13 @@ export default function BrainDumpPage() {
   }
 
   const { mutate: runDump, isPending, error: dumpError } = useMutation({
-    mutationFn: async ({ rawText, mode }: { rawText: string; mode: string }) => {
+    mutationFn: async ({ rawText, mode, model }: { rawText: string; mode: string; model?: string }) => {
       requestStartRef.current = Date.now();
       setScribeStage(0);
       const r = await fetch("/api/brain-dump", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawText, mode }),
+        body: JSON.stringify({ rawText, mode, ...(model && { model }) }),
       });
       if (!r.ok) throw await r.json();
       return r.json() as Promise<BrainDumpAnyResult>;
@@ -339,14 +360,14 @@ export default function BrainDumpPage() {
     return () => clearInterval(interval);
   }, [isPending, dumpMode]);
 
-  async function handleAutoStream(rawText: string) {
+  async function handleAutoStream(rawText: string, model?: string) {
     resetStream();
     setIsStreaming(true);
     setResult(null);
     setReviewState(null);
 
     try {
-      for await (const event of stream("/api/brain-dump/stream", { rawText })) {
+      for await (const event of stream("/api/brain-dump/stream", { rawText, ...(model && { model }) })) {
         switch (event.event) {
           case "status":
             setStreamStatus(event.data as { stage: string; message: string });
@@ -390,12 +411,12 @@ export default function BrainDumpPage() {
       addToInbox(text);
       return;
     }
+    const modelOverride = selectedModel ?? undefined;
     if (dumpMode === "auto") {
-      handleAutoStream(text);
+      handleAutoStream(text, modelOverride);
       return;
     }
-    // review mode still uses blocking call
-    runDump({ rawText: text, mode: dumpMode });
+    runDump({ rawText: text, mode: dumpMode, model: modelOverride });
   }
 
   return (
@@ -430,9 +451,32 @@ export default function BrainDumpPage() {
               </button>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground/70">
-            {MODE_TABS.find((m) => m.value === dumpMode)?.desc}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground/70">
+              {MODE_TABS.find((m) => m.value === dumpMode)?.desc}
+            </p>
+            {brainDumpModels.length > 1 && !isAutoMode && dumpMode !== "inbox" && (
+              <div className="flex items-center gap-1.5">
+                <Cpu className="h-3 w-3 text-muted-foreground/50" />
+                <Select
+                  value={selectedModel ?? "__default__"}
+                  onValueChange={(v) => setSelectedModel(v === "__default__" ? null : v)}
+                >
+                  <SelectTrigger className="h-7 w-auto min-w-[140px] text-xs rounded-none border-border/40 bg-muted/10">
+                    <SelectValue placeholder="Default model" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none">
+                    <SelectItem value="__default__" className="text-xs">Default ({brainDumpModels[0]?.split("/").pop()})</SelectItem>
+                    {brainDumpModels.map((m) => (
+                      <SelectItem key={m} value={m} className="text-xs">
+                        {m.split("/").pop()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
 
           <Textarea
             placeholder={`Write anything — story fragments, NPC ideas, place descriptions, plot points…`}

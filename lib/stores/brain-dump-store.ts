@@ -26,12 +26,14 @@ export interface BrainDumpReviewState {
 interface BrainDumpState {
   text: string;
   dumpMode: DumpMode;
+  selectedModel: string | null;
   result: BrainDumpResultNormalized | null;
   reviewState: BrainDumpReviewState | null;
   inboxItems: string[];
   expandedIds: string[];
   setText: (text: string) => void;
   setDumpMode: (mode: DumpMode) => void;
+  setSelectedModel: (model: string | null) => void;
   setResult: (result: BrainDumpResultNormalized | null) => void;
   setReviewState: (state: BrainDumpReviewState | null) => void;
   toggleReviewApproval: (idx: number) => void;
@@ -50,12 +52,14 @@ export const useBrainDumpStore = create<BrainDumpState>()(
     (set, get) => ({
       text: "",
       dumpMode: "auto",
+      selectedModel: null,
       result: null,
       reviewState: null,
       inboxItems: [],
       expandedIds: [],
       setText: (text) => set({ text }),
       setDumpMode: (dumpMode) => set({ dumpMode }),
+      setSelectedModel: (selectedModel) => set({ selectedModel }),
       setResult: (result) => set({ result }),
       setReviewState: (reviewState) => set({ reviewState }),
       toggleReviewApproval: (idx) => {
@@ -94,6 +98,7 @@ export const useBrainDumpStore = create<BrainDumpState>()(
       partialize: (state) => ({
         text: state.text,
         dumpMode: state.dumpMode,
+        selectedModel: state.selectedModel,
         inboxItems: state.inboxItems,
       }),
     }
