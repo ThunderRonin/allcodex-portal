@@ -5,6 +5,7 @@
  * Auth: Bearer token passed explicitly — resolved from cookies or env by get-creds.ts.
  */
 
+import { cookies } from "next/headers";
 import { ServiceError } from "./route-error";
 import {
   CopilotChatResponseSchema,
@@ -45,7 +46,12 @@ async function akFetch(creds: AkCreds, path: string, init: RequestInit = {}): Pr
     throw new ServiceError("UNREACHABLE", 503, `AllKnower is unreachable at ${creds.url}`);
   }
   if (res.status === 401) {
-    throw new ServiceError("UNAUTHORIZED", 401, "AllKnower credentials are invalid. Go to Settings to reconnect.");
+    try {
+      const jar = await cookies();
+      jar.delete("allknower_token");
+      jar.delete("allknower_url");
+    } catch {}
+    throw new ServiceError("UNAUTHORIZED", 401, "AllKnower session expired. Please sign in again.");
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
