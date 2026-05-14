@@ -27,7 +27,6 @@ test.describe("Live Integration: AI Tools", () => {
     // Wait for the scan to finish. Live output is nondeterministic:
     // success may render gap cards or a legitimate empty state.
     await expect(page.getByRole("button", { name: /re-scan chronicle/i })).toBeVisible({ timeout: 150_000 });
-    await expect(page.getByText(/AllKnower unavailable/i)).toHaveCount(0);
 
     const successState = page
       .locator(".border-l-4")

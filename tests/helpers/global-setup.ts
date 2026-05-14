@@ -28,6 +28,9 @@ const TEST_PASSWORD =
   process.env.PLAYWRIGHT_TEST_PASSWORD ??
   "allcodex-playwright-test-password";
 
+const ALLCODEX_URL = process.env.TEST_ALLCODEX_URL ?? "http://localhost:8080";
+const ALLCODEX_ETAPI_TOKEN = process.env.TEST_ALLCODEX_ETAPI_TOKEN ?? "";
+
 // --------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------
@@ -79,6 +82,29 @@ async function signIn(
   }
 
   return token;
+}
+
+async function connectAllCodex(
+  allknowerUrl: string,
+  bearerToken: string,
+  coreUrl: string,
+  etapiToken: string,
+): Promise<boolean> {
+  const res = await fetch(`${allknowerUrl}/integrations/allcodex/connect`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    body: JSON.stringify({ baseUrl: coreUrl, token: etapiToken }),
+    signal: AbortSignal.timeout(8_000),
+  });
+
+  if (res.ok) return true;
+
+  const body = await res.text().catch(() => "");
+  console.warn(`[global-setup] AllCodex connect returned ${res.status}: ${body}`);
+  return false;
 }
 
 // --------------------------------------------------------------------------
@@ -133,7 +159,18 @@ export default async function globalSetup(config: FullConfig) {
     return;
   }
 
-  // 3. Build the Playwright storage state with the two cookies the portal expects
+  // 3. Connect AllCodex Core so integration tests can reach ETAPI
+  if (ALLCODEX_ETAPI_TOKEN) {
+    console.log(`[global-setup] Connecting AllCodex Core (${ALLCODEX_URL})...`);
+    const connected = await connectAllCodex(allknowerUrl, token, ALLCODEX_URL, ALLCODEX_ETAPI_TOKEN);
+    if (!connected) {
+      console.warn("[global-setup] AllCodex connect failed — integration tests that need Core will fail");
+    }
+  } else {
+    console.warn("[global-setup] TEST_ALLCODEX_ETAPI_TOKEN not set — skipping AllCodex connect");
+  }
+
+  // 4. Build the Playwright storage state with the two cookies the portal expects
   const storageState = {
     cookies: [
       {
