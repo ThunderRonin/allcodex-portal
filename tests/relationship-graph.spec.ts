@@ -33,10 +33,21 @@ test.describe("Relationship Graph", () => {
     await page.route("**/api/ai/relationships", async (route) => {
       if (route.request().method() === "PUT") {
         appliedRelation = true;
+        const body = JSON.parse(route.request().postData() || "{}");
+        const relations = body.relations ?? [];
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          body: JSON.stringify({ ok: true, applied: 1 }),
+          body: JSON.stringify({
+            applied: relations.map((rel: Record<string, string>) => ({
+              sourceNoteId: body.sourceNoteId ?? "note-1",
+              targetNoteId: rel.targetNoteId ?? "unknown",
+              relationshipType: rel.relationshipType ?? "unknown",
+              relationName: rel.relationshipType ?? "unknown",
+            })),
+            skipped: [],
+            failed: [],
+          }),
         });
         return;
       }
@@ -57,8 +68,8 @@ test.describe("Relationship Graph", () => {
     // Click Apply on the AI suggestion
     await page.getByRole("button", { name: "Apply" }).click();
 
-    // Verify it changes to Applied
-    await expect(page.getByRole("button", { name: "Applied" })).toBeVisible();
+    // After applying, the suggestion disappears from the list (filtered out)
+    await expect(page.getByRole("button", { name: "Apply" })).not.toBeVisible();
     expect(appliedRelation).toBe(true);
   });
 

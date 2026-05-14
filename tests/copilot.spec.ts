@@ -15,30 +15,34 @@ test.describe("Article Copilot", () => {
       ],
     });
 
-    // Mock copilot chat response
-    await page.route("**/api/lore/note-1/copilot/chat", async (route) => {
+    // Mock copilot stream response
+    await page.route("**/api/lore/note-1/copilot/stream", async (route) => {
+      const result = {
+        assistantMessage: "Here is a proposal.",
+        citations: [],
+        proposal: {
+          targets: [
+            {
+              kind: "update",
+              targetId: "note-1",
+              title: "Aria Vale, the Warden",
+              contentHtml: "<p>Updated content</p>",
+              labelUpserts: [],
+              labelDeletes: [],
+              relationAdds: [],
+              relationDeletes: [],
+              rationale: "Added title.",
+            },
+          ],
+        },
+      };
       await route.fulfill({
         status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          assistantMessage: "Here is a proposal.",
-          citations: [],
-          proposal: {
-            targets: [
-              {
-                kind: "update",
-                targetId: "note-1",
-                title: "Aria Vale, the Warden",
-                contentHtml: "<p>Updated content</p>",
-                labelUpserts: [],
-                labelDeletes: [],
-                relationAdds: [],
-                relationDeletes: [],
-                rationale: "Added title.",
-              },
-            ],
-          },
-        }),
+        contentType: "text/event-stream",
+        body: [
+          `event: token\ndata: ${JSON.stringify({ content: "Thinking..." })}\n\n`,
+          `event: result\ndata: ${JSON.stringify(result)}\n\n`,
+        ].join(""),
       });
     });
 
@@ -102,44 +106,52 @@ test.describe("Article Copilot", () => {
     });
 
     let chatCallCount = 0;
-    await page.route("**/api/lore/note-1/copilot/chat", async (route) => {
+    await page.route("**/api/lore/note-1/copilot/stream", async (route) => {
       chatCallCount++;
       const request = await route.request().postDataJSON();
       const lastMessage = request.messages[request.messages.length - 1].content;
 
       if (chatCallCount === 1) {
+        const result = {
+          assistantMessage: "Here is a proposal.",
+          citations: [],
+          proposal: {
+            targets: [
+              {
+                kind: "update",
+                targetId: "note-1",
+                title: "Aria Vale, the Warden",
+                rationale: "Added title.",
+                labelUpserts: [],
+                labelDeletes: [],
+                relationAdds: [],
+                relationDeletes: [],
+              },
+            ],
+          },
+        };
         await route.fulfill({
           status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            assistantMessage: "Here is a proposal.",
-            citations: [],
-            proposal: {
-              targets: [
-                {
-                  kind: "update",
-                  targetId: "note-1",
-                  title: "Aria Vale, the Warden",
-                  rationale: "Added title.",
-                  labelUpserts: [],
-                  labelDeletes: [],
-                  relationAdds: [],
-                  relationDeletes: [],
-                },
-              ],
-            },
-          }),
+          contentType: "text/event-stream",
+          body: [
+            `event: token\ndata: ${JSON.stringify({ content: "Thinking..." })}\n\n`,
+            `event: result\ndata: ${JSON.stringify(result)}\n\n`,
+          ].join(""),
         });
       } else {
         expect(lastMessage).toContain("I'm rejecting the previous proposal. Instead: Fix the spelling");
+        const result = {
+          assistantMessage: "Understood, providing a new proposal.",
+          citations: [],
+          proposal: null,
+        };
         await route.fulfill({
           status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            assistantMessage: "Understood, providing a new proposal.",
-            citations: [],
-            proposal: null,
-          }),
+          contentType: "text/event-stream",
+          body: [
+            `event: token\ndata: ${JSON.stringify({ content: "Thinking..." })}\n\n`,
+            `event: result\ndata: ${JSON.stringify(result)}\n\n`,
+          ].join(""),
         });
       }
     });
@@ -171,11 +183,11 @@ test.describe("Article Copilot", () => {
       notes: [buildNote({ noteId: "note-1", title: "Aria Vale" })],
     });
 
-    await page.route("**/api/lore/note-1/copilot/chat", async (route) => {
+    await page.route("**/api/lore/note-1/copilot/stream", async (route) => {
       await route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: JSON.stringify({ error: "LLM_TIMEOUT", message: "The model timed out." }),
+        status: 200,
+        contentType: "text/event-stream",
+        body: `event: error\ndata: ${JSON.stringify({ error: "The model timed out." })}\n\n`,
       });
     });
 
@@ -194,23 +206,27 @@ test.describe("Article Copilot", () => {
       notes: [buildNote({ noteId: "note-1", title: "Aria Vale" })],
     });
 
-    await page.route("**/api/lore/note-1/copilot/chat", async (route) => {
+    await page.route("**/api/lore/note-1/copilot/stream", async (route) => {
+      const result = {
+        assistantMessage: "Here is a proposal.",
+        citations: [],
+        proposal: {
+          targets: [{
+            kind: "update",
+            targetId: "note-1",
+            title: "Aria Vale",
+            contentHtml: "<p>Updated</p>",
+            labelUpserts: [], labelDeletes: [], relationAdds: [], relationDeletes: []
+          }],
+        },
+      };
       await route.fulfill({
         status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          assistantMessage: "Here is a proposal.",
-          citations: [],
-          proposal: {
-            targets: [{ 
-              kind: "update", 
-              targetId: "note-1", 
-              title: "Aria Vale",
-              contentHtml: "<p>Updated</p>",
-              labelUpserts: [], labelDeletes: [], relationAdds: [], relationDeletes: []
-            }],
-          },
-        }),
+        contentType: "text/event-stream",
+        body: [
+          `event: token\ndata: ${JSON.stringify({ content: "Thinking..." })}\n\n`,
+          `event: result\ndata: ${JSON.stringify(result)}\n\n`,
+        ].join(""),
       });
     });
 
@@ -241,26 +257,30 @@ test.describe("Article Copilot", () => {
       ],
     });
 
-    await page.route("**/api/lore/note-1/copilot/chat", async (route) => {
+    await page.route("**/api/lore/note-1/copilot/stream", async (route) => {
+      const result = {
+        assistantMessage: "Here is a multi-target proposal.",
+        citations: [],
+        proposal: {
+          targets: [
+            {
+              kind: "update", targetId: "note-1", title: "Target 1",
+              contentHtml: "<p>1</p>", labelUpserts: [], labelDeletes: [], relationAdds: [], relationDeletes: []
+            },
+            {
+              kind: "create", targetId: "new-1", title: "Target 2",
+              contentHtml: "<p>2</p>", labelUpserts: [], labelDeletes: [], relationAdds: [], relationDeletes: []
+            },
+          ],
+        },
+      };
       await route.fulfill({
         status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          assistantMessage: "Here is a multi-target proposal.",
-          citations: [],
-          proposal: {
-            targets: [
-              { 
-                kind: "update", targetId: "note-1", title: "Target 1",
-                contentHtml: "<p>1</p>", labelUpserts: [], labelDeletes: [], relationAdds: [], relationDeletes: []
-              },
-              { 
-                kind: "create", targetId: "new-1", title: "Target 2",
-                contentHtml: "<p>2</p>", labelUpserts: [], labelDeletes: [], relationAdds: [], relationDeletes: []
-              },
-            ],
-          },
-        }),
+        contentType: "text/event-stream",
+        body: [
+          `event: token\ndata: ${JSON.stringify({ content: "Thinking..." })}\n\n`,
+          `event: result\ndata: ${JSON.stringify(result)}\n\n`,
+        ].join(""),
       });
     });
 

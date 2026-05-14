@@ -711,20 +711,28 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     await fulfillJson(route, configStatus);
   });
 
-  await page.route("**/api/config/connect", async (route) => {
+  await page.route("**/api/integrations/allcodex/connect", async (route) => {
     await fulfillJson(route, { success: true });
   });
 
-  await page.route("**/api/config/allcodex-login", async (route) => {
-    await fulfillJson(route, { success: true });
+  await page.route("**/api/integrations/allcodex", async (route) => {
+    if (route.request().method() === "DELETE") {
+      await fulfillJson(route, { success: true });
+      return;
+    }
+    await route.fallback();
   });
 
   await page.route("**/api/config/allknower-login", async (route) => {
     await fulfillJson(route, { success: true });
   });
 
-  await page.route("**/api/config/allknower-register", async (route) => {
-    await fulfillJson(route, { success: true });
+  await page.route("**/api/auth/login", async (route) => {
+    await fulfillJson(route, { ok: true });
+  });
+
+  await page.route("**/api/auth/register", async (route) => {
+    await fulfillJson(route, { ok: true });
   });
 
   await page.route("**/api/config/disconnect**", async (route) => {
@@ -768,12 +776,34 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
     });
   });
 
-  // Register history AFTER the general brain-dump handler so it wins in LIFO order
-  await page.route("**/api/brain-dump**", async (route) => {
+  // SSE streaming endpoint — auto mode uses this
+  await page.route("**/api/brain-dump/stream", async (route) => {
+    if (brainDump.status && brainDump.status !== 200) {
+      await fulfillJson(route, brainDump.body, brainDump.status);
+      return;
+    }
     if (brainDump.delayMs) {
       await new Promise((resolve) => setTimeout(resolve, brainDump.delayMs));
     }
+    const resultJson = JSON.stringify(brainDump.body);
+    await fulfillSSE(route, [
+      { event: "status", data: { type: "status", stage: "rag", message: "Searching lore..." } },
+      { event: "status", data: { type: "status", stage: "llm", message: "Analyzing with AI..." } },
+      { event: "token", data: { type: "token", content: resultJson.slice(0, 20) } },
+      { event: "done", data: { type: "done", raw: resultJson, tokensUsed: 100, model: "mock", latencyMs: 150 } },
+    ]);
+  });
 
+  // Non-streaming brain-dump (review/commit modes)
+  await page.route("**/api/brain-dump", async (route) => {
+    const url = route.request().url();
+    if (url.includes("/stream") || url.includes("/history")) {
+      await route.fallback();
+      return;
+    }
+    if (brainDump.delayMs) {
+      await new Promise((resolve) => setTimeout(resolve, brainDump.delayMs));
+    }
     await fulfillJson(route, brainDump.body, brainDump.status ?? 200);
   });
 
@@ -784,7 +814,18 @@ export async function installPortalApiMocks(page: Page, options: PortalMockOptio
   await page.route("**/api/ai/relationships", async (route) => {
     const method = route.request().method();
     if (method === "PUT") {
-      await fulfillJson(route, { ok: true, applied: 1 });
+      const body = JSON.parse(route.request().postData() || "{}");
+      const relations = body.relations ?? [];
+      await fulfillJson(route, {
+        applied: relations.map((rel: Record<string, string>) => ({
+          sourceNoteId: body.sourceNoteId ?? "unknown",
+          targetNoteId: rel.targetNoteId ?? "unknown",
+          relationshipType: rel.relationshipType ?? "unknown",
+          relationName: rel.relationshipType ?? "unknown",
+        })),
+        skipped: [],
+        failed: [],
+      });
       return;
     }
 
@@ -879,6 +920,19 @@ async function fulfillJson(route: Route, body: unknown, status = 200) {
     status,
     contentType: "application/json",
     body: JSON.stringify(body),
+  });
+}
+
+function sseEncode(event: string, data: unknown): string {
+  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+async function fulfillSSE(route: Route, events: Array<{ event: string; data: unknown }>) {
+  const body = events.map(e => sseEncode(e.event, e.data)).join("");
+  await route.fulfill({
+    status: 200,
+    contentType: "text/event-stream",
+    body,
   });
 }
 

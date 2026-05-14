@@ -59,7 +59,11 @@ export default async function globalTeardown() {
 
   // Delete the account if we have a valid token
   if (token) {
-    await deleteAccount(allknowerUrl, token);
+    try {
+      await deleteAccount(allknowerUrl, token);
+    } catch {
+      console.warn("[global-teardown] AllKnower unreachable — skipping account deletion");
+    }
   } else {
     console.warn("[global-teardown] No bearer token found — skipping account deletion");
   }
