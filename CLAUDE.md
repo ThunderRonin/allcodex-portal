@@ -45,7 +45,7 @@ bun run test:e2e           # Playwright E2E (needs full stack: Core :8080 + AllK
 bun run check              # typecheck + vitest run
 ```
 
-~258 unit tests in `lib/*.test.ts`. Fast, no external deps.
+~180 unit tests across 7 files in `lib/*.test.ts`. Fast, no external deps.
 
 ### E2E Tests (Playwright)
 
@@ -53,7 +53,7 @@ bun run check              # typecheck + vitest run
 bun run test:e2e           # needs full stack running
 ```
 
-~150 specs across chromium/firefox/webkit in `tests/*.spec.ts`. `bun run check` intentionally excludes Playwright — E2E needs AllKnower (:3001) and AllCodex Core (:8080) live. Playwright auto-starts the dev server.
+~150 test cases across 28 spec files in `tests/*.spec.ts`, running on chromium/firefox/webkit. `bun run check` intentionally excludes Playwright — E2E needs AllKnower (:3001) and AllCodex Core (:8080) live. Playwright auto-starts the dev server.
 
 ### Integration Tests (Playwright, real LLMs)
 
@@ -61,7 +61,7 @@ bun run test:e2e           # needs full stack running
 npx playwright test --project=integration
 ```
 
-4 specs in `tests/integration/*.spec.ts` that hit real LLMs via OpenRouter. Requires `.env.test`:
+3 specs in `tests/integration/*.spec.ts` that hit real LLMs via OpenRouter. Requires `.env.test`:
 ```
 TEST_OPENROUTER_API_KEY=...
 TEST_ALLKNOWER_URL=http://localhost:3001
