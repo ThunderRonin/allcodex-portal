@@ -24,7 +24,9 @@ export async function POST() {
         headers: { Authorization: `Bearer ${akCreds.token}` },
       });
       if (!akRes.ok) {
-        console.error("AllKnower wipe failed:", await akRes.text());
+        const body = await akRes.text();
+        console.error("AllKnower wipe failed:", body);
+        return NextResponse.json({ ok: false, error: `AllKnower wipe failed: ${akRes.status}` }, { status: 502 });
       }
     }
 
