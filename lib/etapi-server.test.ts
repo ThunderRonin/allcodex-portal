@@ -362,9 +362,9 @@ describe("putNoteContent", () => {
     expect(lastFetchInit().method).toBe("PUT");
     expect(lastFetchInit().body).toBe("<p>Updated</p>");
 
-    // Content-Type: text/html overrides the default application/json
+    // Core's express.text() only parses text/plain — text/html results in null body
     const headers = lastFetchInit().headers as Record<string, string>;
-    expect(headers["Content-Type"]).toBe("text/html");
+    expect(headers["Content-Type"]).toBe("text/plain");
   });
 });
 
