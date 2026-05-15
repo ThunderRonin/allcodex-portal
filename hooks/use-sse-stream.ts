@@ -32,6 +32,7 @@ export function useSSEStream() {
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let currentEvent = "message";
 
     while (true) {
       const { done, value } = await reader.read();
@@ -41,7 +42,6 @@ export function useSSEStream() {
       const lines = buffer.split("\n");
       buffer = lines.pop() ?? "";
 
-      let currentEvent = "message";
       for (const line of lines) {
         if (line.startsWith("event: ")) {
           currentEvent = line.slice(7).trim();
@@ -51,6 +51,9 @@ export function useSSEStream() {
           } catch {
             yield { event: currentEvent, data: line.slice(6) };
           }
+          currentEvent = "message";
+        } else if (line === "") {
+          currentEvent = "message";
         }
       }
     }
