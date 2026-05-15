@@ -28,10 +28,10 @@ interface BrainDumpDetailEntry {
   createdAt: string;
   parsedJson: {
     entities?: Array<{
-      noteId: string;
+      noteId?: string;
       title: string;
       type: string;
-      action: "created" | "updated";
+      action?: "created" | "updated" | "skipped";
     }>;
     summary?: string;
   } | null;
@@ -189,35 +189,40 @@ export default function BrainDumpDetailPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {entities.map((e) => (
-                <Link
-                  key={e.noteId}
-                  href={`/lore/${e.noteId}`}
-                  className={`flex items-center gap-3 border-l-2 p-3 hover:bg-card/70 transition-colors ${
-                    e.action === "created"
-                      ? "border-l-[var(--accent)] bg-[var(--accent)]/5"
-                      : "border-l-primary/60 bg-primary/5"
-                  }`}
-                >
-                  <div className={`p-2 shrink-0 ${e.action === "created" ? "text-[var(--accent)]" : "text-primary"}`}>
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{e.title}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{e.type}</p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={`shrink-0 text-[10px] rounded-none ${
-                      e.action === "created"
-                        ? "text-[var(--accent)] border-[var(--accent)]/40"
-                        : "text-primary border-primary/40"
-                    }`}
-                  >
-                    {e.action}
-                  </Badge>
-                </Link>
-              ))}
+              {entities.map((e, i) => {
+                const action = e.action ?? "created";
+                const className = `flex items-center gap-3 border-l-2 p-3 hover:bg-card/70 transition-colors ${
+                  action === "created"
+                    ? "border-l-[var(--accent)] bg-[var(--accent)]/5"
+                    : "border-l-primary/60 bg-primary/5"
+                }`;
+                const inner = (
+                  <>
+                    <div className={`p-2 shrink-0 ${action === "created" ? "text-[var(--accent)]" : "text-primary"}`}>
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{e.title}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{e.type}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 text-[10px] rounded-none ${
+                        action === "created"
+                          ? "text-[var(--accent)] border-[var(--accent)]/40"
+                          : "text-primary border-primary/40"
+                      }`}
+                    >
+                      {action}
+                    </Badge>
+                  </>
+                );
+                return e.noteId ? (
+                  <Link key={e.noteId} href={`/lore/${e.noteId}`} className={className}>{inner}</Link>
+                ) : (
+                  <div key={e.title ?? i} className={className}>{inner}</div>
+                );
+              })}
             </div>
           )}
         </div>
