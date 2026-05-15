@@ -248,6 +248,10 @@ export default function BrainDumpPage() {
   const brainDumpModels = modelChains?.["brain-dump"]?.models ?? [];
   const isAutoMode = modelChains?.["brain-dump"]?.autoMode ?? false;
 
+  if (selectedModel && brainDumpModels.length > 0 && !brainDumpModels.includes(selectedModel)) {
+    setSelectedModel(null);
+  }
+
   const [consistencyResult, setConsistencyResult] = useState<{
     issues: Array<{ type: string; severity: string; description: string; affectedNoteIds: string[] }>;
     summary: string;
@@ -467,7 +471,7 @@ export default function BrainDumpPage() {
                   </SelectTrigger>
                   <SelectContent className="rounded-none">
                     <SelectItem value="__default__" className="text-xs">Default ({brainDumpModels[0]?.split("/").pop()})</SelectItem>
-                    {brainDumpModels.map((m) => (
+                    {brainDumpModels.slice(1).map((m) => (
                       <SelectItem key={m} value={m} className="text-xs">
                         {m.split("/").pop()}
                       </SelectItem>
