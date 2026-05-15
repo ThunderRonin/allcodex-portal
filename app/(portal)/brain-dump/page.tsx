@@ -393,8 +393,8 @@ export default function BrainDumpPage() {
                 ...normalized.updated.map((e) => e.noteId),
               ];
               void runConsistencyCheck(newNoteIds);
-            } catch {
-              // cached or malformed result — still show as complete
+            } catch (err) {
+              console.error("[brain-dump] Failed to process done event:", err, "raw data:", doneData);
             }
             break;
           }
